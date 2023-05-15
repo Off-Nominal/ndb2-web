@@ -19,7 +19,7 @@ export class AuthClient {
       .setExpirationTime(exp)
       .setIssuedAt(iat)
       .setNotBefore(iat)
-      .sign(new TextEncoder().encode(JWT_SECRET));
+      .sign(new TextEncoder().encode(this.jwtSecret));
   }
 
   async verify() {
@@ -27,7 +27,7 @@ export class AuthClient {
 
     const { payload } = await jose.jwtVerify(
       token,
-      new TextEncoder().encode(JWT_SECRET)
+      new TextEncoder().encode(this.jwtSecret)
     );
 
     return payload;
