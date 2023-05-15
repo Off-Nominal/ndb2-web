@@ -9,6 +9,11 @@
     @apply bg-white text-jet-grey dark:bg-jet-grey dark:text-white;
   }
 
+  a,
+  p {
+    @apply text-base;
+  }
+
   h1,
   h2,
   h3,

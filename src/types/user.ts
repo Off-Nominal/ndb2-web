@@ -1,6 +1,7 @@
-import { Session } from "next-auth";
-
-export type User = {
-  discordId: string | null;
-  // session: Session | null;
-};
+export namespace APIAuth {
+  export type User = {
+    name: string;
+    avatarUrl: string;
+    discordId: string;
+  };
+}
