@@ -3,8 +3,9 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { AuthClient } from "@/utils/auth";
 import { DiscordClient } from "@/utils/discord";
+import { getAppUrl } from "@/utils/misc";
 
-const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
+const APP_URL = getAppUrl();
 
 const discordClient = new DiscordClient();
 const authClient = new AuthClient();
@@ -36,7 +37,7 @@ export async function GET(req: Request) {
 
   if (error || !user) {
     console.log(error);
-    return NextResponse.redirect(BASE_URL + "/signin?error=auth");
+    return NextResponse.redirect(APP_URL + "/signin?error=auth");
   }
 
   try {
@@ -58,5 +59,5 @@ export async function GET(req: Request) {
     console.error(err);
   }
 
-  return NextResponse.redirect(BASE_URL);
+  return NextResponse.redirect(APP_URL);
 }
