@@ -1,45 +1,52 @@
 import { Card } from "@/components/Card";
-import { AuthClient } from "@/utils/auth";
-import { AppError, AppErrors } from "@/utils/errors";
 import Image from "next/image";
 import { Navigation } from "./components/Navigation";
-import axios from "axios";
+import { Ndb2Client } from "@/utils/ndb2";
+import { AuthClient } from "@/utils/auth";
+import { redirect } from "next/navigation";
 
-const BASE_URL = process.env.NDB2_API_BASEURL;
-const API_KEY = process.env.NDB2_API_KEY;
-
-const headers = {
-  Authorization: `Bearer ${API_KEY}`,
-};
-
-type Leader = {
+interface Leader {
   id: string;
   rank: number;
-  value: number;
   discord_id: string;
-};
+}
+
+interface PointsLeader extends Leader {
+  points: number;
+}
+
+interface PredictionsLeader extends Leader {
+  predictions: {
+    failed: number;
+    retired: number;
+    successful: number;
+    pending: number;
+  };
+}
+
+interface BetsLeader extends Leader {
+  bets: {
+    failed: number;
+    retired: number;
+    successful: number;
+    pending: number;
+  };
+}
 
 // SERVER SIDE DATA FETCHING
 async function getLeaderboards(): Promise<{
-  points: Leader[];
-  predictions: Leader[];
-  bets: Leader[];
+  points: PointsLeader[];
+  predictions: PredictionsLeader[];
+  bets: BetsLeader[];
 }> {
-  const authClient = new AuthClient();
+  const ndb2Client = new Ndb2Client();
 
-  // Auth check
-  try {
-    await authClient.verify();
-  } catch (err) {
-    throw new AppError(AppErrors.AUTH_INVALID_SIGNATURE);
-  }
+  const headers: RequestInit["headers"] = { cache: "no-store" };
 
   // const guildMembersRes = fetch()
-  const pointsRes = axios(BASE_URL + "/api/scores?view=points", { headers });
-  const predictionsRes = axios(BASE_URL + "/api/scores?view=predictions", {
-    headers,
-  });
-  const betsRes = axios(BASE_URL + "/api/scores?view=bets", { headers });
+  const pointsRes = ndb2Client.getLeaderboard("points", headers);
+  const predictionsRes = ndb2Client.getLeaderboard("predictions", headers);
+  const betsRes = ndb2Client.getLeaderboard("bets", headers);
 
   try {
     const [pointsLeaders, predictionsLeaders, betsLeaders] = await Promise.all([
@@ -48,9 +55,9 @@ async function getLeaderboards(): Promise<{
       betsRes,
     ]);
     return {
-      points: pointsLeaders.data.data.leaders,
-      predictions: predictionsLeaders.data.data.leaders,
-      bets: betsLeaders.data.data.leaders,
+      points: pointsLeaders.data.leaders,
+      predictions: predictionsLeaders.data.leaders,
+      bets: betsLeaders.data.leaders,
     };
   } catch (err) {
     console.error(err);
@@ -65,6 +72,8 @@ type LeaderboardEntryProps = {
   value: number | string;
 };
 
+const defaultAvatarUrl = "https://cdn.discordapp.com/embed/avatars/0.png";
+
 const LeaderboardEntry = (props: LeaderboardEntryProps) => {
   return (
     <li>
@@ -74,7 +83,10 @@ const LeaderboardEntry = (props: LeaderboardEntryProps) => {
         </div>
         <div>
           <Image
-            src={props.avatarUrl}
+            className="rounded-full"
+            src={props.avatarUrl || defaultAvatarUrl}
+            width={24}
+            height={24}
             alt={`Avatar photo for user ${props.name}`}
           />
         </div>
@@ -91,6 +103,13 @@ const LeaderboardEntry = (props: LeaderboardEntryProps) => {
 
 // FRONT END
 export default async function Home() {
+  const authClient = new AuthClient();
+  const payload = await authClient.verify();
+
+  if (!payload) {
+    redirect("/signin");
+  }
+
   const { points, predictions, bets } = await getLeaderboards();
 
   return (
@@ -110,8 +129,8 @@ export default async function Home() {
                   <LeaderboardEntry
                     key={l.discord_id}
                     rank={l.rank}
-                    name={"Name"}
-                    value={l.value}
+                    name={"Discord Nickname"}
+                    value={l.points}
                     avatarUrl=""
                   />
                 );
@@ -125,8 +144,8 @@ export default async function Home() {
                   <LeaderboardEntry
                     key={l.discord_id}
                     rank={l.rank}
-                    name={"Name"}
-                    value={l.value}
+                    name={"Discord Nickname"}
+                    value={l.predictions.successful}
                     avatarUrl=""
                   />
                 );
@@ -140,8 +159,8 @@ export default async function Home() {
                   <LeaderboardEntry
                     key={l.discord_id}
                     rank={l.rank}
-                    name={"Name"}
-                    value={l.value}
+                    name={"Discord Nickname"}
+                    value={l.bets.successful}
                     avatarUrl=""
                   />
                 );

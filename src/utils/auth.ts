@@ -25,11 +25,14 @@ export class AuthClient {
   async verify() {
     const token = cookies().get("token")?.value || "";
 
-    const { payload } = await jose.jwtVerify(
-      token,
-      new TextEncoder().encode(this.jwtSecret)
-    );
-
-    return payload;
+    try {
+      const { payload } = await jose.jwtVerify(
+        token,
+        new TextEncoder().encode(this.jwtSecret)
+      );
+      return payload;
+    } catch (err) {
+      return null;
+    }
   }
 }
