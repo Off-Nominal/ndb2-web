@@ -1,12 +1,13 @@
 import { add } from "date-fns";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { sign } from "@/utils/auth";
+import { AuthClient } from "@/utils/auth";
 import { DiscordClient } from "@/utils/discord";
 
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 
 const discordClient = new DiscordClient();
+const authClient = new AuthClient();
 
 async function exchangeCode(code: string): Promise<{
   user: {
@@ -39,7 +40,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const token = await sign(user);
+    const token = await authClient.sign(user);
 
     // NEXT JS has a bug where it doesn't recognize the typing for the set method inside a server route
     // This comment written while on Next.JS v 13.4.2

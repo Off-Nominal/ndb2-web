@@ -1,5 +1,5 @@
 import { Card } from "@/components/Card";
-import { verify } from "@/utils/auth";
+import { AuthClient } from "@/utils/auth";
 import { AppError, AppErrors } from "@/utils/errors";
 import Image from "next/image";
 import { Navigation } from "./components/Navigation";
@@ -25,9 +25,11 @@ async function getLeaderboards(): Promise<{
   predictions: Leader[];
   bets: Leader[];
 }> {
+  const authClient = new AuthClient();
+
   // Auth check
   try {
-    await verify();
+    await authClient.verify();
   } catch (err) {
     throw new AppError(AppErrors.AUTH_INVALID_SIGNATURE);
   }
