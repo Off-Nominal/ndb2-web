@@ -6,6 +6,7 @@ import {
 } from "discord-api-types/v10";
 
 const DISCORD_API_BASE_URL = "https://discord.com/api";
+const DISCORD_CDN_BASE_URL = "https://cdn.discordapp.com";
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID || "";
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || "";
 const GUILD_ID = process.env.OFFNOMDISCORD_GUILD_ID;
@@ -33,14 +34,14 @@ export const buildAvatarUrl = (
   discriminator: number
 ): string => {
   if (hash) {
-    return `https://cdn.discordapp.com/guilds/${GUILD_ID}/users/${userId}/avatars/${hash}.png`;
+    return `${DISCORD_CDN_BASE_URL}/guilds/${GUILD_ID}/users/${userId}/avatars/${hash}.png`;
   }
 
   if (fallbackHash) {
-    return `https://cdn.discordapp.com/avatars/${userId}/${fallbackHash}.png`;
+    return `${DISCORD_CDN_BASE_URL}/avatars/${userId}/${fallbackHash}.png`;
   }
 
-  return `https://cdn.discordapp.com/embed/avatars/${discriminator % 5}.png`;
+  return `${DISCORD_CDN_BASE_URL}/embed/avatars/${discriminator % 5}.png`;
 };
 
 // Allowed Roles
@@ -102,7 +103,7 @@ export class DiscordClient {
   public identify(access_token: string) {
     return axios
       .get<RESTGetAPIGuildMemberResult>(
-        `https://discord.com/api/users/@me/guilds/${GUILD_ID}/member`,
+        `${this.baseUrl}/users/@me/guilds/${GUILD_ID}/member`,
         { headers: { Authorization: `Bearer ${access_token}` } }
       )
       .then((res) => res.data);
@@ -132,5 +133,14 @@ export class DiscordClient {
     };
 
     return { user, error: null };
+  }
+
+  public fetchGuildMembers(access_token: string) {
+    return axios
+      .get<RESTGetAPIGuildMemberResult[]>(
+        `${this.baseUrl}/guilds/${GUILD_ID}/members`,
+        { headers: { Authorization: `Bearer ${access_token}` } }
+      )
+      .then((res) => res.data);
   }
 }
