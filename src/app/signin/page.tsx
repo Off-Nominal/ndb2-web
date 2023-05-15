@@ -1,8 +1,17 @@
 import { Card } from "@/components/Card";
+import { AuthClient } from "@/utils/auth";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export default function SignIn() {
+export default async function SignIn() {
+  const authClient = new AuthClient();
+  const payload = await authClient.verify();
+
+  if (payload) {
+    redirect("/");
+  }
+
   return (
     <div className="grid h-full place-content-center">
       <Card title="Login with Discord" className="h-min max-w-xl">

@@ -3,6 +3,32 @@ import { cookies } from "next/headers";
 
 const JWT_SECRET = process.env.JWT_SECRET || "";
 
+type AppJWTPayload = {
+  name: string;
+  avatarUrl: string;
+  discordId: string;
+};
+
+const isAppJWTPayload = (val: jose.JWTPayload): val is AppJWTPayload => {
+  if (typeof val !== "object") {
+    return false;
+  }
+
+  if (!("name" in val) || !("avatarUrl" in val) || !("discordId" in val)) {
+    return false;
+  }
+
+  if (
+    typeof val.name !== "string" ||
+    typeof val.avatarUrl !== "string" ||
+    typeof val.discordId !== "string"
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
 export class AuthClient {
   private jwtSecret: string;
 
@@ -22,7 +48,7 @@ export class AuthClient {
       .sign(new TextEncoder().encode(this.jwtSecret));
   }
 
-  async verify() {
+  async verify(): Promise<AppJWTPayload | null> {
     const token = cookies().get("token")?.value || "";
 
     try {
@@ -30,7 +56,16 @@ export class AuthClient {
         token,
         new TextEncoder().encode(this.jwtSecret)
       );
-      return payload;
+
+      if (!isAppJWTPayload(payload)) {
+        return null;
+      }
+
+      return {
+        name: payload.name,
+        avatarUrl: payload.avatarUrl,
+        discordId: payload.discordId,
+      };
     } catch (err) {
       return null;
     }

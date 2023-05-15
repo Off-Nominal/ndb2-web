@@ -107,7 +107,7 @@ export default async function Home() {
   const payload = await authClient.verify();
 
   if (!payload) {
-    redirect("/signin");
+    return redirect("/signin");
   }
 
   const { points, predictions, bets } = await getLeaderboards();
