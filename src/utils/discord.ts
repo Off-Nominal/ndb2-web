@@ -72,7 +72,7 @@ export class DiscordClient {
 
   constructor() {
     this.baseUrl = DISCORD_API_BASE_URL;
-    this.scope = ["identify", "guilds"];
+    this.scope = ["identify", "guilds", "guilds.members.read"];
     this.oauthUrl = buildDiscordOAuthUrl({
       baseUrl: this.baseUrl,
       clientId: CLIENT_ID,
