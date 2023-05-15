@@ -2,6 +2,7 @@ import { Card } from "@/components/Card";
 import { verify } from "@/utils/auth";
 import { AppError, AppErrors } from "@/utils/errors";
 import Image from "next/image";
+import { Navigation } from "./components/Navigation";
 
 const BASE_URL = process.env.NDB2_API_BASEURL;
 const API_KEY = process.env.NDB2_API_KEY;
@@ -90,52 +91,62 @@ export default async function Home() {
   const { points, predictions, bets } = await getLeaderboards();
 
   return (
-    <div className="flex flex-wrap justify-center gap-4">
-      <Card title="Points">
-        <ul>
-          {points.map((l) => {
-            return (
-              <LeaderboardEntry
-                key={l.discord_id}
-                rank={l.rank}
-                name={"Name"}
-                value={l.value}
-                avatarUrl=""
-              />
-            );
-          })}
-        </ul>
-      </Card>
-      <Card title="Predictions">
-        <ul>
-          {predictions.map((l) => {
-            return (
-              <LeaderboardEntry
-                key={l.discord_id}
-                rank={l.rank}
-                name={"Name"}
-                value={l.value}
-                avatarUrl=""
-              />
-            );
-          })}
-        </ul>
-      </Card>
-      <Card title="Bets">
-        <ul>
-          {bets.map((l) => {
-            return (
-              <LeaderboardEntry
-                key={l.discord_id}
-                rank={l.rank}
-                name={"Name"}
-                value={l.value}
-                avatarUrl=""
-              />
-            );
-          })}
-        </ul>
-      </Card>
+    <div className="flex h-full w-full flex-col content-center p-8 align-middle">
+      <nav className="mb-8 mt-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <h1 className="h-min text-center text-3xl sm:text-4xl md:text-5xl">
+          NOSTRADAMBOT<span className={"text-moonstone-blue"}>2</span>
+        </h1>
+        <Navigation />
+      </nav>
+      <main>
+        <div className="flex flex-wrap justify-center gap-4">
+          <Card title="Points">
+            <ul>
+              {points.map((l) => {
+                return (
+                  <LeaderboardEntry
+                    key={l.discord_id}
+                    rank={l.rank}
+                    name={"Name"}
+                    value={l.value}
+                    avatarUrl=""
+                  />
+                );
+              })}
+            </ul>
+          </Card>
+          <Card title="Predictions">
+            <ul>
+              {predictions.map((l) => {
+                return (
+                  <LeaderboardEntry
+                    key={l.discord_id}
+                    rank={l.rank}
+                    name={"Name"}
+                    value={l.value}
+                    avatarUrl=""
+                  />
+                );
+              })}
+            </ul>
+          </Card>
+          <Card title="Bets">
+            <ul>
+              {bets.map((l) => {
+                return (
+                  <LeaderboardEntry
+                    key={l.discord_id}
+                    rank={l.rank}
+                    name={"Name"}
+                    value={l.value}
+                    avatarUrl=""
+                  />
+                );
+              })}
+            </ul>
+          </Card>
+        </div>
+      </main>
     </div>
   );
 }
