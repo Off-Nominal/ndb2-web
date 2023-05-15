@@ -1,27 +1,12 @@
-import { RESTGetAPIGuildMemberResult } from "discord-api-types/v10";
-import { buildAvatarUrl, buildDiscordUrl, hasCorrectRole } from "./helpers";
-import axios from "axios";
 import { add } from "date-fns";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import * as jose from "jose";
 import { sign } from "@/utils/auth";
+import { DiscordClient } from "@/utils/discord";
 
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
 
-const clientId = process.env.DISCORD_CLIENT_ID || "";
-const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || "";
-const guildId = process.env.OFFNOMDISCORD_GUILD_ID;
-
-const redirectUri = `${BASE_URL}/api/auth/oauth`;
-
-const scope = ["identify", "guilds"];
-
-const OAUTH_URL = buildDiscordUrl({
-  clientId,
-  redirectUri,
-  scope,
-});
+const discordClient = new DiscordClient();
 
 async function exchangeCode(code: string): Promise<{
   user: {
@@ -31,47 +16,11 @@ async function exchangeCode(code: string): Promise<{
   } | null;
   error: string | null;
 }> {
-  const body = new URLSearchParams({
-    client_id: clientId,
-    client_secret: CLIENT_SECRET,
-    redirect_uri: redirectUri,
-    grant_type: "authorization_code",
-    code,
-    scope: scope.join(" "),
-  }).toString();
+  const { access_token } = await discordClient.authenticate(code);
+  const member = await discordClient.identify(access_token);
+  const user = await discordClient.authorize(member);
 
-  const { data: auth } = await axios.post<{
-    access_token: string;
-    token_type: string;
-  }>("https://discord.com/api/oauth2/token", body, {
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  });
-
-  const { data: member } = await axios.get<RESTGetAPIGuildMemberResult>(
-    `https://discord.com/api/users/@me/guilds/${guildId}/member`,
-    { headers: { Authorization: `Bearer ${auth.access_token}` } }
-  );
-
-  if (!hasCorrectRole(member.roles)) {
-    return { user: null, error: "Incorrect role" };
-  }
-
-  if (!member.user) {
-    return { user: null, error: "Missing Member information" };
-  }
-
-  const user = {
-    name: member.nick || member.user?.username || "Unknown User",
-    avatarUrl: buildAvatarUrl(
-      member.user.id,
-      member.avatar,
-      member.user.avatar,
-      Number(member.user.discriminator)
-    ),
-    discordId: member.user?.id,
-  };
-
-  return { user, error: null };
+  return user;
 }
 
 export async function GET(req: Request) {
@@ -79,7 +28,7 @@ export async function GET(req: Request) {
   const code = searchParams.get("code");
 
   if (typeof code !== "string") {
-    return NextResponse.redirect(OAUTH_URL);
+    return NextResponse.redirect(discordClient.oauthUrl);
   }
 
   const { user, error } = await exchangeCode(code);

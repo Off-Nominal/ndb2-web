@@ -3,13 +3,14 @@ import { verify } from "@/utils/auth";
 import { AppError, AppErrors } from "@/utils/errors";
 import Image from "next/image";
 import { Navigation } from "./components/Navigation";
+import axios from "axios";
 
 const BASE_URL = process.env.NDB2_API_BASEURL;
 const API_KEY = process.env.NDB2_API_KEY;
 
-const headers = new Headers({
+const headers = {
   Authorization: `Bearer ${API_KEY}`,
-});
+};
 
 type Leader = {
   id: string;
@@ -31,23 +32,23 @@ async function getLeaderboards(): Promise<{
     throw new AppError(AppErrors.AUTH_INVALID_SIGNATURE);
   }
 
-  const pointsRes = fetch(BASE_URL + "/api/scores?view=points", { headers });
-  const predictionsRes = fetch(BASE_URL + "/api/scores?view=predictions", {
+  // const guildMembersRes = fetch()
+  const pointsRes = axios(BASE_URL + "/api/scores?view=points", { headers });
+  const predictionsRes = axios(BASE_URL + "/api/scores?view=predictions", {
     headers,
   });
-  const betsRes = fetch(BASE_URL + "/api/scores?view=bets", { headers });
+  const betsRes = axios(BASE_URL + "/api/scores?view=bets", { headers });
 
   try {
-    const responses = await Promise.all([pointsRes, predictionsRes, betsRes]);
     const [pointsLeaders, predictionsLeaders, betsLeaders] = await Promise.all([
-      responses[0].json(),
-      responses[1].json(),
-      responses[2].json(),
+      pointsRes,
+      predictionsRes,
+      betsRes,
     ]);
     return {
-      points: pointsLeaders.data.leaders,
-      predictions: predictionsLeaders.data.leaders,
-      bets: betsLeaders.data.leaders,
+      points: pointsLeaders.data.data.leaders,
+      predictions: predictionsLeaders.data.data.leaders,
+      bets: betsLeaders.data.data.leaders,
     };
   } catch (err) {
     console.error(err);
