@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NDB2_API_BASEURL;
+const API_URL = process.env.NDB2_API_BASEURL;
 const API_KEY = process.env.NDB2_API_KEY;
 
 export class Ndb2Client {
@@ -6,7 +6,7 @@ export class Ndb2Client {
   private headers: { Authorization: string };
 
   constructor() {
-    this.baseUrl = BASE_URL || "http://localhost:8000";
+    this.baseUrl = API_URL || "http://localhost:8000";
     this.headers = {
       Authorization: `Bearer ${API_KEY}`,
     };

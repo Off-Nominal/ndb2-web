@@ -35,7 +35,7 @@ In order to use the authentication service of this application, you'll need a Di
 1. Visit the Developer Portal for Discord [here](https://discord.com/developers/docs/intro) to learn how it all works
 2. Create an application [here](https://discord.com/developers/applications) with a name like `NDB2_dev` or something similar
 3. Copy your Client ID and Client Secret to somewhere safe (you may need to go the OAuth section to find them). Set these in your local environment variables under the variable names `DISCORD_CLIENT_ID` and `DISCORD_CLIENT_SECRET`.
-4. Add a Redirect URI to your application under the OAuth section. It should be your `BASE_URL` from your .env file with the path of "/api/auth/oauth", for example (`http://localhost:3000/api/auth/oauth`)
+4. Add a Redirect URI to your application under the OAuth section. It should be your `VERCEL_URL` from your .env file with the path of "/api/auth/oauth" and the correct protocol (http for local dev), for example (`http://localhost:3000/api/auth/oauth`)
 
 ### NDB2 API Setup
 

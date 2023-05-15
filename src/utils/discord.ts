@@ -4,6 +4,7 @@ import {
   APIGuildMember,
   RESTGetAPIGuildMemberResult,
 } from "discord-api-types/v10";
+import { getAppUrl } from "./misc";
 
 const DISCORD_API_BASE_URL = "https://discord.com/api";
 const DISCORD_CDN_BASE_URL = "https://cdn.discordapp.com";
@@ -11,8 +12,8 @@ const CLIENT_ID = process.env.DISCORD_CLIENT_ID || "";
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || "";
 const GUILD_ID = process.env.OFFNOMDISCORD_GUILD_ID;
 
-const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
-const REDIRECT_URI = `${BASE_URL}/api/auth/oauth`;
+const APP_URL = getAppUrl();
+const REDIRECT_URI = `${APP_URL}/api/auth/oauth`;
 
 const buildDiscordOAuthUrl = (options: {
   baseUrl: string;
