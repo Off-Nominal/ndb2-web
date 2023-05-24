@@ -8,13 +8,13 @@ import React from "react";
 import { Vote } from "../../../components/Vote";
 
 // SERVER SIDE DATA FETCHING
-async function getPredictionInfo(): Promise<any> {
+async function getPredictionInfo(id: Number): Promise<any> {
   const ndb2Client = new Ndb2Client();
 
   const headers: RequestInit["headers"] = { cache: "no-store" };
 
   try {
-    const predictionInfo = await ndb2Client.getPredictionInfoById(1, headers);
+    const predictionInfo = await ndb2Client.getPredictionInfoById(id, headers);
     return {
       data: predictionInfo.data,
     };
@@ -24,7 +24,7 @@ async function getPredictionInfo(): Promise<any> {
   }
 }
 
-export default async function Predictions() {
+export default async function Predictions({ params }: any) {
   const authClient = new AuthClient();
   const payload = await authClient.verify();
 
@@ -32,15 +32,19 @@ export default async function Predictions() {
     return redirect("/signin");
   }
 
-  const { data } = await getPredictionInfo();
+  const { data } = await getPredictionInfo(params.id);
 
   console.log(data);
   for (const bet of data.bets) {
     console.log(bet);
   }
 
-  const endorsement = data.bets.filter((bet: { endorsed: boolean; }) => bet.endorsed === true)
-  const undorsement = data.bets.filter((bet: { endorsed: boolean; }) => bet.endorsed === false)
+  const endorsement = data.bets.filter(
+    (bet: { endorsed: boolean }) => bet.endorsed === true
+  );
+  const undorsement = data.bets.filter(
+    (bet: { endorsed: boolean }) => bet.endorsed === false
+  );
 
   return (
     <div className="flex h-full w-full flex-col content-center p-8 align-middle">
@@ -84,39 +88,61 @@ export default async function Predictions() {
           <br />
           <br />
           <Card title="Endorsements">
-            <table>
-              <thead>
-                <tr>
-                  <th>Better </th>
-                  <th>Date </th>
-                  <th>Wager </th>
-                  <th>Type of Bet </th>
-                </tr>
-              </thead>
-              <tbody>
-                {endorsement.length > 0 ? endorsement.map((bet: any) => {
-                  return (
-                    <tr key={bet.better.discord_id}>
-                      <td>{bet.better.discord_id}</td>
-                      <td>{bet.date}</td>
-                      <td>{bet.wager}</td>
-                      <td>{bet.endorsed ? "Endorsed" : "Undorsed"}</td>
-                    </tr>
-                  );
-                }): "Nothing to see here"}
-              </tbody>
-            </table>
+            {endorsement.length > 0 ? (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Better </th>
+                    <th>Date </th>
+                    <th>Wager </th>
+                    <th>Type of Bet </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {endorsement.map((bet: any) => {
+                    return (
+                      <tr key={bet.better.discord_id}>
+                        <td>{bet.better.discord_id}</td>
+                        <td>{bet.date}</td>
+                        <td>{bet.wager}</td>
+                        <td>{bet.endorsed ? "Endorsed" : "Undorsed"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            ) : (
+              "Nothing to see here"
+            )}
           </Card>
-          <Card title="Undorsements">{undorsement.length > 0 ? undorsement.map((bet: any) => {
-                  return (
-                    <tr key={bet.better.discord_id}>
-                      <td>{bet.better.discord_id}</td>
-                      <td>{bet.date}</td>
-                      <td>{bet.wager}</td>
-                      <td>{bet.endorsed ? "Endorsed" : "Undorsed"}</td>
-                    </tr>
-                  );
-                }): "Nothing to see here"}</Card>
+          <Card title="Undorsements">
+            {undorsement.length > 0 ? (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Better </th>
+                    <th>Date </th>
+                    <th>Wager </th>
+                    <th>Type of Bet </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {undorsement.map((bet: any) => {
+                    return (
+                      <tr key={bet.better.discord_id}>
+                        <td>{bet.better.discord_id}</td>
+                        <td>{bet.date}</td>
+                        <td>{bet.wager}</td>
+                        <td>{bet.endorsed ? "Endorsed" : "Undorsed"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            ) : (
+              "Nothing to see here"
+            )}
+          </Card>
         </div>
         <br />
         <br />
