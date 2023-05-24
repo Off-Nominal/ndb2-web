@@ -22,4 +22,15 @@ export class Ndb2Client {
       headers: reqHeaders,
     }).then((res) => res.json());
   }
+
+  public getPredictionInfoById(
+    id: Number,
+    headers: RequestInit["headers"] = {}
+  ) {
+    const reqHeaders = new Headers({ ...this.headers, ...headers });
+
+    return fetch(this.baseUrl + `/api/predictions/${id}`, {
+      headers: reqHeaders,
+    }).then((res) => res.json());
+  }
 }

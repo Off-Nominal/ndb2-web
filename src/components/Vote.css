@@ -1,0 +1,82 @@
+body {
+  background-color: gray;
+  color: white;
+}
+table, td, th {
+  border: 1px solid #333;
+}
+
+.container {
+  width: 400px;
+  height: 200px;
+  background-color: #b2afa1;
+  border-radius: 100px;
+  border: 0.5px solid black;
+  background: linear-gradient(to right, #8aa644 50%, #b2afa1 50%);
+  position: relative;
+  overflow: hidden;
+}
+
+.triangle-up,
+.triangle-down {
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.triangle-up {
+  border-left: 55px solid transparent;
+  border-right: 55px solid transparent;
+  border-bottom: 110px solid black;
+  top: 45%;
+  left: 55%;
+  transform: translate(-150%, -40%);
+}
+
+.triangle-up::before {
+  content: "";
+  border-left: 53px solid transparent;
+  border-right: 53px solid transparent;
+  border-bottom: 108px solid white;
+  position: absolute;
+  bottom: -56px;
+  left: -105px;
+  transform: translate(50%, 50%);
+}
+
+.line {
+  background-color: #a0a0a0;
+  width: 1px;
+  height: 200px;
+  bottom: 0%;
+  left: 50%;
+  position: absolute;
+}
+
+.triangle-down {
+  border-left: 55px solid transparent;
+  border-right: 55px solid transparent;
+  border-top: 110px solid black;
+  bottom: 55%;
+  left: 45%;
+  transform: translate(50%, 60%);
+}
+
+.triangle-down::before {
+  content: "";
+  border-left: 53px solid transparent;
+  border-right: 53px solid transparent;
+  border-top: 108px solid white;
+  position: absolute;
+  top: -55px;
+  left: -105px;
+  transform: translate(50%, -50%);
+}
+
+.triangle-down:hover::before {
+  border-top: 108px solid black;
+}
+
+.triangle-up:hover::before {
+  border-bottom: 108px solid black;
+}
