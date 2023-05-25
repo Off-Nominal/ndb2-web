@@ -4,49 +4,22 @@ import { Navigation } from "./components/Navigation";
 import { Ndb2Client } from "@/utils/ndb2";
 import { AuthClient } from "@/utils/auth";
 import { redirect } from "next/navigation";
-
-interface Leader {
-  id: string;
-  rank: number;
-  discord_id: string;
-}
-
-interface PointsLeader extends Leader {
-  points: number;
-}
-
-interface PredictionsLeader extends Leader {
-  predictions: {
-    failed: number;
-    retired: number;
-    successful: number;
-    pending: number;
-  };
-}
-
-interface BetsLeader extends Leader {
-  bets: {
-    failed: number;
-    retired: number;
-    successful: number;
-    pending: number;
-  };
-}
+import { APIScores } from "@/types/scores";
 
 // SERVER SIDE DATA FETCHING
 async function getLeaderboards(): Promise<{
-  points: PointsLeader[];
-  predictions: PredictionsLeader[];
-  bets: BetsLeader[];
+  points: APIScores.PointsLeader[];
+  predictions: APIScores.PredictionsLeader[];
+  bets: APIScores.BetsLeader[];
 }> {
   const ndb2Client = new Ndb2Client();
 
   const headers: RequestInit["headers"] = { cache: "no-store" };
 
   // const guildMembersRes = fetch()
-  const pointsRes = ndb2Client.getLeaderboard("points", headers);
-  const predictionsRes = ndb2Client.getLeaderboard("predictions", headers);
-  const betsRes = ndb2Client.getLeaderboard("bets", headers);
+  const pointsRes = ndb2Client.getPointsLeaderboard(headers);
+  const predictionsRes = ndb2Client.getPredictionsLeaderboard(headers);
+  const betsRes = ndb2Client.getBetsLeaderboard(headers);
 
   try {
     const [pointsLeaders, predictionsLeaders, betsLeaders] = await Promise.all([
