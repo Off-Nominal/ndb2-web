@@ -14,7 +14,7 @@ async function getPredictionInfo(id: Number): Promise<any> {
   const headers: RequestInit["headers"] = { cache: "no-store" };
 
   try {
-    const predictionInfo = await ndb2Client.getPredictionInfoById(id, headers);
+    const predictionInfo = await ndb2Client.getPredictionById(id, headers);
     return {
       data: predictionInfo.data,
     };
