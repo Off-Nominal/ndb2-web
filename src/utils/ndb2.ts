@@ -1,5 +1,5 @@
 import { APIPredictions } from "@/types/predictions";
-import { APIScores, LeaderboardType } from "@/types/scores";
+import { APIScores } from "@/types/scores";
 
 const API_URL = process.env.NDB2_API_BASEURL;
 const API_KEY = process.env.NDB2_API_KEY;
