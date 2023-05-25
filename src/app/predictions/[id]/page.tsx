@@ -6,18 +6,19 @@ import { Card } from "@/components/Card";
 import React from "react";
 
 import { Vote } from "../../../components/Vote";
+import { APIPredictions } from "@/types/predictions";
 
 // SERVER SIDE DATA FETCHING
-async function getPredictionInfo(id: Number): Promise<any> {
+async function fetchPrediction(
+  id: Number
+): Promise<APIPredictions.EnhancedPrediction> {
   const ndb2Client = new Ndb2Client();
 
   const headers: RequestInit["headers"] = { cache: "no-store" };
 
   try {
     const predictionInfo = await ndb2Client.getPredictionById(id, headers);
-    return {
-      data: predictionInfo.data,
-    };
+    return predictionInfo.data;
   } catch (err) {
     console.error(err);
     throw new Error("Failed to fetch prediction data");
@@ -32,19 +33,15 @@ export default async function Predictions({ params }: any) {
     return redirect("/signin");
   }
 
-  const { data } = await getPredictionInfo(params.id);
+  const prediction = await fetchPrediction(params.id);
 
-  console.log(data);
-  for (const bet of data.bets) {
+  console.log(prediction);
+  for (const bet of prediction.bets) {
     console.log(bet);
   }
 
-  const endorsement = data.bets.filter(
-    (bet: { endorsed: boolean }) => bet.endorsed === true
-  );
-  const undorsement = data.bets.filter(
-    (bet: { endorsed: boolean }) => bet.endorsed === false
-  );
+  const endorsement = prediction.bets.filter((bet) => bet.endorsed === true);
+  const undorsement = prediction.bets.filter((bet) => bet.endorsed === false);
 
   return (
     <div className="flex h-full w-full flex-col content-center p-8 align-middle">
@@ -58,24 +55,24 @@ export default async function Predictions({ params }: any) {
         <div className="flex flex-col">
           <div className="flex flex-row">
             <div>
-              Prediction # {data.id}
+              Prediction # {prediction.id}
               <br />
-              by (Discord User) {data.predictor.discord_id}
+              by (Discord User) {prediction.predictor.discord_id}
               <br />
             </div>
-            <div>STATUS: {data.status}</div>
+            <div>STATUS: {prediction.status}</div>
           </div>
           <div>
             <br />
-            TEXT: {data.text}
+            TEXT: {prediction.text}
           </div>
         </div>
         <div className="flex justify-between">
           <div>
             <br />
-            CREATED: {data.created_date}
+            CREATED: {prediction.created_date}
             <br />
-            DUE: {data.due_date}
+            DUE: {prediction.due_date}
             <br />
             <br />
           </div>
