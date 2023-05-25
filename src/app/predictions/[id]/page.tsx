@@ -10,7 +10,7 @@ import { APIPredictions } from "@/types/predictions";
 
 // SERVER SIDE DATA FETCHING
 async function fetchPrediction(
-  id: Number
+  id: number | string
 ): Promise<APIPredictions.EnhancedPrediction> {
   const ndb2Client = new Ndb2Client();
 

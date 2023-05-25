@@ -46,7 +46,7 @@ export class Ndb2Client {
   }
 
   public getPredictionById(
-    id: Number,
+    id: number | string,
     headers: RequestInit["headers"] = {}
   ): Promise<APIPredictions.GetPredictionById> {
     const reqHeaders = new Headers({ ...this.headers, ...headers });
