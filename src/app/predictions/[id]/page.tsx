@@ -1,11 +1,12 @@
-import { AuthClient } from "../../../utils/auth";
+import { AuthClient } from "@/utils/auth";
 import { redirect } from "next/navigation";
-import { Navigation } from "../../components/Navigation";
-import { Ndb2Client } from "../../../utils/ndb2";
+import { Navigation } from "@/app/components/Navigation";
+import { Ndb2Client } from "@/utils/ndb2";
 import { Card } from "@/components/Card";
+import { Timeline } from "@/components/Timeline";
 import React from "react";
 
-import { Vote } from "../../../components/Vote";
+import { Vote } from "@/components/Vote";
 import { APIPredictions } from "@/types/predictions";
 
 // SERVER SIDE DATA FETCHING
@@ -51,7 +52,7 @@ export default async function Predictions({ params }: any) {
         </h1>
         <Navigation />
       </nav>
-      <main>
+      <main className="flex flex-col">
         <div className="flex flex-col">
           <div className="flex flex-row">
             <div>
@@ -69,6 +70,9 @@ export default async function Predictions({ params }: any) {
         </div>
         <div className="flex justify-evenly">
           <div>
+            <Timeline />
+          </div>
+          <div>
             <br />
             CREATED: {prediction.created_date}
             <br />
@@ -80,10 +84,10 @@ export default async function Predictions({ params }: any) {
             <Vote />
           </div>
         </div>
+        <div>
         BETS
+        </div>
         <div className="flex justify-evenly">
-          <br />
-          <br />
           <Card title="Endorsements">
             {endorsement.length > 0 ? (
               <table>
