@@ -2,11 +2,13 @@ import { AuthClient } from "@/utils/auth";
 import { redirect } from "next/navigation";
 import { Navigation } from "@/app/components/Navigation";
 import { Ndb2Client } from "@/utils/ndb2";
-import { Card } from "@/components/Card";
-import { Timeline } from "@/components/Timeline";
 import React from "react";
 
+import { Card } from "@/components/Card";
+import { Timeline } from "@/components/Timeline";
+import { PillDisplay } from "@/components/PillDisplay";
 import { Vote } from "@/components/Vote";
+
 import { APIPredictions } from "@/types/predictions";
 
 // SERVER SIDE DATA FETCHING
@@ -61,11 +63,12 @@ export default async function Predictions({ params }: any) {
               by (Discord User) {prediction.predictor.discord_id}
               <br />
             </div>
-            <div>STATUS: {prediction.status}</div>
+            <PillDisplay text={prediction.status.toUpperCase()} />
           </div>
-          <div>
-            <br />
-            TEXT: {prediction.text}
+          <div className="justify-center w-full h-full p-2 text-left rounded-lg bg-silver-chalice-grey">
+            <p>
+            {prediction.text}
+            </p>
           </div>
         </div>
         <div className="flex justify-evenly">
