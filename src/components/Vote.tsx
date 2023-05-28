@@ -1,12 +1,35 @@
 export const Vote = () => {
   return (
-    <div className="relative w-24 h-12 overflow-hidden border rounded-full border-jet-grey bg-button-gray">
-      {/* Triangle Up */}
-      <div className="absolute hover:before:border-b-[19px] hover:before:border-b-solid hover:before:border-b-black translate-x-[60%] translate-y-[60%] border-x-[10px] border-b-[20px] border-solid border-x-transparent border-b-black  before:translate-x-[-50%] before:translate-y-[5%] before:border-x-[9px] before:border-b-[19px] before:border-solid before:absolute before:border-x-transparent before:border-b-white"></div>
-      {/* Line */}
-      <div className="absolute bottom-0 w-px h-12 bg-line-grey left-1/2"></div>
-      {/* Triangle Down */}
-      <div className="absolute hover:before:border-t-[19px] hover:before:border-t-solid hover:before:border-t-black translate-x-[300%] translate-y-[60%] border-x-[10px] border-t-[20px] border-solid border-x-transparent border-t-black  before:translate-x-[-50%] before:translate-y-[-105%] before:border-x-[9px] before:border-t-[19px] before:border-solid before:absolute before:border-x-transparent before:border-t-white"></div>
-    </div>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 200 40"
+      className="relative w-40 h-20"
+    >
+      <rect
+        x="0"
+        y="0"
+        width="150"
+        height="60"
+        rx="30"
+        ry="30"
+        fill="#b2afa1"
+        stroke="black"
+      />
+      <line x1="75" y1="0" x2="75" y2="60" stroke="#a0a0a0" stroke-width="2" />
+      <polygon
+        points="110,10 130,50 90,50"
+        fill="white"
+        stroke="black"
+        stroke-width="1"
+        className="hover:fill-moss-green"
+      />
+      <polygon
+        points="40,50 20,10 60,10"
+        fill="white"
+        stroke="black"
+        stroke-width="1"
+        className="hover:fill-moss-green"
+      />
+    </svg>
   );
 };

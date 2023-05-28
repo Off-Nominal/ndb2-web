@@ -1,12 +1,12 @@
 export const Timeline = () => {
   return (
-    <div className="relative w-[1px] h-full m-auto timeline">
-  <div className="absolute top-0 w-full h-full -translate-x-1/2 bg-button-gray line left-1/2"></div>
-  <div className="absolute top-0 w-4 h-4 rounded-full bg-button-gray translate-x-[-46%] circle"></div>
-  <div className="absolute w-4 h-4 rounded-full bg-button-gray translate-x-[-46%] translate-y-7 circle"></div>
-  <div className="absolute w-4 h-4 rounded-full bg-button-gray translate-x-[-46%] translate-y-14 circle"></div>
-  <div className="absolute bottom-0 w-4 h-4 -translate-x-1/2 rounded-full bg-moss-green circle"></div>
-</div>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 200" className="relative w-14 ">
+    <line x1="50" y1="25" x2="50" y2="180" stroke="gray" stroke-width="2" />
+    <circle cx="50" cy="25" r="12" fill="green" stroke="green" stroke-width="2" />
+    <circle cx="50" cy="75" r="12" fill="black" stroke="green" stroke-width="2" />
+    <circle cx="50" cy="125" r="12" fill="gray" />
+    <circle cx="50" cy="180" r="12" fill="gray" />
+  </svg>
 
   )
 

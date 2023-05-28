@@ -106,7 +106,6 @@ export default async function Predictions({ params }: any) {
                     <th>Better </th>
                     <th>Date </th>
                     <th>Wager </th>
-                    <th>Type of Bet </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -114,9 +113,8 @@ export default async function Predictions({ params }: any) {
                     return (
                       <tr key={bet.better.discord_id}>
                         <td>{bet.better.discord_id}</td>
-                        <td>{bet.date}</td>
+                        <td>{convertDate(bet.date)}</td>
                         <td>{bet.wager}</td>
-                        <td>{bet.endorsed ? "Endorsed" : "Undorsed"}</td>
                       </tr>
                     );
                   })}
@@ -134,7 +132,6 @@ export default async function Predictions({ params }: any) {
                     <th>Better </th>
                     <th>Date </th>
                     <th>Wager </th>
-                    <th>Type of Bet </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -142,9 +139,8 @@ export default async function Predictions({ params }: any) {
                     return (
                       <tr key={bet.better.discord_id}>
                         <td>{bet.better.discord_id}</td>
-                        <td>{bet.date}</td>
+                        <td>{convertDate(bet.date)}</td>
                         <td>{bet.wager}</td>
-                        <td>{bet.endorsed ? "Endorsed" : "Undorsed"}</td>
                       </tr>
                     );
                   })}
