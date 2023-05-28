@@ -46,6 +46,13 @@ export default async function Predictions({ params }: any) {
   const endorsement = prediction.bets.filter((bet) => bet.endorsed === true);
   const undorsement = prediction.bets.filter((bet) => bet.endorsed === false);
 
+  const convertDate = (dateString: string) => {
+    const date = new Date(dateString)
+    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: 'long', day: 'numeric'};
+    const formattedDate = date.toLocaleDateString('en-US', options)
+     return formattedDate
+  }
+
   return (
     <div className="flex flex-col content-center w-full h-full p-8 align-middle">
       <nav className="flex flex-col gap-4 mt-4 mb-8 lg:flex-row lg:items-center lg:justify-between">
@@ -77,9 +84,9 @@ export default async function Predictions({ params }: any) {
           </div>
           <div>
             <br />
-            CREATED: {prediction.created_date}
+            CREATED: {convertDate(prediction.created_date)}
             <br />
-            DUE: {prediction.due_date}
+            DUE: {convertDate(prediction.due_date)}
             <br />
             <br />
           </div>
