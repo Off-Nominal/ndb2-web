@@ -44,9 +44,9 @@ export default async function Predictions({ params }: any) {
   const undorsement = prediction.bets.filter((bet) => bet.endorsed === false);
 
   return (
-    <div className="flex h-full w-full flex-col content-center p-8 align-middle">
-      <nav className="mb-8 mt-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <h1 className="h-min text-center text-3xl sm:text-4xl md:text-5xl">
+    <div className="flex flex-col content-center w-full h-full p-8 align-middle">
+      <nav className="flex flex-col gap-4 mt-4 mb-8 lg:flex-row lg:items-center lg:justify-between">
+        <h1 className="text-3xl text-center h-min sm:text-4xl md:text-5xl">
           NOSTRADAMBOT<span className={"text-moonstone-blue"}>2</span>
         </h1>
         <Navigation />
@@ -67,7 +67,7 @@ export default async function Predictions({ params }: any) {
             TEXT: {prediction.text}
           </div>
         </div>
-        <div className="flex justify-between">
+        <div className="flex justify-evenly">
           <div>
             <br />
             CREATED: {prediction.created_date}

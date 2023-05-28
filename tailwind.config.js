@@ -24,6 +24,11 @@ module.exports = {
       "california-gold": "#B2893A",
       "platinum-grey": "#E8E8E8",
       "discord-purple": "#7983f5",
+      black: "#000000",
+      "button-gray": "#b2afa1",
+      transparent: "transparent",
+      "line-grey": "#a0a0a0"
+
     },
     fontFamily: {
       header: ["urbane", "sans-serif"],
