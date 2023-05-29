@@ -1,14 +1,11 @@
 import { add } from "date-fns";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { AuthClient } from "@/utils/auth";
-import { DiscordClient } from "@/utils/discord";
 import { getAppUrl } from "@/utils/misc";
+import discordAPI from "@/utils/discord";
+import authAPI from "@/utils/auth";
 
 const APP_URL = getAppUrl();
-
-const discordClient = new DiscordClient();
-const authClient = new AuthClient();
 
 async function exchangeCode(code: string): Promise<{
   user: {
@@ -18,9 +15,9 @@ async function exchangeCode(code: string): Promise<{
   } | null;
   error: string | null;
 }> {
-  const { access_token } = await discordClient.authenticate(code);
-  const member = await discordClient.identify(access_token);
-  const user = await discordClient.authorize(member);
+  const { access_token } = await discordAPI.authenticate(code);
+  const member = await discordAPI.identify(access_token);
+  const user = await discordAPI.authorize(member);
 
   return user;
 }
@@ -30,7 +27,7 @@ export async function GET(req: Request) {
   const code = searchParams.get("code");
 
   if (typeof code !== "string") {
-    return NextResponse.redirect(discordClient.oauthUrl);
+    return NextResponse.redirect(discordAPI.oAuthUrl);
   }
 
   const { user, error } = await exchangeCode(code);
@@ -41,7 +38,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const token = await authClient.sign(user);
+    const token = await authAPI.sign(user);
 
     // NEXT JS has a bug where it doesn't recognize the typing for the set method inside a server route
     // This comment written while on Next.JS v 13.4.2

@@ -1,16 +1,53 @@
 import { APIAuth } from "@/types/user";
-import axios from "axios";
 import {
   APIGuildMember,
   RESTGetAPIGuildMemberResult,
 } from "discord-api-types/v10";
 import { getAppUrl } from "./misc";
+import { ShortDiscordGuildMember } from "@/types/discord";
 
 const DISCORD_API_BASE_URL = "https://discord.com/api";
 const DISCORD_CDN_BASE_URL = "https://cdn.discordapp.com";
-const CLIENT_ID = process.env.DISCORD_CLIENT_ID || "";
-const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || "";
-const GUILD_ID = process.env.OFFNOMDISCORD_GUILD_ID;
+const CLIENT_ID =
+  (process.env.DISCORD_ENV === "production"
+    ? process.env.PROD_DISCORD_CLIENT_ID
+    : process.env.DISCORD_CLIENT_ID) || "";
+const CLIENT_SECRET =
+  (process.env.DISCORD_ENV === "production"
+    ? process.env.PROD_DISCORD_CLIENT_SECRET
+    : process.env.DISCORD_CLIENT_SECRET) || "";
+const CLIENT_BOT_ID =
+  (process.env.DISCORD_ENV === "production"
+    ? process.env.PROD_DISCORD_CLIENT_BOT_TOKEN
+    : process.env.DISCORD_CLIENT_BOT_TOKEN) || "";
+const GUILD_ID =
+  (process.env.DISCORD_ENV === "production"
+    ? process.env.PROD_OFFNOMDISCORD_GUILD_ID
+    : process.env.OFFNOMDISCORD_GUILD_ID) || "";
+
+const allowedRoles =
+  process.env.DISCORD_ENV === "production"
+    ? new Set([
+        process.env.PROD_ROLE_ID_HOST,
+        process.env.PROD_ROLE_ID_MODS,
+        process.env.PROD_ROLE_ID_MECO,
+        process.env.PROD_ROLE_ID_WM,
+        process.env.PROD_ROLE_ID_YT,
+        process.env.PROD_ROLE_ID_ANOM,
+        process.env.PROD_ROLE_ID_GUEST,
+      ])
+    : new Set([
+        process.env.ROLE_ID_HOST,
+        process.env.ROLE_ID_MODS,
+        process.env.ROLE_ID_MECO,
+        process.env.ROLE_ID_WM,
+        process.env.ROLE_ID_YT,
+        process.env.ROLE_ID_ANOM,
+        process.env.ROLE_ID_GUEST,
+      ]);
+
+console.log(process.env.DISCORD_ENV);
+console.log(allowedRoles);
 
 const APP_URL = getAppUrl();
 const REDIRECT_URI = `${APP_URL}/api/auth/oauth`;
@@ -45,17 +82,6 @@ export const buildAvatarUrl = (
   return `${DISCORD_CDN_BASE_URL}/embed/avatars/${discriminator % 5}.png`;
 };
 
-// Allowed Roles
-const allowedRoles = new Set([
-  process.env.ROLE_ID_HOST,
-  process.env.ROLE_ID_MODS,
-  process.env.ROLE_ID_MECO,
-  process.env.ROLE_ID_WM,
-  process.env.ROLE_ID_YT,
-  process.env.ROLE_ID_ANOM,
-  process.env.ROLE_ID_GUEST,
-]);
-
 export const hasCorrectRole = (roles: string[]): boolean => {
   for (const role of roles) {
     if (allowedRoles.has(role)) {
@@ -65,83 +91,148 @@ export const hasCorrectRole = (roles: string[]): boolean => {
   return false;
 };
 
-export class DiscordClient {
-  private baseUrl: string;
-  public oauthUrl: string;
-  private scope: string[];
+const baseUrl = DISCORD_API_BASE_URL;
+const scope = ["identify", "guilds", "guilds.members.read"];
 
-  constructor() {
-    this.baseUrl = DISCORD_API_BASE_URL;
-    this.scope = ["identify", "guilds", "guilds.members.read"];
-    this.oauthUrl = buildDiscordOAuthUrl({
-      baseUrl: this.baseUrl,
-      clientId: CLIENT_ID,
-      redirectUri: REDIRECT_URI,
-      scope: this.scope,
+const authenticate = (
+  code: string
+): Promise<{
+  access_token: string;
+  token_type: string;
+}> => {
+  const body = new URLSearchParams({
+    client_id: CLIENT_ID,
+    client_secret: CLIENT_SECRET,
+    redirect_uri: REDIRECT_URI,
+    grant_type: "authorization_code",
+    code,
+    scope: scope.join(" "),
+  }).toString();
+
+  console.log(body);
+
+  return fetch(`${baseUrl}/oauth2/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+  }).then((res) => res.json());
+};
+
+const identify = (
+  access_token: string
+): Promise<RESTGetAPIGuildMemberResult> => {
+  return fetch(`${baseUrl}/users/@me/guilds/${GUILD_ID}/member`, {
+    headers: { Authorization: `Bearer ${access_token}` },
+  }).then((res) => res.json());
+};
+
+const authorize = (
+  member: APIGuildMember
+): {
+  user: APIAuth.User | null;
+  error: string | null;
+} => {
+  if (!hasCorrectRole(member.roles)) {
+    return { user: null, error: "Incorrect role" };
+  }
+
+  if (!member.user) {
+    return { user: null, error: "Missing Member information" };
+  }
+
+  const user = {
+    name: member.nick || member.user?.username || "Unknown User",
+    avatarUrl: buildAvatarUrl(
+      member.user.id,
+      member.avatar,
+      member.user.avatar,
+      Number(member.user.discriminator)
+    ),
+    discordId: member.user?.id,
+  };
+
+  return { user, error: null };
+};
+
+const getGuildMembers = () => {
+  return fetch(`${baseUrl}/guilds/${GUILD_ID}/members?limit=1000`, {
+    headers: { Authorization: `Bot ${CLIENT_BOT_ID}` },
+    next: {
+      revalidate: 86400,
+    },
+  }).then((res) => res.json());
+};
+
+const getGuildMemberByDiscordId = (discordId: string) => {
+  return fetch(`${baseUrl}/guilds/${GUILD_ID}/members/${discordId}`, {
+    headers: { Authorization: `Bot ${CLIENT_BOT_ID}` },
+    next: {
+      revalidate: 86400,
+    },
+  }).then((res) => {
+    if (res.ok) {
+      return res.json();
+    } else {
+      throw res;
+    }
+  });
+};
+
+export class GuildMemberManager {
+  private members: Record<string, ShortDiscordGuildMember> = {};
+
+  public initialize = (): Promise<void> => {
+    return getGuildMembers().then((members) => {
+      for (const member of members) {
+        this.members[member.user.id] = {
+          name: member.nick || member.user.username || "Unknown User",
+          avatarUrl: buildAvatarUrl(
+            member.user.id,
+            member.avatar,
+            member.user.avatar,
+            Number(member.user?.discriminator)
+          ),
+          discordId: member.user.id,
+        };
+      }
     });
-  }
+  };
 
-  public authenticate(code: string) {
-    const body = new URLSearchParams({
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
-      redirect_uri: REDIRECT_URI,
-      grant_type: "authorization_code",
-      code,
-      scope: this.scope.join(" "),
-    }).toString();
-
-    return axios
-      .post<{
-        access_token: string;
-        token_type: string;
-      }>(`${this.baseUrl}/oauth2/token`, body, {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      })
-      .then((res) => res.data);
-  }
-
-  public identify(access_token: string) {
-    return axios
-      .get<RESTGetAPIGuildMemberResult>(
-        `${this.baseUrl}/users/@me/guilds/${GUILD_ID}/member`,
-        { headers: { Authorization: `Bearer ${access_token}` } }
-      )
-      .then((res) => res.data);
-  }
-
-  public authorize(member: APIGuildMember): {
-    user: APIAuth.User | null;
-    error: string | null;
-  } {
-    if (!hasCorrectRole(member.roles)) {
-      return { user: null, error: "Incorrect role" };
+  public getMemberByDiscordId = (
+    discordId: string
+  ): Promise<ShortDiscordGuildMember> => {
+    if (this.members[discordId]) {
+      return Promise.resolve(this.members[discordId]);
+    } else {
+      return getGuildMemberByDiscordId(discordId).then((member) => {
+        console.log(member);
+        this.members[discordId] = {
+          name: member.nick || member.user?.username || "Unknown User",
+          avatarUrl: buildAvatarUrl(
+            member.user.id,
+            member.avatar,
+            member.user.avatar,
+            Number(member.user.discriminator)
+          ),
+          discordId: member.user.id,
+        };
+        return this.members[discordId];
+      });
     }
-
-    if (!member.user) {
-      return { user: null, error: "Missing Member information" };
-    }
-
-    const user = {
-      name: member.nick || member.user?.username || "Unknown User",
-      avatarUrl: buildAvatarUrl(
-        member.user.id,
-        member.avatar,
-        member.user.avatar,
-        Number(member.user.discriminator)
-      ),
-      discordId: member.user?.id,
-    };
-
-    return { user, error: null };
-  }
-
-  public fetchGuildMembers(access_token: string) {
-    return axios
-      .get<RESTGetAPIGuildMemberResult[]>(
-        `${this.baseUrl}/guilds/${GUILD_ID}/members`,
-        { headers: { Authorization: `Bearer ${access_token}` } }
-      )
-      .then((res) => res.data);
-  }
+  };
 }
+
+const discordAPI = {
+  authenticate,
+  identify,
+  authorize,
+  GuildMemberManager,
+  oAuthUrl: buildDiscordOAuthUrl({
+    baseUrl,
+    clientId: CLIENT_ID,
+    redirectUri: REDIRECT_URI,
+    scope,
+  }),
+};
+
+export default discordAPI;
