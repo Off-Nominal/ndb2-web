@@ -147,26 +147,30 @@ const getGuildMemberByDiscordId = (discordId: string) => {
     next: {
       revalidate: 86400,
     },
-  }).then((res) => res.json());
+  }).then((res) => {
+    if (res.ok) {
+      return res.json();
+    } else {
+      throw res;
+    }
+  });
 };
 
 export class GuildMemberManager {
   private members: Record<string, ShortDiscordGuildMember> = {};
 
-  constructor() {}
-
   public initialize = (): Promise<void> => {
     return getGuildMembers().then((members) => {
       for (const member of members) {
         this.members[member.user.id] = {
-          name: member.nick || member.user?.username || "Unknown User",
+          name: member.nick || member.user.username || "Unknown User",
           avatarUrl: buildAvatarUrl(
-            member.user?.id,
+            member.user.id,
             member.avatar,
-            member.user?.avatar,
+            member.user.avatar,
             Number(member.user?.discriminator)
           ),
-          discordId: member.user?.id,
+          discordId: member.user.id,
         };
       }
     });
@@ -179,15 +183,16 @@ export class GuildMemberManager {
       return Promise.resolve(this.members[discordId]);
     } else {
       return getGuildMemberByDiscordId(discordId).then((member) => {
+        console.log(member);
         this.members[discordId] = {
           name: member.nick || member.user?.username || "Unknown User",
           avatarUrl: buildAvatarUrl(
-            member.user?.id,
+            member.user.id,
             member.avatar,
-            member.user?.avatar,
-            Number(member.user?.discriminator)
+            member.user.avatar,
+            Number(member.user.discriminator)
           ),
-          discordId: member.user?.id,
+          discordId: member.user.id,
         };
         return this.members[discordId];
       });

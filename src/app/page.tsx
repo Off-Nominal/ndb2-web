@@ -44,12 +44,25 @@ async function getLeaderboards(): Promise<{
         guildMemberManager.getMemberByDiscordId(leader.discord_id)
       );
     }
+    for (const leader of predictionsLeaders.data.leaders) {
+      usersArray.push(
+        guildMemberManager.getMemberByDiscordId(leader.discord_id)
+      );
+    }
+    for (const leader of betsLeaders.data.leaders) {
+      usersArray.push(
+        guildMemberManager.getMemberByDiscordId(leader.discord_id)
+      );
+    }
 
-    return Promise.all(usersArray).then((users) => {
+    return Promise.allSettled(usersArray).then((users) => {
       const usersLookup: Record<string, ShortDiscordGuildMember> = {};
 
       for (const user of users) {
-        usersLookup[user.discordId] = user;
+        if ("value" in user) {
+          const discordId = user.value.discordId;
+          usersLookup[discordId] = user.value;
+        }
       }
 
       return {
@@ -57,21 +70,21 @@ async function getLeaderboards(): Promise<{
           discordId: l.discord_id,
           rank: l.rank,
           avatarUrl: usersLookup[l.discord_id]?.avatarUrl,
-          name: usersLookup[l.discord_id]?.name,
+          name: usersLookup[l.discord_id]?.name || "Unknown User",
           value: l.points,
         })),
         predictions: predictionsLeaders.data.leaders.map((l) => ({
           discordId: l.discord_id,
           rank: l.rank,
           avatarUrl: usersLookup[l.discord_id]?.avatarUrl,
-          name: usersLookup[l.discord_id]?.name,
+          name: usersLookup[l.discord_id]?.name || "Unknown User",
           value: l.predictions.successful,
         })),
         bets: betsLeaders.data.leaders.map((l) => ({
           discordId: l.discord_id,
           rank: l.rank,
           avatarUrl: usersLookup[l.discord_id]?.avatarUrl,
-          name: usersLookup[l.discord_id]?.name,
+          name: usersLookup[l.discord_id]?.name || "Unknown User",
           value: l.bets.successful,
         })),
       };
