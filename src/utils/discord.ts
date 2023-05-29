@@ -1,5 +1,4 @@
 import { APIAuth } from "@/types/user";
-import axios from "axios";
 import {
   APIGuildMember,
   RESTGetAPIGuildMemberResult,
@@ -65,83 +64,77 @@ export const hasCorrectRole = (roles: string[]): boolean => {
   return false;
 };
 
-export class DiscordClient {
-  private baseUrl: string;
-  public oauthUrl: string;
-  private scope: string[];
+const baseUrl = DISCORD_API_BASE_URL;
+const scope = ["identify", "guilds", "guilds.members.read"];
 
-  constructor() {
-    this.baseUrl = DISCORD_API_BASE_URL;
-    this.scope = ["identify", "guilds", "guilds.members.read"];
-    this.oauthUrl = buildDiscordOAuthUrl({
-      baseUrl: this.baseUrl,
-      clientId: CLIENT_ID,
-      redirectUri: REDIRECT_URI,
-      scope: this.scope,
-    });
+const authenticate = (
+  code: string
+): Promise<{
+  access_token: string;
+  token_type: string;
+}> => {
+  const body = new URLSearchParams({
+    client_id: CLIENT_ID,
+    client_secret: CLIENT_SECRET,
+    redirect_uri: REDIRECT_URI,
+    grant_type: "authorization_code",
+    code,
+    scope: scope.join(" "),
+  }).toString();
+
+  return fetch(`${baseUrl}/oauth2/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+  }).then((res) => res.json());
+};
+
+const identify = (
+  access_token: string
+): Promise<RESTGetAPIGuildMemberResult> => {
+  return fetch(`${baseUrl}/users/@me/guilds/${GUILD_ID}/member`, {
+    headers: { Authorization: `Bearer ${access_token}` },
+  }).then((res) => res.json());
+};
+
+const authorize = (
+  member: APIGuildMember
+): {
+  user: APIAuth.User | null;
+  error: string | null;
+} => {
+  if (!hasCorrectRole(member.roles)) {
+    return { user: null, error: "Incorrect role" };
   }
 
-  public authenticate(code: string) {
-    const body = new URLSearchParams({
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
-      redirect_uri: REDIRECT_URI,
-      grant_type: "authorization_code",
-      code,
-      scope: this.scope.join(" "),
-    }).toString();
-
-    return axios
-      .post<{
-        access_token: string;
-        token_type: string;
-      }>(`${this.baseUrl}/oauth2/token`, body, {
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      })
-      .then((res) => res.data);
+  if (!member.user) {
+    return { user: null, error: "Missing Member information" };
   }
 
-  public identify(access_token: string) {
-    return axios
-      .get<RESTGetAPIGuildMemberResult>(
-        `${this.baseUrl}/users/@me/guilds/${GUILD_ID}/member`,
-        { headers: { Authorization: `Bearer ${access_token}` } }
-      )
-      .then((res) => res.data);
-  }
+  const user = {
+    name: member.nick || member.user?.username || "Unknown User",
+    avatarUrl: buildAvatarUrl(
+      member.user.id,
+      member.avatar,
+      member.user.avatar,
+      Number(member.user.discriminator)
+    ),
+    discordId: member.user?.id,
+  };
 
-  public authorize(member: APIGuildMember): {
-    user: APIAuth.User | null;
-    error: string | null;
-  } {
-    if (!hasCorrectRole(member.roles)) {
-      return { user: null, error: "Incorrect role" };
-    }
+  return { user, error: null };
+};
 
-    if (!member.user) {
-      return { user: null, error: "Missing Member information" };
-    }
+const discordAPI = {
+  authenticate,
+  identify,
+  authorize,
+  oAuthUrl: buildDiscordOAuthUrl({
+    baseUrl,
+    clientId: CLIENT_ID,
+    redirectUri: REDIRECT_URI,
+    scope,
+  }),
+};
 
-    const user = {
-      name: member.nick || member.user?.username || "Unknown User",
-      avatarUrl: buildAvatarUrl(
-        member.user.id,
-        member.avatar,
-        member.user.avatar,
-        Number(member.user.discriminator)
-      ),
-      discordId: member.user?.id,
-    };
-
-    return { user, error: null };
-  }
-
-  public fetchGuildMembers(access_token: string) {
-    return axios
-      .get<RESTGetAPIGuildMemberResult[]>(
-        `${this.baseUrl}/guilds/${GUILD_ID}/members`,
-        { headers: { Authorization: `Bearer ${access_token}` } }
-      )
-      .then((res) => res.data);
-  }
-}
+export default discordAPI;

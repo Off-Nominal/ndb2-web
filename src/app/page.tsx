@@ -1,10 +1,11 @@
 import { Card } from "@/components/Card";
 import Image from "next/image";
 import { Navigation } from "./components/Navigation";
-import { Ndb2Client } from "@/utils/ndb2";
-import { AuthClient } from "@/utils/auth";
 import { redirect } from "next/navigation";
 import { APIScores } from "@/types/scores";
+import { RequestInit } from "next/dist/server/web/spec-extension/request";
+import ndb2API from "@/utils/api";
+import authAPI from "@/utils/auth";
 
 // SERVER SIDE DATA FETCHING
 async function getLeaderboards(): Promise<{
@@ -12,14 +13,11 @@ async function getLeaderboards(): Promise<{
   predictions: APIScores.PredictionsLeader[];
   bets: APIScores.BetsLeader[];
 }> {
-  const ndb2Client = new Ndb2Client();
+  const options: RequestInit = { cache: "no-cache" };
 
-  const headers: RequestInit["headers"] = { cache: "no-store" };
-
-  // const guildMembersRes = fetch()
-  const pointsRes = ndb2Client.getPointsLeaderboard(headers);
-  const predictionsRes = ndb2Client.getPredictionsLeaderboard(headers);
-  const betsRes = ndb2Client.getBetsLeaderboard(headers);
+  const pointsRes = ndb2API.getPointsLeaderboard(options);
+  const predictionsRes = ndb2API.getPredictionsLeaderboard(options);
+  const betsRes = ndb2API.getBetsLeaderboard(options);
 
   try {
     const [pointsLeaders, predictionsLeaders, betsLeaders] = await Promise.all([
@@ -76,8 +74,7 @@ const LeaderboardEntry = (props: LeaderboardEntryProps) => {
 
 // FRONT END
 export default async function Home() {
-  const authClient = new AuthClient();
-  const payload = await authClient.verify();
+  const payload = await authAPI.verify();
 
   if (!payload) {
     return redirect("/signin");
