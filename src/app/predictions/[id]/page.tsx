@@ -14,6 +14,7 @@ import ndb2API from "@/utils/ndb2";
 import discordAPI from "@/utils/discord";
 import { ShortDiscordGuildMember } from "@/types/discord";
 import { format } from "date-fns";
+import Image from "next/image";
 
 type ListBet = Omit<APIPredictions.Bet, "better"> & {
   name: string;
@@ -150,6 +151,14 @@ export default async function Predictions({ params }: any) {
                   {endorsements.map((bet) => {
                     return (
                       <tr key={bet.id}>
+                        <td>
+                          <Image
+                            src={bet.avatarUrl}
+                            alt={bet.name}
+                            width={25}
+                            height={25}
+                          />
+                        </td>
                         <td>{bet.name}</td>
                         <td>{formatDate(bet.date)}</td>
                         <td>{bet.wager}</td>
@@ -176,6 +185,14 @@ export default async function Predictions({ params }: any) {
                   {undorsements.map((bet) => {
                     return (
                       <tr key={bet.id}>
+                        <td>
+                          <Image
+                            src={bet.avatarUrl}
+                            alt={bet.name}
+                            width={25}
+                            height={25}
+                          />
+                        </td>
                         <td>{bet.name}</td>
                         <td>{formatDate(bet.date)}</td>
                         <td>{bet.wager}</td>

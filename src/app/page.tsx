@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import ndb2API, { GetLeaderboardOptions } from "@/utils/ndb2";
 import authAPI from "@/utils/auth";
 import discordAPI from "@/utils/discord";
-import { ShortDiscordGuildMember } from "@/types/discord";
 
 type Leader = {
   discordId: string;
