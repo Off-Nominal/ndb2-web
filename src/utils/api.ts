@@ -10,30 +10,55 @@ const headers = new Headers({
   Authorization: `Bearer ${API_KEY}`,
 });
 
+export type GetLeaderboardOptions = RequestInit & {
+  seasonIdentifier?: "current" | "last" | number;
+};
+
 const getPointsLeaderboard = (
-  options?: RequestInit
+  options?: GetLeaderboardOptions
 ): Promise<APIScores.GetPointsLeaderboard> => {
-  return fetch(baseUrl + `/api/scores?view=points`, {
+  let url: string = baseUrl + "/api/scores";
+  if (options?.seasonIdentifier) {
+    url += `/seasons/${options.seasonIdentifier}`;
+  }
+  url += "?view=points";
+
+  return fetch(url, {
     headers,
-    ...options,
+    cache: options?.cache,
+    next: options?.next,
   }).then((res) => res.json());
 };
 
 const getBetsLeaderboard = (
-  options?: RequestInit
+  options?: GetLeaderboardOptions
 ): Promise<APIScores.GetBetsLeaderboard> => {
-  return fetch(baseUrl + `/api/scores?view=bets`, {
+  let url: string = baseUrl + "/api/scores";
+  if (options?.seasonIdentifier) {
+    url += `/seasons/${options.seasonIdentifier}`;
+  }
+  url += "?view=bets";
+
+  return fetch(url, {
     headers,
-    ...options,
+    cache: options?.cache,
+    next: options?.next,
   }).then((res) => res.json());
 };
 
 const getPredictionsLeaderboard = (
-  options?: RequestInit
+  options?: GetLeaderboardOptions
 ): Promise<APIScores.GetPredictionsLeaderboard> => {
-  return fetch(baseUrl + `/api/scores?view=predictions`, {
+  let url: string = baseUrl + "/api/scores";
+  if (options?.seasonIdentifier) {
+    url += `/seasons/${options.seasonIdentifier}`;
+  }
+  url += "?view=predictions";
+
+  return fetch(url, {
     headers,
-    ...options,
+    cache: options?.cache,
+    next: options?.next,
   }).then((res) => res.json());
 };
 

@@ -63,6 +63,7 @@ const allowedRoles = new Set([
 ]);
 
 export const hasCorrectRole = (roles: string[]): boolean => {
+  console.log(roles);
   for (const role of roles) {
     if (allowedRoles.has(role)) {
       return true;
