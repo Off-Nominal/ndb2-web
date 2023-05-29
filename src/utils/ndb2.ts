@@ -1,58 +1,82 @@
 import { APIPredictions } from "@/types/predictions";
 import { APIScores } from "@/types/scores";
+import { RequestInit } from "next/dist/server/web/spec-extension/request";
 
 const API_URL = process.env.NDB2_API_BASEURL;
 const API_KEY = process.env.NDB2_API_KEY;
 
-export class Ndb2Client {
-  private baseUrl: string;
-  private headers: { Authorization: string };
+const baseUrl = API_URL || "http://localhost:8000";
+const headers = new Headers({
+  Authorization: `Bearer ${API_KEY}`,
+});
 
-  constructor() {
-    this.baseUrl = API_URL || "http://localhost:8000";
-    this.headers = {
-      Authorization: `Bearer ${API_KEY}`,
-    };
+export type GetLeaderboardOptions = RequestInit & {
+  seasonIdentifier?: "current" | "last" | number;
+};
+
+const getPointsLeaderboard = (
+  options?: GetLeaderboardOptions
+): Promise<APIScores.GetPointsLeaderboard> => {
+  let url: string = baseUrl + "/api/scores";
+  if (options?.seasonIdentifier) {
+    url += `/seasons/${options.seasonIdentifier}`;
   }
+  url += "?view=points";
 
-  public getPointsLeaderboard(
-    headers: RequestInit["headers"] = {}
-  ): Promise<APIScores.GetPointsLeaderboard> {
-    const reqHeaders = new Headers({ ...this.headers, ...headers });
+  return fetch(url, {
+    headers,
+    cache: options?.cache,
+    next: options?.next,
+  }).then((res) => res.json());
+};
 
-    return fetch(this.baseUrl + `/api/scores?view=points`, {
-      headers: reqHeaders,
-    }).then((res) => res.json());
+const getBetsLeaderboard = (
+  options?: GetLeaderboardOptions
+): Promise<APIScores.GetBetsLeaderboard> => {
+  let url: string = baseUrl + "/api/scores";
+  if (options?.seasonIdentifier) {
+    url += `/seasons/${options.seasonIdentifier}`;
   }
+  url += "?view=bets";
 
-  public getBetsLeaderboard(
-    headers: RequestInit["headers"] = {}
-  ): Promise<APIScores.GetBetsLeaderboard> {
-    const reqHeaders = new Headers({ ...this.headers, ...headers });
+  return fetch(url, {
+    headers,
+    cache: options?.cache,
+    next: options?.next,
+  }).then((res) => res.json());
+};
 
-    return fetch(this.baseUrl + `/api/scores?view=bets`, {
-      headers: reqHeaders,
-    }).then((res) => res.json());
+const getPredictionsLeaderboard = (
+  options?: GetLeaderboardOptions
+): Promise<APIScores.GetPredictionsLeaderboard> => {
+  let url: string = baseUrl + "/api/scores";
+  if (options?.seasonIdentifier) {
+    url += `/seasons/${options.seasonIdentifier}`;
   }
+  url += "?view=predictions";
 
-  public getPredictionsLeaderboard(
-    headers: RequestInit["headers"] = {}
-  ): Promise<APIScores.GetPredictionsLeaderboard> {
-    const reqHeaders = new Headers({ ...this.headers, ...headers });
+  return fetch(url, {
+    headers,
+    cache: options?.cache,
+    next: options?.next,
+  }).then((res) => res.json());
+};
 
-    return fetch(this.baseUrl + `/api/scores?view=predictions`, {
-      headers: reqHeaders,
-    }).then((res) => res.json());
-  }
+const getPredictionById = (
+  id: Number,
+  options?: RequestInit
+): Promise<APIPredictions.GetPredictionById> => {
+  return fetch(baseUrl + `/api/predictions/${id}`, {
+    headers,
+    ...options,
+  }).then((res) => res.json());
+};
 
-  public getPredictionById(
-    id: Number,
-    headers: RequestInit["headers"] = {}
-  ): Promise<APIPredictions.GetPredictionById> {
-    const reqHeaders = new Headers({ ...this.headers, ...headers });
+const ndb2API = {
+  getPointsLeaderboard,
+  getBetsLeaderboard,
+  getPredictionsLeaderboard,
+  getPredictionById,
+};
 
-    return fetch(this.baseUrl + `/api/predictions/${id}`, {
-      headers: reqHeaders,
-    }).then((res) => res.json());
-  }
-}
+export default ndb2API;

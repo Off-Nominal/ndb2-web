@@ -29,45 +29,44 @@ const isAppJWTPayload = (val: jose.JWTPayload): val is AppJWTPayload => {
   return true;
 };
 
-export class AuthClient {
-  private jwtSecret: string;
+const sign = (payload: any): Promise<string> => {
+  const iat = Math.floor(Date.now() / 1000);
+  const exp = iat + 24 * 60 * 60; // one day
 
-  constructor() {
-    this.jwtSecret = JWT_SECRET;
-  }
+  return new jose.SignJWT({ ...payload })
+    .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+    .setExpirationTime(exp)
+    .setIssuedAt(iat)
+    .setNotBefore(iat)
+    .sign(new TextEncoder().encode(JWT_SECRET));
+};
 
-  sign(payload: any): Promise<string> {
-    const iat = Math.floor(Date.now() / 1000);
-    const exp = iat + 24 * 60 * 60; // one day
+const verify = async (): Promise<AppJWTPayload | null> => {
+  const token = cookies().get("token")?.value || "";
 
-    return new jose.SignJWT({ ...payload })
-      .setProtectedHeader({ alg: "HS256", typ: "JWT" })
-      .setExpirationTime(exp)
-      .setIssuedAt(iat)
-      .setNotBefore(iat)
-      .sign(new TextEncoder().encode(this.jwtSecret));
-  }
+  try {
+    const { payload } = await jose.jwtVerify(
+      token,
+      new TextEncoder().encode(JWT_SECRET)
+    );
 
-  async verify(): Promise<AppJWTPayload | null> {
-    const token = cookies().get("token")?.value || "";
-
-    try {
-      const { payload } = await jose.jwtVerify(
-        token,
-        new TextEncoder().encode(this.jwtSecret)
-      );
-
-      if (!isAppJWTPayload(payload)) {
-        return null;
-      }
-
-      return {
-        name: payload.name,
-        avatarUrl: payload.avatarUrl,
-        discordId: payload.discordId,
-      };
-    } catch (err) {
+    if (!isAppJWTPayload(payload)) {
       return null;
     }
+
+    return {
+      name: payload.name,
+      avatarUrl: payload.avatarUrl,
+      discordId: payload.discordId,
+    };
+  } catch (err) {
+    return null;
   }
-}
+};
+
+const authAPI = {
+  sign,
+  verify,
+};
+
+export default authAPI;
