@@ -2,10 +2,10 @@ import { Card } from "@/components/Card";
 import Image from "next/image";
 import { Navigation } from "./components/Navigation";
 import { redirect } from "next/navigation";
-import { RequestInit } from "next/dist/server/web/spec-extension/request";
-import ndb2API, { GetLeaderboardOptions } from "@/utils/api";
+import ndb2API, { GetLeaderboardOptions } from "@/utils/ndb2";
 import authAPI from "@/utils/auth";
-import discordAPI, { ShortDiscordGuildMember } from "@/utils/discord";
+import discordAPI from "@/utils/discord";
+import { ShortDiscordGuildMember } from "@/types/discord";
 
 type Leader = {
   discordId: string;

@@ -4,19 +4,50 @@ import {
   RESTGetAPIGuildMemberResult,
 } from "discord-api-types/v10";
 import { getAppUrl } from "./misc";
-
-export type ShortDiscordGuildMember = {
-  name: string;
-  avatarUrl: string;
-  discordId: string;
-};
+import { ShortDiscordGuildMember } from "@/types/discord";
 
 const DISCORD_API_BASE_URL = "https://discord.com/api";
 const DISCORD_CDN_BASE_URL = "https://cdn.discordapp.com";
-const CLIENT_ID = process.env.DISCORD_CLIENT_ID || "";
-const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || "";
-const CLIENT_BOT_ID = process.env.DISCORD_CLIENT_BOT_TOKEN || "";
-const GUILD_ID = process.env.OFFNOMDISCORD_GUILD_ID;
+const CLIENT_ID =
+  (process.env.DISCORD_ENV === "production"
+    ? process.env.PROD_DISCORD_CLIENT_ID
+    : process.env.DISCORD_CLIENT_ID) || "";
+const CLIENT_SECRET =
+  (process.env.DISCORD_ENV === "production"
+    ? process.env.PROD_DISCORD_CLIENT_SECRET
+    : process.env.DISCORD_CLIENT_SECRET) || "";
+const CLIENT_BOT_ID =
+  (process.env.DISCORD_ENV === "production"
+    ? process.env.PROD_DISCORD_CLIENT_BOT_TOKEN
+    : process.env.DISCORD_CLIENT_BOT_TOKEN) || "";
+const GUILD_ID =
+  (process.env.DISCORD_ENV === "production"
+    ? process.env.PROD_OFFNOMDISCORD_GUILD_ID
+    : process.env.OFFNOMDISCORD_GUILD_ID) || "";
+
+const allowedRoles =
+  process.env.DISCORD_ENV === "production"
+    ? new Set([
+        process.env.PROD_ROLE_ID_HOST,
+        process.env.PROD_ROLE_ID_MODS,
+        process.env.PROD_ROLE_ID_MECO,
+        process.env.PROD_ROLE_ID_WM,
+        process.env.PROD_ROLE_ID_YT,
+        process.env.PROD_ROLE_ID_ANOM,
+        process.env.PROD_ROLE_ID_GUEST,
+      ])
+    : new Set([
+        process.env.ROLE_ID_HOST,
+        process.env.ROLE_ID_MODS,
+        process.env.ROLE_ID_MECO,
+        process.env.ROLE_ID_WM,
+        process.env.ROLE_ID_YT,
+        process.env.ROLE_ID_ANOM,
+        process.env.ROLE_ID_GUEST,
+      ]);
+
+console.log(process.env.DISCORD_ENV);
+console.log(allowedRoles);
 
 const APP_URL = getAppUrl();
 const REDIRECT_URI = `${APP_URL}/api/auth/oauth`;
@@ -51,19 +82,7 @@ export const buildAvatarUrl = (
   return `${DISCORD_CDN_BASE_URL}/embed/avatars/${discriminator % 5}.png`;
 };
 
-// Allowed Roles
-const allowedRoles = new Set([
-  process.env.ROLE_ID_HOST,
-  process.env.ROLE_ID_MODS,
-  process.env.ROLE_ID_MECO,
-  process.env.ROLE_ID_WM,
-  process.env.ROLE_ID_YT,
-  process.env.ROLE_ID_ANOM,
-  process.env.ROLE_ID_GUEST,
-]);
-
 export const hasCorrectRole = (roles: string[]): boolean => {
-  console.log(roles);
   for (const role of roles) {
     if (allowedRoles.has(role)) {
       return true;
@@ -89,6 +108,8 @@ const authenticate = (
     code,
     scope: scope.join(" "),
   }).toString();
+
+  console.log(body);
 
   return fetch(`${baseUrl}/oauth2/token`, {
     method: "POST",
