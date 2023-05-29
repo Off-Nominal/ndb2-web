@@ -5,10 +5,17 @@ import {
 } from "discord-api-types/v10";
 import { getAppUrl } from "./misc";
 
+export type ShortDiscordGuildMember = {
+  name: string;
+  avatarUrl: string;
+  discordId: string;
+};
+
 const DISCORD_API_BASE_URL = "https://discord.com/api";
 const DISCORD_CDN_BASE_URL = "https://cdn.discordapp.com";
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID || "";
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || "";
+const CLIENT_BOT_ID = process.env.DISCORD_CLIENT_BOT_TOKEN || "";
 const GUILD_ID = process.env.OFFNOMDISCORD_GUILD_ID;
 
 const APP_URL = getAppUrl();
@@ -125,10 +132,74 @@ const authorize = (
   return { user, error: null };
 };
 
+const getGuildMembers = () => {
+  return fetch(`${baseUrl}/guilds/${GUILD_ID}/members?limit=1000`, {
+    headers: { Authorization: `Bot ${CLIENT_BOT_ID}` },
+    next: {
+      revalidate: 86400,
+    },
+  }).then((res) => res.json());
+};
+
+const getGuildMemberByDiscordId = (discordId: string) => {
+  return fetch(`${baseUrl}/guilds/${GUILD_ID}/members/${discordId}`, {
+    headers: { Authorization: `Bot ${CLIENT_BOT_ID}` },
+    next: {
+      revalidate: 86400,
+    },
+  }).then((res) => res.json());
+};
+
+export class GuildMemberManager {
+  private members: Record<string, ShortDiscordGuildMember> = {};
+
+  constructor() {}
+
+  public initialize = (): Promise<void> => {
+    return getGuildMembers().then((members) => {
+      for (const member of members) {
+        this.members[member.user.id] = {
+          name: member.nick || member.user?.username || "Unknown User",
+          avatarUrl: buildAvatarUrl(
+            member.user?.id,
+            member.avatar,
+            member.user?.avatar,
+            Number(member.user?.discriminator)
+          ),
+          discordId: member.user?.id,
+        };
+      }
+    });
+  };
+
+  public getMemberByDiscordId = (
+    discordId: string
+  ): Promise<ShortDiscordGuildMember> => {
+    if (this.members[discordId]) {
+      return Promise.resolve(this.members[discordId]);
+    } else {
+      return getGuildMemberByDiscordId(discordId).then((member) => {
+        this.members[discordId] = {
+          name: member.nick || member.user?.username || "Unknown User",
+          avatarUrl: buildAvatarUrl(
+            member.user?.id,
+            member.avatar,
+            member.user?.avatar,
+            Number(member.user?.discriminator)
+          ),
+          discordId: member.user?.id,
+        };
+        return this.members[discordId];
+      });
+    }
+  };
+}
+
 const discordAPI = {
   authenticate,
   identify,
   authorize,
+  GuildMemberManager,
   oAuthUrl: buildDiscordOAuthUrl({
     baseUrl,
     clientId: CLIENT_ID,

@@ -1,10 +1,9 @@
-import { AuthClient } from "@/utils/auth";
+import authAPI from "@/utils/auth";
 import { redirect } from "next/navigation";
 import { Navigation } from "../components/Navigation";
 
 export default async function Predictions() {
-  const authClient = new AuthClient();
-  const payload = await authClient.verify();
+  const payload = await authAPI.verify();
 
   if (!payload) {
     return redirect("/signin");

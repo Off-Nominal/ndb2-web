@@ -1,12 +1,11 @@
 import { Card } from "@/components/Card";
-import { AuthClient } from "@/utils/auth";
+import authAPI from "@/utils/auth";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export default async function SignIn() {
-  const authClient = new AuthClient();
-  const payload = await authClient.verify();
+  const payload = await authAPI.verify();
 
   if (payload) {
     redirect("/");

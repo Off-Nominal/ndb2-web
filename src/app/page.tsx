@@ -2,18 +2,28 @@ import { Card } from "@/components/Card";
 import Image from "next/image";
 import { Navigation } from "./components/Navigation";
 import { redirect } from "next/navigation";
-import { APIScores } from "@/types/scores";
 import { RequestInit } from "next/dist/server/web/spec-extension/request";
 import ndb2API from "@/utils/api";
 import authAPI from "@/utils/auth";
+import discordAPI, { ShortDiscordGuildMember } from "@/utils/discord";
+
+type Leader = {
+  discordId: string;
+  rank: number;
+  avatarUrl: string;
+  name: string;
+  value: number | string;
+};
 
 // SERVER SIDE DATA FETCHING
 async function getLeaderboards(): Promise<{
-  points: APIScores.PointsLeader[];
-  predictions: APIScores.PredictionsLeader[];
-  bets: APIScores.BetsLeader[];
+  points: Leader[];
+  predictions: Leader[];
+  bets: Leader[];
 }> {
   const options: RequestInit = { cache: "no-cache" };
+
+  const guildMemberManager = new discordAPI.GuildMemberManager();
 
   const pointsRes = ndb2API.getPointsLeaderboard(options);
   const predictionsRes = ndb2API.getPredictionsLeaderboard(options);
@@ -24,12 +34,48 @@ async function getLeaderboards(): Promise<{
       pointsRes,
       predictionsRes,
       betsRes,
+      guildMemberManager.initialize(),
     ]);
-    return {
-      points: pointsLeaders.data.leaders,
-      predictions: predictionsLeaders.data.leaders,
-      bets: betsLeaders.data.leaders,
-    };
+
+    const usersArray = [];
+
+    for (const leader of pointsLeaders.data.leaders) {
+      usersArray.push(
+        guildMemberManager.getMemberByDiscordId(leader.discord_id)
+      );
+    }
+
+    return Promise.all(usersArray).then((users) => {
+      const usersLookup: Record<string, ShortDiscordGuildMember> = {};
+
+      for (const user of users) {
+        usersLookup[user.discordId] = user;
+      }
+
+      return {
+        points: pointsLeaders.data.leaders.map((l) => ({
+          discordId: l.discord_id,
+          rank: l.rank,
+          avatarUrl: usersLookup[l.discord_id]?.avatarUrl,
+          name: usersLookup[l.discord_id]?.name,
+          value: l.points,
+        })),
+        predictions: predictionsLeaders.data.leaders.map((l) => ({
+          discordId: l.discord_id,
+          rank: l.rank,
+          avatarUrl: usersLookup[l.discord_id]?.avatarUrl,
+          name: usersLookup[l.discord_id]?.name,
+          value: l.predictions.successful,
+        })),
+        bets: betsLeaders.data.leaders.map((l) => ({
+          discordId: l.discord_id,
+          rank: l.rank,
+          avatarUrl: usersLookup[l.discord_id]?.avatarUrl,
+          name: usersLookup[l.discord_id]?.name,
+          value: l.bets.successful,
+        })),
+      };
+    });
   } catch (err) {
     console.error(err);
     throw new Error("Failed to fetch leaderboard data");
@@ -97,11 +143,11 @@ export default async function Home() {
               {points.map((l) => {
                 return (
                   <LeaderboardEntry
-                    key={l.discord_id}
+                    key={l.discordId}
                     rank={l.rank}
-                    name={"Discord Nickname"}
-                    value={l.points}
-                    avatarUrl=""
+                    name={l.name}
+                    value={l.value}
+                    avatarUrl={l.avatarUrl}
                   />
                 );
               })}
@@ -112,11 +158,11 @@ export default async function Home() {
               {predictions.map((l) => {
                 return (
                   <LeaderboardEntry
-                    key={l.discord_id}
+                    key={l.discordId}
                     rank={l.rank}
-                    name={"Discord Nickname"}
-                    value={l.predictions.successful}
-                    avatarUrl=""
+                    name={l.name}
+                    value={l.value}
+                    avatarUrl={l.avatarUrl}
                   />
                 );
               })}
@@ -127,11 +173,11 @@ export default async function Home() {
               {bets.map((l) => {
                 return (
                   <LeaderboardEntry
-                    key={l.discord_id}
+                    key={l.discordId}
                     rank={l.rank}
-                    name={"Discord Nickname"}
-                    value={l.bets.successful}
-                    avatarUrl=""
+                    name={l.name}
+                    value={l.value}
+                    avatarUrl={l.avatarUrl}
                   />
                 );
               })}
