@@ -1,7 +1,6 @@
-import { AuthClient } from "@/utils/auth";
 import { redirect } from "next/navigation";
 import { Navigation } from "@/app/components/Navigation";
-import { Ndb2Client } from "@/utils/ndb2";
+
 import React from "react";
 
 import { Card } from "@/components/Card";
@@ -10,53 +9,96 @@ import { PillDisplay } from "@/components/PillDisplay";
 import { Vote } from "@/components/Vote";
 
 import { APIPredictions } from "@/types/predictions";
+import authAPI from "@/utils/auth";
+import ndb2API from "@/utils/ndb2";
+import discordAPI from "@/utils/discord";
+import { ShortDiscordGuildMember } from "@/types/discord";
+import { format } from "date-fns";
+
+type ListBet = Omit<APIPredictions.Bet, "better"> & {
+  name: string;
+  avatarUrl: string;
+};
+
+const formatDate = (date: string) => {
+  return format(new Date(date), "LLL do, yyyy");
+};
+
+const generateBet = (
+  bet: APIPredictions.Bet,
+  member: ShortDiscordGuildMember
+): ListBet => {
+  return {
+    id: bet.id,
+    date: bet.date,
+    wager: bet.wager,
+    valid: bet.valid,
+    payout: bet.payout,
+    endorsed: bet.endorsed,
+    season_payout: bet.season_payout,
+    name: member.name,
+    avatarUrl: member.avatarUrl,
+  };
+};
 
 // SERVER SIDE DATA FETCHING
-async function fetchPrediction(
-  id: number | string
-): Promise<APIPredictions.EnhancedPrediction> {
-  const ndb2Client = new Ndb2Client();
-
+async function fetchPrediction(id: number): Promise<{
+  prediction: APIPredictions.EnhancedPrediction;
+  predictor: ShortDiscordGuildMember;
+  endorsements: ListBet[];
+  undorsements: ListBet[];
+}> {
   const headers: RequestInit["headers"] = { cache: "no-store" };
+  const guildMemberManager = new discordAPI.GuildMemberManager();
+
+  const promises: [Promise<void>, Promise<APIPredictions.GetPredictionById>] = [
+    guildMemberManager.initialize(),
+    ndb2API.getPredictionById(id, headers),
+  ];
+
+  let prediction: APIPredictions.EnhancedPrediction;
 
   try {
-    const predictionInfo = await ndb2Client.getPredictionById(id, headers);
-    return predictionInfo.data;
+    const results = await Promise.all(promises);
+    prediction = results[1].data;
   } catch (err) {
     console.error(err);
     throw new Error("Failed to fetch prediction data");
   }
+
+  try {
+    const userLookup = await guildMemberManager.buildUserLookup(
+      prediction.bets.map((bet) => bet.better.discord_id)
+    );
+    const predictor = userLookup[prediction.predictor.discord_id];
+    const endorsements = prediction.bets
+      .filter((bet) => bet.endorsed)
+      .map((bet) => generateBet(bet, userLookup[bet.better.discord_id]));
+    const undorsements = prediction.bets
+      .filter((bet) => !bet.endorsed)
+      .map((bet) => generateBet(bet, userLookup[bet.better.discord_id]));
+
+    return { prediction, predictor, endorsements, undorsements };
+  } catch (err) {
+    console.error(err);
+    throw new Error("Failed to fetch user infor");
+  }
 }
 
 export default async function Predictions({ params }: any) {
-  const authClient = new AuthClient();
-  const payload = await authClient.verify();
+  const payload = await authAPI.verify();
 
   if (!payload) {
     return redirect("/signin");
   }
 
-  const prediction = await fetchPrediction(params.id);
-
-  console.log(prediction);
-  for (const bet of prediction.bets) {
-    console.log(bet);
-  }
-
-  const endorsement = prediction.bets.filter((bet) => bet.endorsed === true);
-  const undorsement = prediction.bets.filter((bet) => bet.endorsed === false);
-
-  const convertDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: 'long', day: 'numeric'};
-    const formattedDate = date.toLocaleDateString('en-US', options)
-     return formattedDate
-  }
+  const { prediction, predictor, endorsements, undorsements } =
+    await fetchPrediction(params.id);
 
   return (
-    <div className="flex flex-col content-center w-full h-full p-8 align-middle">
-      <nav className="flex flex-col gap-4 mt-4 mb-8 lg:flex-row lg:items-center lg:justify-between">
-        <h1 className="text-3xl text-center h-min sm:text-4xl md:text-5xl">
+    <div className="flex h-full w-full flex-col content-center p-8 align-middle">
+      <nav className="mb-8 mt-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <h1 className="h-min text-center text-3xl sm:text-4xl md:text-5xl">
           NOSTRADAMBOT<span className={"text-moonstone-blue"}>2</span>
         </h1>
         <Navigation />
@@ -67,15 +109,13 @@ export default async function Predictions({ params }: any) {
             <div>
               Prediction # {prediction.id}
               <br />
-              by (Discord User) {prediction.predictor.discord_id}
+              by {predictor.name}
               <br />
             </div>
             <PillDisplay text={prediction.status.toUpperCase()} />
           </div>
-          <div className="justify-center w-full h-full p-2 text-left rounded-lg bg-silver-chalice-grey">
-            <p>
-            {prediction.text}
-            </p>
+          <div className="h-full w-full justify-center rounded-lg bg-silver-chalice-grey p-2 text-left">
+            <p>{prediction.text}</p>
           </div>
         </div>
         <div className="flex justify-evenly">
@@ -84,9 +124,9 @@ export default async function Predictions({ params }: any) {
           </div>
           <div>
             <br />
-            CREATED: {convertDate(prediction.created_date)}
+            CREATED: {formatDate(prediction.created_date)}
             <br />
-            DUE: {convertDate(prediction.due_date)}
+            DUE: {formatDate(prediction.due_date)}
             <br />
             <br />
           </div>
@@ -94,12 +134,10 @@ export default async function Predictions({ params }: any) {
             <Vote />
           </div>
         </div>
-        <div>
-        BETS
-        </div>
+        <div>BETS</div>
         <div className="flex justify-evenly">
           <Card title="Endorsements">
-            {endorsement.length > 0 ? (
+            {endorsements.length > 0 ? (
               <table>
                 <thead>
                   <tr>
@@ -109,11 +147,11 @@ export default async function Predictions({ params }: any) {
                   </tr>
                 </thead>
                 <tbody>
-                  {endorsement.map((bet: any) => {
+                  {endorsements.map((bet) => {
                     return (
-                      <tr key={bet.better.discord_id}>
-                        <td>{bet.better.discord_id}</td>
-                        <td>{convertDate(bet.date)}</td>
+                      <tr key={bet.id}>
+                        <td>{bet.name}</td>
+                        <td>{formatDate(bet.date)}</td>
                         <td>{bet.wager}</td>
                       </tr>
                     );
@@ -125,7 +163,7 @@ export default async function Predictions({ params }: any) {
             )}
           </Card>
           <Card title="Undorsements">
-            {undorsement.length > 0 ? (
+            {undorsements.length > 0 ? (
               <table>
                 <thead>
                   <tr>
@@ -135,11 +173,11 @@ export default async function Predictions({ params }: any) {
                   </tr>
                 </thead>
                 <tbody>
-                  {undorsement.map((bet: any) => {
+                  {undorsements.map((bet) => {
                     return (
-                      <tr key={bet.better.discord_id}>
-                        <td>{bet.better.discord_id}</td>
-                        <td>{convertDate(bet.date)}</td>
+                      <tr key={bet.id}>
+                        <td>{bet.name}</td>
+                        <td>{formatDate(bet.date)}</td>
                         <td>{bet.wager}</td>
                       </tr>
                     );

@@ -62,96 +62,59 @@ async function getLeaderboards(): Promise<{
       guildMemberManager.initialize(),
     ]);
 
-    const usersArray = [];
+    const userLookup = await guildMemberManager.buildUserLookup([
+      ...s_pointsLeaders.data.leaders.map((l) => l.discord_id),
+      ...s_predictionsLeaders.data.leaders.map((l) => l.discord_id),
+      ...s_betsLeaders.data.leaders.map((l) => l.discord_id),
+      ...at_pointsLeaders.data.leaders.map((l) => l.discord_id),
+      ...at_predictionsLeaders.data.leaders.map((l) => l.discord_id),
+      ...at_betsLeaders.data.leaders.map((l) => l.discord_id),
+    ]);
 
-    for (const leader of s_pointsLeaders.data.leaders) {
-      usersArray.push(
-        guildMemberManager.getMemberByDiscordId(leader.discord_id)
-      );
-    }
-    for (const leader of s_predictionsLeaders.data.leaders) {
-      usersArray.push(
-        guildMemberManager.getMemberByDiscordId(leader.discord_id)
-      );
-    }
-    for (const leader of s_betsLeaders.data.leaders) {
-      usersArray.push(
-        guildMemberManager.getMemberByDiscordId(leader.discord_id)
-      );
-    }
-    for (const leader of at_pointsLeaders.data.leaders) {
-      usersArray.push(
-        guildMemberManager.getMemberByDiscordId(leader.discord_id)
-      );
-    }
-    for (const leader of at_predictionsLeaders.data.leaders) {
-      usersArray.push(
-        guildMemberManager.getMemberByDiscordId(leader.discord_id)
-      );
-    }
-    for (const leader of at_betsLeaders.data.leaders) {
-      usersArray.push(
-        guildMemberManager.getMemberByDiscordId(leader.discord_id)
-      );
-    }
-
-    return Promise.allSettled(usersArray).then((users) => {
-      const usersLookup: Record<string, ShortDiscordGuildMember> = {};
-
-      for (const user of users) {
-        if ("value" in user) {
-          const discordId = user.value.discordId;
-          usersLookup[discordId] = user.value;
-        }
-      }
-
-      console.log(s_predictionsLeaders.data.leaders);
-
-      return {
-        s_points: s_pointsLeaders.data.leaders.map((l) => ({
-          discordId: l.discord_id,
-          rank: l.rank,
-          avatarUrl: usersLookup[l.discord_id]?.avatarUrl,
-          name: usersLookup[l.discord_id]?.name || "Unknown User",
-          value: l.points,
-        })),
-        s_predictions: s_predictionsLeaders.data.leaders.map((l) => ({
-          discordId: l.discord_id,
-          rank: l.rank,
-          avatarUrl: usersLookup[l.discord_id]?.avatarUrl,
-          name: usersLookup[l.discord_id]?.name || "Unknown User",
-          value: l.predictions.successful,
-        })),
-        s_bets: s_betsLeaders.data.leaders.map((l) => ({
-          discordId: l.discord_id,
-          rank: l.rank,
-          avatarUrl: usersLookup[l.discord_id]?.avatarUrl,
-          name: usersLookup[l.discord_id]?.name || "Unknown User",
-          value: l.bets.successful,
-        })),
-        at_points: at_pointsLeaders.data.leaders.map((l) => ({
-          discordId: l.discord_id,
-          rank: l.rank,
-          avatarUrl: usersLookup[l.discord_id]?.avatarUrl,
-          name: usersLookup[l.discord_id]?.name || "Unknown User",
-          value: l.points,
-        })),
-        at_predictions: at_predictionsLeaders.data.leaders.map((l) => ({
-          discordId: l.discord_id,
-          rank: l.rank,
-          avatarUrl: usersLookup[l.discord_id]?.avatarUrl,
-          name: usersLookup[l.discord_id]?.name || "Unknown User",
-          value: l.predictions.successful,
-        })),
-        at_bets: at_betsLeaders.data.leaders.map((l) => ({
-          discordId: l.discord_id,
-          rank: l.rank,
-          avatarUrl: usersLookup[l.discord_id]?.avatarUrl,
-          name: usersLookup[l.discord_id]?.name || "Unknown User",
-          value: l.bets.successful,
-        })),
-      };
-    });
+    return {
+      s_points: s_pointsLeaders.data.leaders.map((l) => ({
+        discordId: l.discord_id,
+        rank: l.rank,
+        avatarUrl: userLookup[l.discord_id]?.avatarUrl,
+        name: userLookup[l.discord_id]?.name || "Unknown User",
+        value: l.points,
+      })),
+      s_predictions: s_predictionsLeaders.data.leaders.map((l) => ({
+        discordId: l.discord_id,
+        rank: l.rank,
+        avatarUrl: userLookup[l.discord_id]?.avatarUrl,
+        name: userLookup[l.discord_id]?.name || "Unknown User",
+        value: l.predictions.successful,
+      })),
+      s_bets: s_betsLeaders.data.leaders.map((l) => ({
+        discordId: l.discord_id,
+        rank: l.rank,
+        avatarUrl: userLookup[l.discord_id]?.avatarUrl,
+        name: userLookup[l.discord_id]?.name || "Unknown User",
+        value: l.bets.successful,
+      })),
+      at_points: at_pointsLeaders.data.leaders.map((l) => ({
+        discordId: l.discord_id,
+        rank: l.rank,
+        avatarUrl: userLookup[l.discord_id]?.avatarUrl,
+        name: userLookup[l.discord_id]?.name || "Unknown User",
+        value: l.points,
+      })),
+      at_predictions: at_predictionsLeaders.data.leaders.map((l) => ({
+        discordId: l.discord_id,
+        rank: l.rank,
+        avatarUrl: userLookup[l.discord_id]?.avatarUrl,
+        name: userLookup[l.discord_id]?.name || "Unknown User",
+        value: l.predictions.successful,
+      })),
+      at_bets: at_betsLeaders.data.leaders.map((l) => ({
+        discordId: l.discord_id,
+        rank: l.rank,
+        avatarUrl: userLookup[l.discord_id]?.avatarUrl,
+        name: userLookup[l.discord_id]?.name || "Unknown User",
+        value: l.bets.successful,
+      })),
+    };
   } catch (err) {
     console.error(err);
     throw new Error("Failed to fetch leaderboard data");
