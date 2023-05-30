@@ -16,10 +16,15 @@ export default function Error({
   const errorMessage = error.message || defaultError;
   return (
     <section className="grid h-full place-content-center">
-      <Card title="Something went wrong!" className="h-min max-w-xl shadow-md">
-        <p>{errorMessage}</p>
-        <div className="mt-8 flex justify-center">
-          <Button onClick={() => reset()} label="Try again" />
+      <Card
+        title="Something went wrong!"
+        className="m-4 h-min max-w-xl shadow-md"
+      >
+        <div className="p-8">
+          <p className="my-8">{errorMessage}</p>
+          <div className="mt-16 flex justify-center">
+            <Button onClick={() => reset()} label="Try again" />
+          </div>
         </div>
       </Card>
     </section>
