@@ -8,13 +8,13 @@ import { Timeline } from "@/components/Timeline";
 import { PillDisplay } from "@/components/PillDisplay";
 import { Vote } from "@/components/Vote";
 
-import { APIPredictions } from "@/types/predictions";
 import authAPI from "@/utils/auth";
 import ndb2API from "@/utils/ndb2";
 import discordAPI from "@/utils/discord";
 import { ShortDiscordGuildMember } from "@/types/discord";
 import { format } from "date-fns";
 import Image from "next/image";
+import { APIPredictions, PredictionLifeCycle } from "@/types/predictions";
 
 type ListBet = Omit<APIPredictions.Bet, "better"> & {
   name: string;
@@ -96,26 +96,37 @@ export default async function Predictions({ params }: any) {
   const { prediction, predictor, endorsements, undorsements } =
     await fetchPrediction(params.id);
 
+  const statusColor = {
+    [PredictionLifeCycle.RETIRED]: "bg-button-gray",
+    [PredictionLifeCycle.SUCCESSFUL]: "bg-moss-green",
+    [PredictionLifeCycle.FAILED]: "bg-deep-chestnut-red",
+    [PredictionLifeCycle.OPEN]: "bg-moonstone-blue",
+    [PredictionLifeCycle.CLOSED]: "bg-button-gray",
+  };
+
   return (
-    <div className="flex h-full w-full flex-col content-center p-8 align-middle">
-      <nav className="mb-8 mt-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <h1 className="h-min text-center text-3xl sm:text-4xl md:text-5xl">
+    <div className="flex flex-col content-center w-full h-full p-8 align-middle">
+      <nav className="flex flex-col gap-4 mt-4 mb-8 lg:flex-row lg:items-center lg:justify-between">
+        <h1 className="text-3xl text-center h-min sm:text-4xl md:text-5xl">
           NOSTRADAMBOT<span className={"text-moonstone-blue"}>2</span>
         </h1>
         <Navigation />
       </nav>
       <main className="flex flex-col">
         <div className="flex flex-col">
-          <div className="flex flex-row">
+          <div className="flex flex-row justify-between">
             <div>
               Prediction # {prediction.id}
               <br />
               by {predictor.name}
               <br />
             </div>
-            <PillDisplay text={prediction.status.toUpperCase()} />
+            <PillDisplay
+              text={prediction.status.toUpperCase()}
+              color={statusColor[prediction.status]}
+            />
           </div>
-          <div className="h-full w-full justify-center rounded-lg bg-silver-chalice-grey p-2 text-left">
+          <div className="justify-center w-full h-full p-2 text-left rounded-lg bg-silver-chalice-grey">
             <p>{prediction.text}</p>
           </div>
         </div>
@@ -132,7 +143,24 @@ export default async function Predictions({ params }: any) {
             <br />
           </div>
           <div>
-            <Vote />
+            <div>
+              <div>
+                <p>YOUR BET</p>
+                <p>BET ON SOME DAY</p>
+              </div>
+              <div>
+                <Vote />
+              </div>
+            </div>
+            <div>
+              <div>
+                <p>POTENTIAL POINTS</p>
+                <p>GIVEN DUE DATE OF SOME DAY</p>
+              </div>
+              <div>
+                <PillDisplay text={"+/- 278"} color={"bg-button-gray"} />
+              </div>
+            </div>
           </div>
         </div>
         <div>BETS</div>
