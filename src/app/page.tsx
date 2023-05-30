@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import ndb2API, { GetLeaderboardOptions } from "@/utils/ndb2";
 import authAPI from "@/utils/auth";
 import discordAPI from "@/utils/discord";
+import { APIScores } from "@/types/scores";
 
 type Leader = {
   discordId: string;
@@ -13,6 +14,17 @@ type Leader = {
   name: string;
   value: number | string;
 };
+
+const seasonLeaders: {
+  points?: APIScores.PointsLeader[];
+  predictions?: APIScores.PredictionsLeader[];
+  bets?: APIScores.BetsLeader[];
+} = {};
+const allTimeLeaders: {
+  points?: APIScores.PointsLeader[];
+  predictions?: APIScores.PredictionsLeader[];
+  bets?: APIScores.BetsLeader[];
+} = {};
 
 // SERVER SIDE DATA FETCHING
 async function getLeaderboards(): Promise<{
@@ -23,22 +35,14 @@ async function getLeaderboards(): Promise<{
   at_predictions: Leader[];
   at_bets: Leader[];
 }> {
-  const options: GetLeaderboardOptions = { cache: "no-cache" };
-
   const guildMemberManager = new discordAPI.GuildMemberManager();
 
-  const s_pointsRes = ndb2API.getPointsLeaderboard({
-    ...options,
-    seasonIdentifier: "current",
-  });
-  const s_predictionsRes = ndb2API.getPredictionsLeaderboard({
-    ...options,
-    seasonIdentifier: "current",
-  });
-  const s_betsRes = ndb2API.getBetsLeaderboard({
-    ...options,
-    seasonIdentifier: "current",
-  });
+  const options: GetLeaderboardOptions = { cache: "no-cache" };
+  const seasonOptions = { ...options, seasonIfentifier: "current" };
+
+  const s_pointsRes = ndb2API.getPointsLeaderboard(seasonOptions);
+  const s_predictionsRes = ndb2API.getPredictionsLeaderboard(seasonOptions);
+  const s_betsRes = ndb2API.getBetsLeaderboard(seasonOptions);
   const at_pointsRes = ndb2API.getPointsLeaderboard(options);
   const at_predictionsRes = ndb2API.getPredictionsLeaderboard(options);
   const at_betsRes = ndb2API.getBetsLeaderboard(options);
@@ -61,52 +65,66 @@ async function getLeaderboards(): Promise<{
       guildMemberManager.initialize(),
     ]);
 
+    seasonLeaders.points = s_pointsLeaders.data.leaders;
+    seasonLeaders.predictions = s_predictionsLeaders.data.leaders;
+    seasonLeaders.bets = s_betsLeaders.data.leaders;
+    allTimeLeaders.points = at_pointsLeaders.data.leaders;
+    allTimeLeaders.predictions = at_predictionsLeaders.data.leaders;
+    allTimeLeaders.bets = at_betsLeaders.data.leaders;
+  } catch (err) {
+    console.error(err);
+    throw new Error(
+      "There was an error fetching the data for the Leaderboards from the Nostradambot2 API."
+    );
+  }
+
+  try {
     const userLookup = await guildMemberManager.buildUserLookup([
-      ...s_pointsLeaders.data.leaders.map((l) => l.discord_id),
-      ...s_predictionsLeaders.data.leaders.map((l) => l.discord_id),
-      ...s_betsLeaders.data.leaders.map((l) => l.discord_id),
-      ...at_pointsLeaders.data.leaders.map((l) => l.discord_id),
-      ...at_predictionsLeaders.data.leaders.map((l) => l.discord_id),
-      ...at_betsLeaders.data.leaders.map((l) => l.discord_id),
+      ...seasonLeaders.points.map((l) => l.discord_id),
+      ...seasonLeaders.predictions.map((l) => l.discord_id),
+      ...seasonLeaders.bets.map((l) => l.discord_id),
+      ...allTimeLeaders.points.map((l) => l.discord_id),
+      ...allTimeLeaders.predictions.map((l) => l.discord_id),
+      ...allTimeLeaders.bets.map((l) => l.discord_id),
     ]);
 
     return {
-      s_points: s_pointsLeaders.data.leaders.map((l) => ({
+      s_points: seasonLeaders.points.map((l) => ({
         discordId: l.discord_id,
         rank: l.rank,
         avatarUrl: userLookup[l.discord_id]?.avatarUrl,
         name: userLookup[l.discord_id]?.name || "Unknown User",
         value: l.points,
       })),
-      s_predictions: s_predictionsLeaders.data.leaders.map((l) => ({
+      s_predictions: seasonLeaders.predictions.map((l) => ({
         discordId: l.discord_id,
         rank: l.rank,
         avatarUrl: userLookup[l.discord_id]?.avatarUrl,
         name: userLookup[l.discord_id]?.name || "Unknown User",
         value: l.predictions.successful,
       })),
-      s_bets: s_betsLeaders.data.leaders.map((l) => ({
+      s_bets: seasonLeaders.bets.map((l) => ({
         discordId: l.discord_id,
         rank: l.rank,
         avatarUrl: userLookup[l.discord_id]?.avatarUrl,
         name: userLookup[l.discord_id]?.name || "Unknown User",
         value: l.bets.successful,
       })),
-      at_points: at_pointsLeaders.data.leaders.map((l) => ({
+      at_points: allTimeLeaders.points.map((l) => ({
         discordId: l.discord_id,
         rank: l.rank,
         avatarUrl: userLookup[l.discord_id]?.avatarUrl,
         name: userLookup[l.discord_id]?.name || "Unknown User",
         value: l.points,
       })),
-      at_predictions: at_predictionsLeaders.data.leaders.map((l) => ({
+      at_predictions: allTimeLeaders.predictions.map((l) => ({
         discordId: l.discord_id,
         rank: l.rank,
         avatarUrl: userLookup[l.discord_id]?.avatarUrl,
         name: userLookup[l.discord_id]?.name || "Unknown User",
         value: l.predictions.successful,
       })),
-      at_bets: at_betsLeaders.data.leaders.map((l) => ({
+      at_bets: allTimeLeaders.bets.map((l) => ({
         discordId: l.discord_id,
         rank: l.rank,
         avatarUrl: userLookup[l.discord_id]?.avatarUrl,
@@ -116,7 +134,9 @@ async function getLeaderboards(): Promise<{
     };
   } catch (err) {
     console.error(err);
-    throw new Error("Failed to fetch leaderboard data");
+    throw new Error(
+      "There was an error fetching data from Discord about the users in the Leaderboards."
+    );
   }
 }
 
