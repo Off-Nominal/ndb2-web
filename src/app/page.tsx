@@ -6,6 +6,9 @@ import ndb2API, { GetLeaderboardOptions } from "@/utils/ndb2";
 import authAPI from "@/utils/auth";
 import discordAPI from "@/utils/discord";
 import { APIScores } from "@/types/scores";
+import { List } from "@/components/List";
+import { Avatar } from "@/components/Avatar";
+import { truncateText } from "@/utils/misc";
 
 type Leader = {
   discordId: string;
@@ -151,28 +154,24 @@ const defaultAvatarUrl = "https://cdn.discordapp.com/embed/avatars/0.png";
 
 const LeaderboardEntry = (props: LeaderboardEntryProps) => {
   return (
-    <li>
-      <div className="flex justify-evenly">
-        <div>
-          <p>{props.rank}</p>
-        </div>
-        <div>
-          <Image
-            className="rounded-full"
-            src={props.avatarUrl || defaultAvatarUrl}
-            width={24}
-            height={24}
-            alt={`Avatar photo for user ${props.name}`}
-          />
-        </div>
-        <div>
-          <p>{props.name}</p>
-        </div>
-        <div>
-          <p>{props.value}</p>
-        </div>
+    <div className="flex items-center">
+      <div className="mr-2 flex shrink-0 grow-0 basis-5 justify-end">
+        <span>{props.rank}</span>
       </div>
-    </li>
+      <div className="mx-2 shrink-0 grow-0 basis-8">
+        <Avatar
+          src={props.avatarUrl || defaultAvatarUrl}
+          alt={`Avatar photo for user ${props.name}`}
+          size={30}
+        />
+      </div>
+      <div className="mx-2 grow">
+        <span>{props.name}</span>
+      </div>
+      <div className="ml-2 shrink-0 grow-0 ">
+        <span>{props.value.toLocaleString("en-US")}</span>
+      </div>
+    </div>
   );
 };
 
@@ -202,96 +201,100 @@ export default async function Home() {
         <Navigation />
       </nav>
       <main>
-        <div className="flex flex-wrap justify-center gap-4">
-          <Card title="Points">
-            <ul>
-              {s_points.map((l) => {
+        <h2>Season Stats</h2>
+        <div className="my-8 flex flex-col justify-center gap-4 lg:flex-row">
+          <Card title="Points" className="grow">
+            <List
+              items={s_points.map((l) => {
                 return (
                   <LeaderboardEntry
                     key={l.discordId}
                     rank={l.rank}
-                    name={l.name}
+                    name={truncateText(l.name, 20)}
                     value={l.value}
                     avatarUrl={l.avatarUrl}
                   />
                 );
               })}
-            </ul>
+            />
           </Card>
-          <Card title="Predictions">
-            <ul>
-              {s_predictions.map((l) => {
+          <Card title="Predictions" className="grow">
+            <List
+              items={s_predictions.map((l) => {
                 return (
                   <LeaderboardEntry
                     key={l.discordId}
                     rank={l.rank}
-                    name={l.name}
+                    name={truncateText(l.name, 20)}
                     value={l.value}
                     avatarUrl={l.avatarUrl}
                   />
                 );
               })}
-            </ul>
+            />
           </Card>
-          <Card title="Bets">
-            <ul>
-              {s_bets.map((l) => {
+          <Card title="Bets" className="grow">
+            <List
+              items={s_bets.map((l) => {
                 return (
                   <LeaderboardEntry
                     key={l.discordId}
                     rank={l.rank}
-                    name={l.name}
+                    name={truncateText(l.name, 20)}
                     value={l.value}
                     avatarUrl={l.avatarUrl}
                   />
                 );
               })}
-            </ul>
+            />
           </Card>
-          <Card title="Points">
-            <ul>
-              {at_points.map((l) => {
+        </div>
+        <h2>All-Time Stats</h2>
+        <div className="my-8 flex flex-col justify-center gap-4 lg:flex-row">
+          <Card title="Points" className="grow">
+            <List
+              items={at_points.map((l) => {
                 return (
                   <LeaderboardEntry
                     key={l.discordId}
                     rank={l.rank}
-                    name={l.name}
+                    name={truncateText(l.name, 20)}
                     value={l.value}
                     avatarUrl={l.avatarUrl}
                   />
                 );
               })}
-            </ul>
+            />
           </Card>
-          <Card title="Predictions">
-            <ul>
-              {at_predictions.map((l) => {
+          <Card title="Predictions" className="grow">
+            <List
+              items={at_predictions.map((l) => {
                 return (
                   <LeaderboardEntry
                     key={l.discordId}
                     rank={l.rank}
-                    name={l.name}
+                    name={truncateText(l.name, 20)}
                     value={l.value}
                     avatarUrl={l.avatarUrl}
                   />
                 );
               })}
-            </ul>
+            />
           </Card>
-          <Card title="Bets">
-            <ul>
-              {at_bets.map((l) => {
+          <Card title="Bets" className="grow">
+            <List
+              items={at_bets.map((l) => {
                 return (
                   <LeaderboardEntry
                     key={l.discordId}
                     rank={l.rank}
-                    name={l.name}
+                    name={truncateText(l.name, 20)}
                     value={l.value}
                     avatarUrl={l.avatarUrl}
                   />
                 );
               })}
-            </ul>
+            />
           </Card>
         </div>
       </main>
