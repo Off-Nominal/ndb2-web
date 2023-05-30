@@ -9,6 +9,20 @@ export enum PredictionLifeCycle {
 }
 
 export namespace APIPredictions {
+  export type Bet = {
+    id: string;
+    endorsed: boolean;
+    date: string;
+    wager: number;
+    valid: boolean;
+    payout: number;
+    season_payout: number;
+    better: {
+      id: string;
+      discord_id: string;
+    };
+  };
+
   export type EnhancedPrediction = {
     id: number;
     predictor: {
@@ -27,18 +41,7 @@ export namespace APIPredictions {
     judged_date: string | null;
     retired_date: string | null;
     status: PredictionLifeCycle;
-    bets: {
-      id: string;
-      endorsed: boolean;
-      date: string;
-      wager: number;
-      valid: boolean;
-      payout: number;
-      better: {
-        id: string;
-        discord_id: string;
-      };
-    }[];
+    bets: Bet[];
     votes: {
       id: string;
       vote: boolean;

@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
-import { AppError } from "@/utils/errors";
 
 export default function Error({
   error,
@@ -11,12 +10,21 @@ export default function Error({
   error: Error;
   reset: () => void;
 }) {
+  const defaultError =
+    "Something went wrong! We could not process this request.";
+
+  const errorMessage = error.message || defaultError;
   return (
     <section className="grid h-full place-content-center">
-      <Card title="Something went wrong!" className="h-min max-w-xl shadow-md">
-        <p>We had trouble processing your request.</p>
-        <div className="mt-8 flex justify-center">
-          <Button onClick={() => reset()} label="Try again" />
+      <Card
+        title="Something went wrong!"
+        className="m-4 h-min max-w-xl shadow-md"
+      >
+        <div className="p-8">
+          <p className="my-8">{errorMessage}</p>
+          <div className="mt-16 flex justify-center">
+            <Button onClick={() => reset()} label="Try again" />
+          </div>
         </div>
       </Card>
     </section>

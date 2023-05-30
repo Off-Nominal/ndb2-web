@@ -46,9 +46,6 @@ const allowedRoles =
         process.env.ROLE_ID_GUEST,
       ]);
 
-console.log(process.env.DISCORD_ENV);
-console.log(allowedRoles);
-
 const APP_URL = getAppUrl();
 const REDIRECT_URI = `${APP_URL}/api/auth/oauth`;
 
@@ -108,8 +105,6 @@ const authenticate = (
     code,
     scope: scope.join(" "),
   }).toString();
-
-  console.log(body);
 
   return fetch(`${baseUrl}/oauth2/token`, {
     method: "POST",
@@ -205,7 +200,6 @@ export class GuildMemberManager {
       return Promise.resolve(this.members[discordId]);
     } else {
       return getGuildMemberByDiscordId(discordId).then((member) => {
-        console.log(member);
         this.members[discordId] = {
           name: member.nick || member.user?.username || "Unknown User",
           avatarUrl: buildAvatarUrl(
@@ -219,6 +213,22 @@ export class GuildMemberManager {
         return this.members[discordId];
       });
     }
+  };
+
+  public buildUserLookup = (
+    discordIds: string[]
+  ): Promise<Record<string, ShortDiscordGuildMember>> => {
+    const usersPromises = discordIds.map((discordId) =>
+      this.getMemberByDiscordId(discordId)
+    );
+    const userLookup: Record<string, ShortDiscordGuildMember> = {};
+
+    return Promise.all(usersPromises).then((users) => {
+      for (const user of users) {
+        userLookup[user.discordId] = user;
+      }
+      return userLookup;
+    });
   };
 }
 

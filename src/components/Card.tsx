@@ -8,13 +8,18 @@ type CardProps = {
 
 export const Card = (props: CardProps) => {
   return (
-    <div className={"rounded-3xl bg-quartz-grey shadow-md " + props.className}>
+    <div
+      className={
+        "rounded-3xl bg-slate-200 shadow-md dark:bg-slate-700 " +
+        props.className
+      }
+    >
       <div className={"rounded-t-3xl bg-moonstone-blue px-8 py-2"}>
-        <h2 className="text-center text-2xl uppercase sm:text-3xl">
+        <h2 className="text-center text-2xl uppercase text-white sm:text-3xl">
           {props.title}
         </h2>
       </div>
-      <div className="p-8">{props.children}</div>
+      <div>{props.children}</div>
     </div>
   );
 };

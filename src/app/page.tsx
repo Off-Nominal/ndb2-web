@@ -5,7 +5,10 @@ import { redirect } from "next/navigation";
 import ndb2API, { GetLeaderboardOptions } from "@/utils/ndb2";
 import authAPI from "@/utils/auth";
 import discordAPI from "@/utils/discord";
-import { ShortDiscordGuildMember } from "@/types/discord";
+import { APIScores } from "@/types/scores";
+import { List } from "@/components/List";
+import { Avatar } from "@/components/Avatar";
+import { truncateText } from "@/utils/helpers";
 
 type Leader = {
   discordId: string;
@@ -14,6 +17,17 @@ type Leader = {
   name: string;
   value: number | string;
 };
+
+const seasonLeaders: {
+  points?: APIScores.PointsLeader[];
+  predictions?: APIScores.PredictionsLeader[];
+  bets?: APIScores.BetsLeader[];
+} = {};
+const allTimeLeaders: {
+  points?: APIScores.PointsLeader[];
+  predictions?: APIScores.PredictionsLeader[];
+  bets?: APIScores.BetsLeader[];
+} = {};
 
 // SERVER SIDE DATA FETCHING
 async function getLeaderboards(): Promise<{
@@ -24,22 +38,14 @@ async function getLeaderboards(): Promise<{
   at_predictions: Leader[];
   at_bets: Leader[];
 }> {
-  const options: GetLeaderboardOptions = { cache: "no-cache" };
-
   const guildMemberManager = new discordAPI.GuildMemberManager();
 
-  const s_pointsRes = ndb2API.getPointsLeaderboard({
-    ...options,
-    seasonIdentifier: "current",
-  });
-  const s_predictionsRes = ndb2API.getPredictionsLeaderboard({
-    ...options,
-    seasonIdentifier: "current",
-  });
-  const s_betsRes = ndb2API.getBetsLeaderboard({
-    ...options,
-    seasonIdentifier: "current",
-  });
+  const options: GetLeaderboardOptions = { cache: "no-cache" };
+  const seasonOptions = { ...options, seasonIfentifier: "current" };
+
+  const s_pointsRes = ndb2API.getPointsLeaderboard(seasonOptions);
+  const s_predictionsRes = ndb2API.getPredictionsLeaderboard(seasonOptions);
+  const s_betsRes = ndb2API.getBetsLeaderboard(seasonOptions);
   const at_pointsRes = ndb2API.getPointsLeaderboard(options);
   const at_predictionsRes = ndb2API.getPredictionsLeaderboard(options);
   const at_betsRes = ndb2API.getBetsLeaderboard(options);
@@ -62,99 +68,78 @@ async function getLeaderboards(): Promise<{
       guildMemberManager.initialize(),
     ]);
 
-    const usersArray = [];
-
-    for (const leader of s_pointsLeaders.data.leaders) {
-      usersArray.push(
-        guildMemberManager.getMemberByDiscordId(leader.discord_id)
-      );
-    }
-    for (const leader of s_predictionsLeaders.data.leaders) {
-      usersArray.push(
-        guildMemberManager.getMemberByDiscordId(leader.discord_id)
-      );
-    }
-    for (const leader of s_betsLeaders.data.leaders) {
-      usersArray.push(
-        guildMemberManager.getMemberByDiscordId(leader.discord_id)
-      );
-    }
-    for (const leader of at_pointsLeaders.data.leaders) {
-      usersArray.push(
-        guildMemberManager.getMemberByDiscordId(leader.discord_id)
-      );
-    }
-    for (const leader of at_predictionsLeaders.data.leaders) {
-      usersArray.push(
-        guildMemberManager.getMemberByDiscordId(leader.discord_id)
-      );
-    }
-    for (const leader of at_betsLeaders.data.leaders) {
-      usersArray.push(
-        guildMemberManager.getMemberByDiscordId(leader.discord_id)
-      );
-    }
-
-    return Promise.allSettled(usersArray).then((users) => {
-      const usersLookup: Record<string, ShortDiscordGuildMember> = {};
-
-      for (const user of users) {
-        if ("value" in user) {
-          const discordId = user.value.discordId;
-          usersLookup[discordId] = user.value;
-        }
-      }
-
-      console.log(s_predictionsLeaders.data.leaders);
-
-      return {
-        s_points: s_pointsLeaders.data.leaders.map((l) => ({
-          discordId: l.discord_id,
-          rank: l.rank,
-          avatarUrl: usersLookup[l.discord_id]?.avatarUrl,
-          name: usersLookup[l.discord_id]?.name || "Unknown User",
-          value: l.points,
-        })),
-        s_predictions: s_predictionsLeaders.data.leaders.map((l) => ({
-          discordId: l.discord_id,
-          rank: l.rank,
-          avatarUrl: usersLookup[l.discord_id]?.avatarUrl,
-          name: usersLookup[l.discord_id]?.name || "Unknown User",
-          value: l.predictions.successful,
-        })),
-        s_bets: s_betsLeaders.data.leaders.map((l) => ({
-          discordId: l.discord_id,
-          rank: l.rank,
-          avatarUrl: usersLookup[l.discord_id]?.avatarUrl,
-          name: usersLookup[l.discord_id]?.name || "Unknown User",
-          value: l.bets.successful,
-        })),
-        at_points: at_pointsLeaders.data.leaders.map((l) => ({
-          discordId: l.discord_id,
-          rank: l.rank,
-          avatarUrl: usersLookup[l.discord_id]?.avatarUrl,
-          name: usersLookup[l.discord_id]?.name || "Unknown User",
-          value: l.points,
-        })),
-        at_predictions: at_predictionsLeaders.data.leaders.map((l) => ({
-          discordId: l.discord_id,
-          rank: l.rank,
-          avatarUrl: usersLookup[l.discord_id]?.avatarUrl,
-          name: usersLookup[l.discord_id]?.name || "Unknown User",
-          value: l.predictions.successful,
-        })),
-        at_bets: at_betsLeaders.data.leaders.map((l) => ({
-          discordId: l.discord_id,
-          rank: l.rank,
-          avatarUrl: usersLookup[l.discord_id]?.avatarUrl,
-          name: usersLookup[l.discord_id]?.name || "Unknown User",
-          value: l.bets.successful,
-        })),
-      };
-    });
+    seasonLeaders.points = s_pointsLeaders.data.leaders;
+    seasonLeaders.predictions = s_predictionsLeaders.data.leaders;
+    seasonLeaders.bets = s_betsLeaders.data.leaders;
+    allTimeLeaders.points = at_pointsLeaders.data.leaders;
+    allTimeLeaders.predictions = at_predictionsLeaders.data.leaders;
+    allTimeLeaders.bets = at_betsLeaders.data.leaders;
   } catch (err) {
     console.error(err);
-    throw new Error("Failed to fetch leaderboard data");
+    throw new Error(
+      "There was an error fetching the data for the Leaderboards from the Nostradambot2 API."
+    );
+  }
+
+  try {
+    const userLookup = await guildMemberManager.buildUserLookup([
+      ...seasonLeaders.points.map((l) => l.discord_id),
+      ...seasonLeaders.predictions.map((l) => l.discord_id),
+      ...seasonLeaders.bets.map((l) => l.discord_id),
+      ...allTimeLeaders.points.map((l) => l.discord_id),
+      ...allTimeLeaders.predictions.map((l) => l.discord_id),
+      ...allTimeLeaders.bets.map((l) => l.discord_id),
+    ]);
+
+    return {
+      s_points: seasonLeaders.points.map((l) => ({
+        discordId: l.discord_id,
+        rank: l.rank,
+        avatarUrl: userLookup[l.discord_id]?.avatarUrl,
+        name: userLookup[l.discord_id]?.name || "Unknown User",
+        value: l.points,
+      })),
+      s_predictions: seasonLeaders.predictions.map((l) => ({
+        discordId: l.discord_id,
+        rank: l.rank,
+        avatarUrl: userLookup[l.discord_id]?.avatarUrl,
+        name: userLookup[l.discord_id]?.name || "Unknown User",
+        value: l.predictions.successful,
+      })),
+      s_bets: seasonLeaders.bets.map((l) => ({
+        discordId: l.discord_id,
+        rank: l.rank,
+        avatarUrl: userLookup[l.discord_id]?.avatarUrl,
+        name: userLookup[l.discord_id]?.name || "Unknown User",
+        value: l.bets.successful,
+      })),
+      at_points: allTimeLeaders.points.map((l) => ({
+        discordId: l.discord_id,
+        rank: l.rank,
+        avatarUrl: userLookup[l.discord_id]?.avatarUrl,
+        name: userLookup[l.discord_id]?.name || "Unknown User",
+        value: l.points,
+      })),
+      at_predictions: allTimeLeaders.predictions.map((l) => ({
+        discordId: l.discord_id,
+        rank: l.rank,
+        avatarUrl: userLookup[l.discord_id]?.avatarUrl,
+        name: userLookup[l.discord_id]?.name || "Unknown User",
+        value: l.predictions.successful,
+      })),
+      at_bets: allTimeLeaders.bets.map((l) => ({
+        discordId: l.discord_id,
+        rank: l.rank,
+        avatarUrl: userLookup[l.discord_id]?.avatarUrl,
+        name: userLookup[l.discord_id]?.name || "Unknown User",
+        value: l.bets.successful,
+      })),
+    };
+  } catch (err) {
+    console.error(err);
+    throw new Error(
+      "There was an error fetching data from Discord about the users in the Leaderboards."
+    );
   }
 }
 
@@ -169,28 +154,24 @@ const defaultAvatarUrl = "https://cdn.discordapp.com/embed/avatars/0.png";
 
 const LeaderboardEntry = (props: LeaderboardEntryProps) => {
   return (
-    <li>
-      <div className="flex justify-evenly">
-        <div>
-          <p>{props.rank}</p>
-        </div>
-        <div>
-          <Image
-            className="rounded-full"
-            src={props.avatarUrl || defaultAvatarUrl}
-            width={24}
-            height={24}
-            alt={`Avatar photo for user ${props.name}`}
-          />
-        </div>
-        <div>
-          <p>{props.name}</p>
-        </div>
-        <div>
-          <p>{props.value}</p>
-        </div>
+    <div className="flex items-center">
+      <div className="mr-2 flex shrink-0 grow-0 basis-5 justify-end">
+        <span>{props.rank}</span>
       </div>
-    </li>
+      <div className="mx-2 shrink-0 grow-0 basis-8">
+        <Avatar
+          src={props.avatarUrl || defaultAvatarUrl}
+          alt={`Avatar photo for user ${props.name}`}
+          size={30}
+        />
+      </div>
+      <div className="mx-2 grow">
+        <span>{props.name}</span>
+      </div>
+      <div className="ml-2 shrink-0 grow-0 ">
+        <span>{props.value.toLocaleString("en-US")}</span>
+      </div>
+    </div>
   );
 };
 
@@ -220,96 +201,100 @@ export default async function Home() {
         <Navigation />
       </nav>
       <main>
-        <div className="flex flex-wrap justify-center gap-4">
-          <Card title="Points">
-            <ul>
-              {s_points.map((l) => {
+        <h2>Season Stats</h2>
+        <div className="my-8 flex flex-col justify-center gap-4 lg:flex-row">
+          <Card title="Points" className="grow basis-4">
+            <List
+              items={s_points.map((l) => {
                 return (
                   <LeaderboardEntry
                     key={l.discordId}
                     rank={l.rank}
-                    name={l.name}
+                    name={truncateText(l.name, 20)}
                     value={l.value}
                     avatarUrl={l.avatarUrl}
                   />
                 );
               })}
-            </ul>
+            />
           </Card>
-          <Card title="Predictions">
-            <ul>
-              {s_predictions.map((l) => {
+          <Card title="Predictions" className="grow basis-4">
+            <List
+              items={s_predictions.map((l) => {
                 return (
                   <LeaderboardEntry
                     key={l.discordId}
                     rank={l.rank}
-                    name={l.name}
+                    name={truncateText(l.name, 24)}
                     value={l.value}
                     avatarUrl={l.avatarUrl}
                   />
                 );
               })}
-            </ul>
+            />
           </Card>
-          <Card title="Bets">
-            <ul>
-              {s_bets.map((l) => {
+          <Card title="Bets" className="grow basis-4">
+            <List
+              items={s_bets.map((l) => {
                 return (
                   <LeaderboardEntry
                     key={l.discordId}
                     rank={l.rank}
-                    name={l.name}
+                    name={truncateText(l.name, 20)}
                     value={l.value}
                     avatarUrl={l.avatarUrl}
                   />
                 );
               })}
-            </ul>
+            />
           </Card>
-          <Card title="Points">
-            <ul>
-              {at_points.map((l) => {
+        </div>
+        <h2>All-Time Stats</h2>
+        <div className="my-8 flex flex-col justify-center gap-4 lg:flex-row">
+          <Card title="Points" className="grow basis-4">
+            <List
+              items={at_points.map((l) => {
                 return (
                   <LeaderboardEntry
                     key={l.discordId}
                     rank={l.rank}
-                    name={l.name}
+                    name={truncateText(l.name, 20)}
                     value={l.value}
                     avatarUrl={l.avatarUrl}
                   />
                 );
               })}
-            </ul>
+            />
           </Card>
-          <Card title="Predictions">
-            <ul>
-              {at_predictions.map((l) => {
+          <Card title="Predictions" className="grow basis-4">
+            <List
+              items={at_predictions.map((l) => {
                 return (
                   <LeaderboardEntry
                     key={l.discordId}
                     rank={l.rank}
-                    name={l.name}
+                    name={truncateText(l.name, 20)}
                     value={l.value}
                     avatarUrl={l.avatarUrl}
                   />
                 );
               })}
-            </ul>
+            />
           </Card>
-          <Card title="Bets">
-            <ul>
-              {at_bets.map((l) => {
+          <Card title="Bets" className="grow basis-4">
+            <List
+              items={at_bets.map((l) => {
                 return (
                   <LeaderboardEntry
                     key={l.discordId}
                     rank={l.rank}
-                    name={l.name}
+                    name={truncateText(l.name, 20)}
                     value={l.value}
                     avatarUrl={l.avatarUrl}
                   />
                 );
               })}
-            </ul>
+            />
           </Card>
         </div>
       </main>
