@@ -8,7 +8,7 @@ import discordAPI from "@/utils/discord";
 import { APIScores } from "@/types/scores";
 import { List } from "@/components/List";
 import { Avatar } from "@/components/Avatar";
-import { truncateText } from "@/utils/misc";
+import { truncateText } from "@/utils/helpers";
 
 type Leader = {
   discordId: string;
@@ -225,7 +225,7 @@ export default async function Home() {
                   <LeaderboardEntry
                     key={l.discordId}
                     rank={l.rank}
-                    name={truncateText(l.name, 20)}
+                    name={truncateText(l.name, 24)}
                     value={l.value}
                     avatarUrl={l.avatarUrl}
                   />
