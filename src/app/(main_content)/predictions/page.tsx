@@ -1,3 +1,9 @@
+import { SearchPredictions } from "./SearchPredictions";
+
 export default async function Predictions() {
-  return <>Under Contruction</>;
+  return (
+    <>
+      <SearchPredictions />
+    </>
+  );
 }

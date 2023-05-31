@@ -1,4 +1,8 @@
-import { APIPredictions } from "@/types/predictions";
+import {
+  APIPredictions,
+  SearchOptions,
+  SortByOption,
+} from "@/types/predictions";
 import { APIScores } from "@/types/scores";
 import { RequestInit } from "next/dist/server/web/spec-extension/request";
 import { responseHandler } from "./misc";
@@ -164,11 +168,55 @@ const getPredictionById = (
   }).then((res) => res.json());
 };
 
+const searchPredictions = (
+  options: SearchOptions
+): Promise<APIPredictions.SearchPredictions> => {
+  const url = new URL(`/api/predictions/search`, baseUrl);
+  console.log(url);
+
+  if (options.statuses) {
+    for (const status of options.statuses) {
+      url.searchParams.append("status", status);
+    }
+  }
+
+  if (options.keyword) {
+    url.searchParams.append("keyword", options.keyword);
+  }
+
+  if (options.sort_by) {
+    url.searchParams.append("sort_by", options.sort_by);
+  }
+
+  if (options.predictor_id) {
+    url.searchParams.append("creator", options.predictor_id);
+  }
+
+  if (options.non_better_id) {
+    url.searchParams.append("unbetter", options.non_better_id);
+  }
+
+  if (options.page) {
+    url.searchParams.append("page", options.page.toString());
+  }
+
+  if (options.season_id) {
+    url.searchParams.append("season", options.season_id.toString());
+  }
+
+  return fetch(url, {
+    headers,
+  })
+    .then(responseHandler)
+    .catch(errorHandler);
+};
+
 const ndb2API = {
   getPointsLeaderboard,
   getBetsLeaderboard,
   getPredictionsLeaderboard,
   getPredictionById,
+  searchPredictions,
 };
 
 export default ndb2API;

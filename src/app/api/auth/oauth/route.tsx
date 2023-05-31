@@ -7,21 +7,6 @@ import { RESTGetAPIGuildMemberResult } from "discord-api-types/v10";
 import { APIAuth } from "@/types/user";
 import envVars from "@/config";
 
-async function exchangeCode(code: string): Promise<{
-  user: {
-    name: string;
-    avatarUrl: string;
-    discordId: string;
-  } | null;
-  error: string | null;
-}> {
-  const { access_token } = await discordAPI.authenticate(code);
-  const member = await discordAPI.identify(access_token);
-  const user = await discordAPI.authorize(member);
-
-  return user;
-}
-
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const code = searchParams.get("code");
