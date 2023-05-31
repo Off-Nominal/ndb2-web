@@ -1,8 +1,6 @@
-import { getAppUrl } from "@/utils/misc";
+import envVars from "@/config";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-
-const APP_URL = getAppUrl();
 
 export async function GET() {
   // NEXT JS has a bug where it doesn't recognize the typing for the set method inside a server route
@@ -18,5 +16,5 @@ export async function GET() {
     sameSite: "lax",
   });
 
-  return NextResponse.redirect(APP_URL + "/signin");
+  return NextResponse.redirect(envVars.APP_URL + "/signin");
 }

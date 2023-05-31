@@ -4,51 +4,12 @@ import {
   RESTError,
   RESTGetAPIGuildMemberResult,
 } from "discord-api-types/v10";
-import { getAppUrl, responseHandler } from "./misc";
+import { responseHandler } from "./misc";
 import { ShortDiscordGuildMember } from "@/types/discord";
+import envVars, { ALLOWED_ROLES } from "@/config";
 
-const DISCORD_API_BASE_URL = "https://discord.com/api";
-const DISCORD_CDN_BASE_URL = "https://cdn.discordapp.com";
-const CLIENT_ID =
-  (process.env.DISCORD_ENV === "production"
-    ? process.env.PROD_DISCORD_CLIENT_ID
-    : process.env.DISCORD_CLIENT_ID) || "";
-const CLIENT_SECRET =
-  (process.env.DISCORD_ENV === "production"
-    ? process.env.PROD_DISCORD_CLIENT_SECRET
-    : process.env.DISCORD_CLIENT_SECRET) || "";
-const CLIENT_BOT_ID =
-  (process.env.DISCORD_ENV === "production"
-    ? process.env.PROD_DISCORD_CLIENT_BOT_TOKEN
-    : process.env.DISCORD_CLIENT_BOT_TOKEN) || "";
-const GUILD_ID =
-  (process.env.DISCORD_ENV === "production"
-    ? process.env.PROD_OFFNOMDISCORD_GUILD_ID
-    : process.env.OFFNOMDISCORD_GUILD_ID) || "";
-
-const allowedRoles =
-  process.env.DISCORD_ENV === "production"
-    ? new Set([
-        process.env.PROD_ROLE_ID_HOST,
-        process.env.PROD_ROLE_ID_MODS,
-        process.env.PROD_ROLE_ID_MECO,
-        process.env.PROD_ROLE_ID_WM,
-        process.env.PROD_ROLE_ID_YT,
-        process.env.PROD_ROLE_ID_ANOM,
-        process.env.PROD_ROLE_ID_GUEST,
-      ])
-    : new Set([
-        process.env.ROLE_ID_HOST,
-        process.env.ROLE_ID_MODS,
-        process.env.ROLE_ID_MECO,
-        process.env.ROLE_ID_WM,
-        process.env.ROLE_ID_YT,
-        process.env.ROLE_ID_ANOM,
-        process.env.ROLE_ID_GUEST,
-      ]);
-
-const APP_URL = getAppUrl();
-const REDIRECT_URI = `${APP_URL}/api/auth/oauth`;
+const REDIRECT_URI = `${envVars.APP_URL}/api/auth/oauth`;
+const GUILD_ID = envVars.DISCORD_GUILD_ID;
 
 const isDiscordAPIError = (err: any): err is RESTError => {
   if (typeof err !== "object") {
@@ -105,26 +66,28 @@ export const buildAvatarUrl = (
   discriminator: number
 ): string => {
   if (hash) {
-    return `${DISCORD_CDN_BASE_URL}/guilds/${GUILD_ID}/users/${userId}/avatars/${hash}.png`;
+    return `${envVars.DISCORD_CDN_BASE_URL}/guilds/${GUILD_ID}/users/${userId}/avatars/${hash}.png`;
   }
 
   if (fallbackHash) {
-    return `${DISCORD_CDN_BASE_URL}/avatars/${userId}/${fallbackHash}.png`;
+    return `${envVars.DISCORD_CDN_BASE_URL}/avatars/${userId}/${fallbackHash}.png`;
   }
 
-  return `${DISCORD_CDN_BASE_URL}/embed/avatars/${discriminator % 5}.png`;
+  return `${envVars.DISCORD_CDN_BASE_URL}/embed/avatars/${
+    discriminator % 5
+  }.png`;
 };
 
 export const hasCorrectRole = (roles: string[]): boolean => {
   for (const role of roles) {
-    if (allowedRoles.has(role)) {
+    if (ALLOWED_ROLES.has(role)) {
       return true;
     }
   }
   return false;
 };
 
-const baseUrl = DISCORD_API_BASE_URL;
+const baseUrl = envVars.DISCORD_API_BASE_URL;
 const scope = ["identify", "guilds", "guilds.members.read"];
 
 const authenticate = (
@@ -134,8 +97,8 @@ const authenticate = (
   token_type: string;
 }> => {
   const body = new URLSearchParams({
-    client_id: CLIENT_ID,
-    client_secret: CLIENT_SECRET,
+    client_id: envVars.DISCORD_CLIENT_ID,
+    client_secret: envVars.DISCORD_CLIENT_SECRET,
     redirect_uri: REDIRECT_URI,
     grant_type: "authorization_code",
     code,
@@ -191,7 +154,7 @@ const authorize = (
 
 const getGuildMembers = () => {
   return fetch(`${baseUrl}/guilds/${GUILD_ID}/members?limit=1000`, {
-    headers: { Authorization: `Bot ${CLIENT_BOT_ID}` },
+    headers: { Authorization: `Bot ${envVars.DISCORD_BOT_TOKEN}` },
     next: {
       revalidate: 86400,
     },
@@ -202,7 +165,7 @@ const getGuildMembers = () => {
 
 const getGuildMemberByDiscordId = (discordId: string) => {
   return fetch(`${baseUrl}/guilds/${GUILD_ID}/members/${discordId}`, {
-    headers: { Authorization: `Bot ${CLIENT_BOT_ID}` },
+    headers: { Authorization: `Bot ${envVars.DISCORD_BOT_TOKEN}` },
     next: {
       revalidate: 86400,
     },
@@ -277,7 +240,7 @@ const discordAPI = {
   GuildMemberManager,
   oAuthUrl: buildDiscordOAuthUrl({
     baseUrl,
-    clientId: CLIENT_ID,
+    clientId: envVars.DISCORD_CLIENT_ID,
     redirectUri: REDIRECT_URI,
     scope,
   }),
