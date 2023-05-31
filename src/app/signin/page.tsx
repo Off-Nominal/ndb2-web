@@ -3,6 +3,7 @@ import authAPI from "@/utils/auth";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { SignInMessage } from "./message";
 
 export default async function SignIn() {
   const payload = await authAPI.verify();
@@ -24,10 +25,7 @@ export default async function SignIn() {
               priority
             />
           </div>
-          <p className="my-16">
-            Nostradambot 2 requires paid membership to the Off-Nominal Discord.
-            Authenticate here with your Discord account to gain access.
-          </p>
+          <SignInMessage />
           <Link
             prefetch={false}
             className={

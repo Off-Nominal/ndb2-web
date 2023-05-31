@@ -1,6 +1,7 @@
 import { APIPredictions } from "@/types/predictions";
 import { APIScores } from "@/types/scores";
 import { RequestInit } from "next/dist/server/web/spec-extension/request";
+import { responseHandler } from "./misc";
 
 const API_URL = process.env.NDB2_API_BASEURL;
 const API_KEY = process.env.NDB2_API_KEY;
@@ -90,14 +91,6 @@ const handleNDB2Error = (res: Response, body: any) => {
       return new Error(
         `Unexpected response from server, HTTP Status ${res.status}.`
       );
-  }
-};
-
-const responseHandler = (res: Response) => {
-  if (res.ok) {
-    return res.json();
-  } else {
-    throw res;
   }
 };
 
