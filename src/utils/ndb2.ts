@@ -172,7 +172,6 @@ const searchPredictions = (
   options: SearchOptions
 ): Promise<APIPredictions.SearchPredictions> => {
   const url = new URL(`/api/predictions/search`, baseUrl);
-  console.log(url);
 
   if (options.statuses) {
     for (const status of options.statuses) {
