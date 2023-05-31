@@ -3,7 +3,7 @@ import authAPI from "@/utils/auth";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { SignInMessage } from "./message";
+import { SignInMessage } from "./SignInMessage";
 
 export default async function SignIn() {
   const payload = await authAPI.verify();
