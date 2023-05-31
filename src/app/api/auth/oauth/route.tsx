@@ -4,6 +4,8 @@ import { cookies } from "next/headers";
 import { getAppUrl } from "@/utils/misc";
 import discordAPI from "@/utils/discord";
 import authAPI from "@/utils/auth";
+import { RESTGetAPIGuildMemberResult } from "discord-api-types/v10";
+import { APIAuth } from "@/types/user";
 
 const APP_URL = getAppUrl();
 
@@ -30,11 +32,37 @@ export async function GET(req: Request) {
     return NextResponse.redirect(discordAPI.oAuthUrl);
   }
 
-  const { user, error } = await exchangeCode(code);
+  let access_token: string;
 
-  if (error || !user) {
-    console.log(error);
+  try {
+    const response = await discordAPI.authenticate(code);
+    access_token = response.access_token;
+  } catch (err) {
+    console.error(err);
     return NextResponse.redirect(APP_URL + "/signin?error=auth");
+  }
+
+  let member: RESTGetAPIGuildMemberResult;
+
+  try {
+    member = await discordAPI.identify(access_token);
+  } catch (err) {
+    console.error(err);
+    return NextResponse.redirect(APP_URL + "/signin?error=identify");
+  }
+
+  let user: APIAuth.User | null;
+
+  try {
+    const response = await discordAPI.authorize(member);
+    if (response.error) {
+      throw new Error(response.error);
+    } else {
+      user = response.user;
+    }
+  } catch (err) {
+    console.error(err);
+    return NextResponse.redirect(APP_URL + "/signin?error=authorize");
   }
 
   try {

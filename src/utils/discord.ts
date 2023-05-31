@@ -1,9 +1,10 @@
 import { APIAuth } from "@/types/user";
 import {
   APIGuildMember,
+  RESTError,
   RESTGetAPIGuildMemberResult,
 } from "discord-api-types/v10";
-import { getAppUrl } from "./misc";
+import { getAppUrl, responseHandler } from "./misc";
 import { ShortDiscordGuildMember } from "@/types/discord";
 
 const DISCORD_API_BASE_URL = "https://discord.com/api";
@@ -48,6 +49,41 @@ const allowedRoles =
 
 const APP_URL = getAppUrl();
 const REDIRECT_URI = `${APP_URL}/api/auth/oauth`;
+
+const isDiscordAPIError = (err: any): err is RESTError => {
+  if (typeof err !== "object") {
+    return false;
+  }
+
+  if (!("code" in err) || !("message" in err)) {
+    return false;
+  }
+
+  return true;
+};
+
+const handleDiscordError = (res: Response, body: any) => {
+  if (!isDiscordAPIError(body)) {
+    if (res.status) {
+      return new Error(
+        `Received an error from the Discord API but it is not recognized:\n- HTTP: ${res.status}\n- Message: ${res.statusText}`
+      );
+    } else {
+      return new Error(
+        "Something went wrong with the Discord API call, but we don't recognise the error."
+      );
+    }
+  }
+  return new Error(
+    `Discord API Error:\n- HTTP: ${res.status}\n- Message: ${body.message}\n- Error Code: ${body.code}`
+  );
+};
+
+const errorHandler = (res: Response) => {
+  return res.json().then((body) => {
+    throw handleDiscordError(res, body);
+  });
+};
 
 const buildDiscordOAuthUrl = (options: {
   baseUrl: string;
@@ -110,7 +146,9 @@ const authenticate = (
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body,
-  }).then((res) => res.json());
+  })
+    .then(responseHandler)
+    .catch(errorHandler);
 };
 
 const identify = (
@@ -118,7 +156,9 @@ const identify = (
 ): Promise<RESTGetAPIGuildMemberResult> => {
   return fetch(`${baseUrl}/users/@me/guilds/${GUILD_ID}/member`, {
     headers: { Authorization: `Bearer ${access_token}` },
-  }).then((res) => res.json());
+  })
+    .then(responseHandler)
+    .catch(errorHandler);
 };
 
 const authorize = (
@@ -155,7 +195,9 @@ const getGuildMembers = () => {
     next: {
       revalidate: 86400,
     },
-  }).then((res) => res.json());
+  })
+    .then(responseHandler)
+    .catch(errorHandler);
 };
 
 const getGuildMemberByDiscordId = (discordId: string) => {
@@ -164,13 +206,9 @@ const getGuildMemberByDiscordId = (discordId: string) => {
     next: {
       revalidate: 86400,
     },
-  }).then((res) => {
-    if (res.ok) {
-      return res.json();
-    } else {
-      throw res;
-    }
-  });
+  })
+    .then(responseHandler)
+    .catch(errorHandler);
 };
 
 export class GuildMemberManager {
