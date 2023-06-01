@@ -147,5 +147,6 @@ export const usePredictionSearch = () => {
     },
     setStatus,
     sort_by,
+    setSortBy,
   };
 };

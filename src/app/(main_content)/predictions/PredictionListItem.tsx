@@ -64,11 +64,14 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
           </div>
         </summary>
         <div className="mb-4 mt-8 flex gap-4">
-          <div className="shrink-0 grow-0 basis-12"></div>
-          <div className="grow">
-            <div></div>
+          <div className=" grow-0 basis-12"></div>
+          <div className="flex grow flex-col md:flex-row">
+            <div className="grow basis-1/2 ">Timeline</div>
             <div
-              className={"grid grid-cols-[auto,2rem,auto] gap-4 " + gridRows}
+              className={
+                "grid grow basis-1/2 grid-cols-[auto,2rem,auto] gap-4 " +
+                gridRows
+              }
             >
               <div className="font-bold uppercase">Endorsements</div>
               <div className="flex justify-center">
@@ -76,7 +79,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
                   <span>14</span>
                 </div>
               </div>
-              <div>
+              <div className="flex justify-end">
                 <RiskPill value={props.endorse_ratio} />
               </div>
               <div className="font-bold uppercase">Undorsements</div>
@@ -85,7 +88,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
                   <span>24</span>
                 </div>
               </div>
-              <div>
+              <div className="flex justify-end">
                 <RiskPill value={props.undorse_ratio} />
               </div>
               {showVotes && (
@@ -108,7 +111,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
               )}
             </div>
           </div>
-          <div className="shrink-0 grow-0 basis-12"></div>
+          <div className=" grow-0 basis-12"></div>
         </div>
         <div className="flex justify-end p-6">
           <Link href={`/predictions/${props.id}`}>

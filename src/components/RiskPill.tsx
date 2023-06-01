@@ -22,10 +22,14 @@ const getRisk = (value: number) => {
 export const RiskPill = (props: RiskPillProps) => {
   const { color, risk } = getRisk(props.value);
   return (
-    <div className={"flex justify-center rounded-full " + color}>
+    <div
+      className={
+        "flex w-full max-w-[120px] justify-center rounded-full px-4 " + color
+      }
+    >
       <span
         data-after={risk}
-        className={`md:after:w-auto md:after:content-[attr(data-after)]`}
+        className={`lg:after:w-auto lg:after:content-[attr(data-after)]`}
       >
         {props.value.toFixed(2)}
       </span>
