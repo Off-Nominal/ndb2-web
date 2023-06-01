@@ -47,3 +47,9 @@
     @apply text-lg;
   }
 }
+
+@layer utilities {
+  .clip-select-arrow {
+    clip-path: polygon(100% 0%, 0 0%, 50% 100%);
+  }
+}
