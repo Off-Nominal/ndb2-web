@@ -35,6 +35,7 @@ const handleDiscordError = (res: Response, body: any) => {
       );
     }
   }
+
   return new Error(
     `Discord API Error:\n- HTTP: ${res.status}\n- Message: ${body.message}\n- Error Code: ${body.code}`
   );
@@ -170,7 +171,29 @@ const getGuildMemberByDiscordId = (discordId: string) => {
       revalidate: 86400,
     },
   })
-    .then(responseHandler)
+    .then((res) => {
+      return res.json().then((body) => {
+        const data: [any, Response] = [body, res];
+        return data;
+      });
+    })
+    .then(([body, res]) => {
+      if (res.ok) {
+        return body;
+      }
+
+      if (res.status === 404 && body.code === 10013) {
+        const fakeUser = {
+          user: {
+            id: discordId,
+            discriminator: "0000",
+          },
+        };
+        return fakeUser;
+      } else {
+        return body;
+      }
+    })
     .catch(errorHandler);
 };
 

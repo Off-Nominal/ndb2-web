@@ -37,7 +37,10 @@ async function getLeaderboards(): Promise<{
   const guildMemberManager = new discordAPI.GuildMemberManager();
 
   const options: GetLeaderboardOptions = { cache: "no-cache" };
-  const seasonOptions = { ...options, seasonIfentifier: "current" };
+  const seasonOptions: GetLeaderboardOptions = {
+    ...options,
+    seasonIdentifier: "current",
+  };
 
   const s_pointsRes = ndb2API.getPointsLeaderboard(seasonOptions);
   const s_predictionsRes = ndb2API.getPredictionsLeaderboard(seasonOptions);
