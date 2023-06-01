@@ -141,6 +141,8 @@ export const SearchPredictions = () => {
               id={p.id}
               status={p.status}
               endorsed={endorsed}
+              endorse_ratio={p.payouts.endorse}
+              undorse_ratio={p.payouts.undorse}
             />
           );
         })}

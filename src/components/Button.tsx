@@ -1,17 +1,31 @@
 import { MouseEventHandler, ReactNode } from "react";
 
 type ButtonProps = {
-  label: string;
-  onClick: MouseEventHandler<HTMLButtonElement>;
+  children: ReactNode | ReactNode[];
+  size?: "sm" | "md" | "lg";
+  onClick?: MouseEventHandler<HTMLButtonElement>;
 };
 
 export const Button = (props: ButtonProps) => {
+  let sizeClasses = "px-6 py-3 text-lg";
+
+  if (props.size === "sm") {
+    sizeClasses = "px-6 py-2 text-md";
+  } else if (props.size === "md") {
+    sizeClasses = "px-6 py-3 text-lg";
+  } else if (props.size === "lg") {
+    sizeClasses = "px-8 py-4 text-2xl";
+  }
+
   return (
     <button
-      className="rounded-full bg-moss-green px-8 py-4 text-center text-2xl font-bold uppercase tracking-widest shadow-md hover:bg-moss-green-dark"
+      className={
+        sizeClasses +
+        " rounded-full bg-moss-green text-center font-bold uppercase tracking-widest shadow-md hover:bg-moss-green-dark"
+      }
       onClick={props.onClick}
     >
-      {props.label}
+      {props.children}
     </button>
   );
 };

@@ -23,7 +23,9 @@ export default function Error({
         <div className="p-8">
           <p className="my-8">{errorMessage}</p>
           <div className="mt-16 flex justify-center">
-            <Button onClick={() => reset()} label="Try again" />
+            <Button size="lg" onClick={() => reset()}>
+              Try Again
+            </Button>
           </div>
         </div>
       </Card>
