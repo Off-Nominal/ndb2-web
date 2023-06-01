@@ -8,10 +8,19 @@ import { usePredictionSearch } from "./usePredictionSearch";
 import { CheckboxButtonList } from "@/components/CheckboxButtonList";
 import { Select } from "@/components/Select";
 import { PredictionListItem } from "./PredictionListItem";
+import { useEffect } from "react";
 
 export const SearchPredictions = () => {
-  const { predictions, statuses, setStatus, sort_by, setSortBy } =
-    usePredictionSearch();
+  const {
+    keyword,
+    predictions,
+    statuses,
+    setStatus,
+    sort_by,
+    setSortBy,
+    setKeyword,
+    searching,
+  } = usePredictionSearch();
 
   const handleStatusChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = event.target;
@@ -31,8 +40,10 @@ export const SearchPredictions = () => {
         <h2 className="text-center text-xl uppercase">Search Predictions</h2>
         <div className="mb-6 mt-4">
           <input
+            onChange={(event) => setKeyword(event.target.value)}
+            value={keyword}
             placeholder="Keyword"
-            className="w-full rounded-lg border-2 border-slate-300 bg-gradient-to-b from-slate-200 to-slate-300 px-4 py-2 dark:border-slate-600 dark:bg-slate-700 dark:from-slate-700 dark:to-slate-600"
+            className="w-full rounded-lg border-2 border-slate-300 bg-gradient-to-b from-slate-200 to-slate-300 px-4 py-2 focus-visible:outline-moonstone-blue dark:border-slate-600 dark:bg-slate-700 dark:from-slate-700 dark:to-slate-600"
           />
         </div>
         <details className="group">
@@ -157,6 +168,7 @@ export const SearchPredictions = () => {
 
           return (
             <PredictionListItem
+              loading={searching}
               key={p.id}
               text={p.text}
               id={p.id}

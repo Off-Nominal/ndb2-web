@@ -5,7 +5,7 @@ import {
   SortByOption,
 } from "@/types/predictions";
 import { responseHandler } from "@/utils/misc";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const findStatus = (
   status: PredictionLifeCycle,
@@ -18,75 +18,93 @@ const allStatuses = (statuses: PredictionLifeCycle[]): boolean => {
   return statuses.length === 5 || statuses.length === 0;
 };
 
+const search = (
+  options: SearchOptions
+): Promise<APIPredictions.EnhancedPrediction[]> => {
+  const params = new URLSearchParams();
+
+  if (options.statuses) {
+    for (const status of options.statuses) {
+      params.append("status", status);
+    }
+  }
+
+  if (options.keyword) {
+    params.append("keyword", options.keyword);
+  }
+
+  if (options.sort_by) {
+    params.append("sort_by", options.sort_by);
+  }
+
+  if (options.predictor_id) {
+    params.append("creator", options.predictor_id);
+  }
+
+  if (options.non_better_id) {
+    params.append("unbetter", options.non_better_id);
+  }
+
+  if (options.page) {
+    params.append("page", options.page.toString());
+  }
+
+  if (options.season_id) {
+    params.append("season", options.season_id.toString());
+  }
+
+  return fetch("/api/predictions/search?" + params.toString()).then(
+    responseHandler
+  );
+};
+
 export const usePredictionSearch = () => {
   const [predictions, setPredictions] = useState<
     APIPredictions.EnhancedPrediction[]
   >([]);
 
   // Search Params States
+  const [searching, setSearching] = useState(false);
+  const [keyword, setKeyword] = useState("");
   const [statuses, setStatuses] = useState<PredictionLifeCycle[]>([]);
   const [sort_by, setSortBy] = useState<SortByOption>(SortByOption.DUE_DESC);
 
-  const search = (
-    options: SearchOptions
-  ): Promise<APIPredictions.EnhancedPrediction[]> => {
-    const params = new URLSearchParams();
+  const timeout = useRef<ReturnType<typeof setTimeout> | undefined>();
+  const keywordRef = useRef(keyword);
 
-    if (options.statuses) {
-      for (const status of options.statuses) {
-        params.append("status", status);
-      }
-    }
-
-    if (options.keyword) {
-      params.append("keyword", options.keyword);
-    }
-
-    if (options.sort_by) {
-      params.append("sort_by", options.sort_by);
-    }
-
-    if (options.predictor_id) {
-      params.append("creator", options.predictor_id);
-    }
-
-    if (options.non_better_id) {
-      params.append("unbetter", options.non_better_id);
-    }
-
-    if (options.page) {
-      params.append("page", options.page.toString());
-    }
-
-    if (options.season_id) {
-      params.append("season", options.season_id.toString());
-    }
-
-    return fetch("/api/predictions/search?" + params.toString()).then(
-      responseHandler
-    );
+  const handleSearch = (options: SearchOptions) => {
+    setSearching(true);
+    search(options)
+      .then((predictions) => {
+        setPredictions(predictions);
+      })
+      .catch((err) => console.error(err))
+      .finally(() => {
+        setSearching(false);
+      });
   };
 
-  useEffect(() => {
-    search({
-      statuses: statuses.length > 0 ? statuses : undefined,
-      sort_by,
-    })
-      .then((predictions) => {
-        setPredictions(predictions);
-      })
-      .catch((err) => console.error(err));
-  }, [statuses, sort_by]);
+  const debouncedSearch = useCallback((options: SearchOptions) => {
+    clearTimeout(timeout.current);
+    timeout.current = setTimeout(() => {
+      handleSearch(options);
+    }, 500);
+  }, []);
 
   useEffect(() => {
-    search({
-      sort_by: SortByOption.DUE_DESC,
-    })
-      .then((predictions) => {
-        setPredictions(predictions);
-      })
-      .catch((err) => console.error(err));
-  }, []);
+    const options: SearchOptions = {
+      keyword,
+      statuses,
+      sort_by,
+    };
+
+    if (keywordRef.current !== keyword) {
+      keywordRef.current = keyword;
+      debouncedSearch(options);
+    } else {
+      handleSearch(options);
+    }
+  }, [keyword, statuses, sort_by, debouncedSearch]);
 
   const setStatus = (
     newStatus: PredictionLifeCycle | "all",
@@ -148,5 +166,8 @@ export const usePredictionSearch = () => {
     setStatus,
     sort_by,
     setSortBy,
+    keyword,
+    setKeyword,
+    searching,
   };
 };

@@ -10,6 +10,7 @@ type PredictionListItemProps = {
   endorsed: boolean | undefined;
   endorse_ratio: number;
   undorse_ratio: number;
+  loading: boolean;
 };
 
 export const PredictionListItem = (props: PredictionListItemProps) => {
@@ -29,10 +30,10 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
     showVotes = true;
   }
 
-  let gridRows = showVotes ? "grid-rows-4" : "grid-rows-2";
+  const gridRows = showVotes ? "grid-rows-4" : "grid-rows-2";
 
   return (
-    <article className="">
+    <article className={props.loading ? "animate-pulse" : ""}>
       <details className="group h-[7em] rounded-lg bg-slate-200 open:h-full dark:bg-slate-700">
         <summary className="flex h-full gap-4">
           <div
