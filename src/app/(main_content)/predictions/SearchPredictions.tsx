@@ -35,7 +35,7 @@ export const SearchPredictions = () => {
   };
 
   return (
-    <>
+    <div className="flex flex-col items-center">
       <section>
         <h2 className="text-center text-xl uppercase">Search Predictions</h2>
         <div className="mb-6 mt-4">
@@ -180,6 +180,6 @@ export const SearchPredictions = () => {
           );
         })}
       </section>
-    </>
+    </div>
   );
 };
