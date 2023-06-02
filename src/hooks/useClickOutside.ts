@@ -5,7 +5,6 @@ export const useClickOutside = (callback: () => any) => {
 
   useEffect(() => {
     const handleClickOutside = () => {
-      console.log("click");
       callback();
     };
 

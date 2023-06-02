@@ -29,6 +29,10 @@ const search = (
     }
   }
 
+  if (options.predictor_id) {
+    params.append("creator", options.predictor_id);
+  }
+
   if (options.keyword) {
     params.append("keyword", options.keyword);
   }
@@ -58,13 +62,17 @@ const search = (
   );
 };
 
-export const usePredictionSearch = () => {
+export const usePredictionSearch = (
+  discordId: string,
+  bets: Omit<APIPredictions.Bet, "better_id">[]
+) => {
   const [predictions, setPredictions] = useState<
     APIPredictions.EnhancedPrediction[]
   >([]);
 
   // Search Params States
   const [searching, setSearching] = useState(false);
+  const [predictor_id, setPredictorId] = useState<string | undefined>("");
   const [keyword, setKeyword] = useState("");
   const [statuses, setStatuses] = useState<PredictionLifeCycle[]>([]);
   const [sort_by, setSortBy] = useState<SortByOption>(SortByOption.DUE_DESC);
@@ -96,6 +104,7 @@ export const usePredictionSearch = () => {
       keyword,
       statuses,
       sort_by,
+      predictor_id,
     };
 
     if (keywordRef.current !== keyword) {
@@ -104,7 +113,7 @@ export const usePredictionSearch = () => {
     } else {
       handleSearch(options);
     }
-  }, [keyword, statuses, sort_by, debouncedSearch]);
+  }, [keyword, statuses, sort_by, predictor_id, debouncedSearch]);
 
   const setStatus = (
     newStatus: PredictionLifeCycle | "all",
@@ -169,5 +178,7 @@ export const usePredictionSearch = () => {
     keyword,
     setKeyword,
     searching,
+    predictor_id,
+    setPredictorId,
   };
 };
