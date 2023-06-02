@@ -36,7 +36,7 @@ export const SearchPredictions = () => {
 
   return (
     <div className="flex flex-col items-center">
-      <section>
+      <section className="md:w-[675px]">
         <h2 className="text-center text-xl uppercase">Search Predictions</h2>
         <div className="mb-6 mt-4">
           <input
@@ -49,9 +49,9 @@ export const SearchPredictions = () => {
         <details className="group">
           <summary className="flex items-center justify-center gap-6">
             <h3 className="text-center text-xl uppercase">
-              Filter Status and Sort
+              Advanced Filtering and Sorting
             </h3>
-            <div className="clip-select-arrow h-5 w-5 translate-x-1 -rotate-90 bg-slate-500 transition ease-in-out group-open:translate-y-1 group-open:rotate-0 dark:bg-slate-200"></div>
+            <div className="clip-select-arrow h-5 w-5 translate-x-1 -rotate-90 bg-slate-500 transition ease-in-out group-open:-translate-y-0.5 group-open:rotate-0 dark:bg-slate-200"></div>
           </summary>
           <div className="my-4 flex justify-center">
             <CheckboxButtonList<PredictionLifeCycle | "all">

@@ -17,16 +17,16 @@ export const CheckboxButtonList = <
     <div className="w-full">
       <fieldset className={"flex w-full flex-col md:flex-row"}>
         {props.items.map((item, i) => {
-          let classes = `before:border before:border-slate-400 before:dark:border-slate-600 peer-checked:before:border-moonstone-blue peer-checked:before:bg-moonstone-blue font-bold before:absolute before:left-0 before:right-0 before:top-0 before:-z-10 before:block before:h-full before:w-full before:dark:bg-slate-700 before:bg-slate-200`;
+          let classes = `after:-z-10 after:border after:border-slate-400 after:dark:border-slate-600 peer-checked:after:border-moonstone-blue peer-checked:after:bg-moonstone-blue font-bold after:absolute after:left-0 after:right-0 after:top-0 after:block after:h-full after:w-full after:dark:bg-slate-700 after:bg-slate-200`;
 
           if (i === 0) {
             classes +=
-              " before:rounded-tl-lg before:rounded-tr-lg md:before:rounded-tr-none md:before:rounded-bl-lg";
+              " after:rounded-tl-lg after:rounded-tr-lg md:after:rounded-tr-none md:after:rounded-bl-lg";
           }
 
           if (i === props.items.length - 1) {
             classes +=
-              " before:rounded-br-lg before:rounded-bl-lg md:before:rounded-bl-none md:before:rounded-tr-lg";
+              " after:rounded-br-lg after:rounded-bl-lg md:after:rounded-bl-none md:after:rounded-tr-lg";
           }
 
           return (

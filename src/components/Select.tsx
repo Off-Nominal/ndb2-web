@@ -1,3 +1,6 @@
+import { useClickOutside } from "@/hooks/useClickOutside";
+import { useState } from "react";
+
 type SelectOption = {
   label: string;
   value: string;
@@ -10,14 +13,64 @@ type SelectProps = {
   className?: string;
 };
 
-const classes = "bg-slate-200  p-4 font-bold uppercase ";
 export const Select = (props: SelectProps) => {
+  const [open, setOpen] = useState(false);
+
+  const selectVisibility = open ? "rounded-t-lg" : "rounded-lg";
+  const dropDownVisibility = open ? "block" : "hidden";
+
+  const ref = useClickOutside(() => setOpen(false));
+
   return (
-    <div className="after:clip-select-arrow relative grid w-full cursor-pointer items-center rounded-lg border-2 border-slate-300 bg-gradient-to-b from-slate-200 to-slate-300 py-1 [grid-template-areas:select] after:h-3 after:w-5 after:justify-self-end after:bg-slate-500 after:[grid-area:'select'] dark:border-slate-600 dark:bg-slate-700 dark:from-slate-700 dark:to-slate-600 dark:after:bg-slate-200">
+    <div className="relative" ref={ref}>
+      <div
+        aria-hidden="true"
+        onClick={() => setOpen((prev) => !prev)}
+        className={
+          selectVisibility +
+          " flex w-full justify-between border-2 border-slate-300 bg-gradient-to-b from-slate-200 to-slate-300 px-4 py-2 dark:border-slate-600 dark:bg-slate-700 dark:from-slate-700 dark:to-slate-600"
+        }
+      >
+        <div>
+          <span>
+            {props.options.find((o) => o.value === props.value)?.label ||
+              "Select a sorting method"}
+          </span>
+        </div>
+        <div className="clip-select-arrow h-5 w-5 bg-slate-800 dark:bg-white"></div>
+      </div>
+
+      <div
+        aria-hidden="true"
+        className={
+          dropDownVisibility +
+          " absolute z-10 w-full rounded-b-lg border-2 border-slate-300 bg-gradient-to-r from-slate-200 to-slate-300 dark:border-slate-600 dark:bg-slate-700 dark:from-slate-700 dark:to-slate-600"
+        }
+      >
+        {props.options.map((option) => {
+          return (
+            <div
+              className="px-4 py-4 hover:bg-slate-100 dark:hover:bg-slate-600 md:py-2"
+              key={option.value}
+              onClick={(event) => {
+                event.stopPropagation();
+                props.onChange({
+                  target: {
+                    value: option.value,
+                  },
+                } as React.ChangeEvent<HTMLSelectElement>);
+                setOpen(false);
+              }}
+            >
+              {option.label}
+            </div>
+          );
+        })}
+      </div>
       <select
         value={props.value}
         onChange={props.onChange}
-        className="z-10 w-full appearance-none border-none bg-transparent p-0 pr-4 outline-none [grid-area:select]"
+        className="visually-hide"
       >
         {props.options.map((option) => {
           return (
