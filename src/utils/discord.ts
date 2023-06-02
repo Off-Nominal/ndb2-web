@@ -182,7 +182,7 @@ const getGuildMemberByDiscordId = (discordId: string) => {
         return body;
       }
 
-      if (res.status === 404 && body.code === 10013) {
+      if (res.status === 404 && "code" in body) {
         const fakeUser = {
           user: {
             id: discordId,
