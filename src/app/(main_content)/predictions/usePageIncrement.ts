@@ -2,7 +2,7 @@ import { APIPredictions } from "@/types/predictions";
 import { useEffect, useRef } from "react";
 
 export const usePageIncrement = (
-  predictions: APIPredictions.EnhancedPrediction[],
+  predictions: APIPredictions.ShortEnhancedPrediction[],
   callback: () => void
 ) => {
   const targetRef = useRef<HTMLElement | null>(null);

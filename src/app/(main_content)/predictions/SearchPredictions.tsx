@@ -15,10 +15,11 @@ import { Avatar } from "@/components/Avatar";
 import { ReactNode, useState } from "react";
 import { Button } from "@/components/Button";
 import { usePageIncrement } from "./usePageIncrement";
+import { APIBets } from "@/types/bets";
 
 export type SearchPredictionsProps = {
   discordId: string;
-  bets: Omit<APIPredictions.Bet, "better_id">[];
+  bets: APIBets.UserBet[];
   members: ShortDiscordGuildMember[];
 };
 
@@ -266,16 +267,22 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
             </div>
           </div>
           <div className="mt-4 flex justify-center md:mt-8 md:justify-end">
-            <Button onClick={clearFilters}>Clear Filters</Button>
+            <Button
+              type="reset"
+              onClick={(event) => {
+                event.preventDefault();
+                clearFilters();
+              }}
+            >
+              Clear Filters
+            </Button>
           </div>
         </details>
       </form>
       <section className="my-8 flex w-full flex-col gap-4">
         {predictions.length > 0 &&
           predictions.map((p) => {
-            const endorsed = p.bets?.find(
-              (b) => b.better.discord_id === "444"
-            )?.endorsed;
+            const endorsed = !!props.bets.find((b) => b.prediction_id === p.id);
 
             return (
               <PredictionListItem
@@ -287,6 +294,10 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
                 endorsed={endorsed}
                 endorse_ratio={p.payouts.endorse}
                 undorse_ratio={p.payouts.undorse}
+                endorsements={p.bets.endorsements}
+                undorsements={p.bets.undorsements}
+                yesVotes={p.votes.yes}
+                noVotes={p.votes.no}
                 dueDate={new Date(p.due_date)}
                 createdDate={new Date(p.created_date)}
                 judgedDate={
@@ -315,7 +326,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
           </div>
         </section>
       )}
-      {reachedEndOfList && (
+      {predictions.length !== 0 && reachedEndOfList && (
         <section className="md:w-[675px]">
           <div className="flex justify-center">
             <p className="text-center text-xl">

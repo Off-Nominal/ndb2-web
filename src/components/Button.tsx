@@ -3,6 +3,7 @@ import { MouseEventHandler, ReactNode } from "react";
 type ButtonProps = {
   children: ReactNode | ReactNode[];
   size?: "sm" | "md" | "lg";
+  type?: "button" | "submit" | "reset" | undefined;
   onClick?: MouseEventHandler<HTMLButtonElement>;
 };
 
@@ -17,8 +18,12 @@ export const Button = (props: ButtonProps) => {
     sizeClasses = "px-8 py-4 text-2xl";
   }
 
+  const type: "button" | "submit" | "reset" | undefined =
+    props.type || "button";
+
   return (
     <button
+      type={type}
       className={
         sizeClasses +
         " rounded-full bg-moss-green text-center font-bold uppercase tracking-widest shadow-md hover:bg-moss-green-dark"

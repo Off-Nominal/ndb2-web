@@ -1,4 +1,5 @@
 import { APIResponse } from "./api";
+import { APIBets } from "./bets";
 
 export enum PredictionLifeCycle {
   OPEN = "open",
@@ -52,20 +53,6 @@ export type SearchOptions = {
 };
 
 export namespace APIPredictions {
-  export type Bet = {
-    id: string;
-    endorsed: boolean;
-    date: string;
-    wager: number;
-    valid: boolean;
-    payout: number;
-    season_payout: number;
-    better: {
-      id: string;
-      discord_id: string;
-    };
-  };
-
   export type EnhancedPrediction = {
     id: number;
     predictor: {
@@ -84,7 +71,7 @@ export namespace APIPredictions {
     judged_date: string | null;
     retired_date: string | null;
     status: PredictionLifeCycle;
-    bets: Bet[];
+    bets: APIBets.Bet[];
     votes: {
       id: string;
       vote: boolean;
@@ -100,7 +87,22 @@ export namespace APIPredictions {
     };
   };
 
+  export type ShortEnhancedPrediction = Omit<
+    EnhancedPrediction,
+    "bets" | "votes"
+  > & {
+    bets: {
+      endorsements: number;
+      undorsements: number;
+      invalid: number;
+    };
+    votes: {
+      yes: number;
+      no: number;
+    };
+  };
+
   export type GetPredictionById = APIResponse<EnhancedPrediction>;
 
-  export type SearchPredictions = APIResponse<EnhancedPrediction>;
+  export type SearchPredictions = APIResponse<ShortEnhancedPrediction>;
 }

@@ -1,3 +1,4 @@
+import { APIBets } from "@/types/bets";
 import {
   APIPredictions,
   PredictionLifeCycle,
@@ -20,7 +21,7 @@ const allStatuses = (statuses: PredictionLifeCycle[]): boolean => {
 
 const search = (
   options: SearchOptions
-): Promise<APIPredictions.EnhancedPrediction[]> => {
+): Promise<APIPredictions.ShortEnhancedPrediction[]> => {
   const params = new URLSearchParams();
 
   if (options.page) {
@@ -72,10 +73,10 @@ const search = (
 
 export const usePredictionSearch = (
   discordId: string,
-  bets: Omit<APIPredictions.Bet, "better_id">[]
+  bets: APIBets.UserBet[]
 ) => {
   const [predictions, setPredictions] = useState<
-    APIPredictions.EnhancedPrediction[]
+    APIPredictions.ShortEnhancedPrediction[]
   >([]);
 
   // loading states
@@ -87,7 +88,9 @@ export const usePredictionSearch = (
   const [page, setPage] = useState(1);
   const [predictor_id, setPredictorId] = useState<string | undefined>("");
   const [keyword, setKeyword] = useState("");
-  const [statuses, setStatuses] = useState<PredictionLifeCycle[]>([]);
+  const [statuses, setStatuses] = useState<PredictionLifeCycle[]>([
+    PredictionLifeCycle.OPEN,
+  ]);
   const [sort_by, setSortBy] = useState<SortByOption>(SortByOption.DUE_ASC);
   const [showBetOpportunities, setShowBetOpportunities] = useState(false);
 

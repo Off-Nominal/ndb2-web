@@ -5,6 +5,7 @@ import ndb2API from "@/utils/ndb2";
 import { APIPredictions } from "@/types/predictions";
 import discordAPI from "@/utils/discord";
 import { ShortDiscordGuildMember } from "@/types/discord";
+import { APIBets } from "@/types/bets";
 
 const getPredictionSearchData = async () => {
   const payload = await authAPI.verify();
@@ -15,7 +16,7 @@ const getPredictionSearchData = async () => {
 
   const data: {
     discordId: string;
-    bets: APIPredictions.Bet[];
+    bets: APIBets.UserBet[];
     members: ShortDiscordGuildMember[];
   } = { discordId: payload.discordId, bets: [], members: [] };
   const guildMemberManager = new discordAPI.GuildMemberManager();

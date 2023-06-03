@@ -18,6 +18,10 @@ type PredictionListItemProps = {
   triggeredDate: Date | null;
   retiredDate: Date | null;
   judgedDate: Date | null;
+  endorsements: number;
+  undorsements: number;
+  yesVotes: number;
+  noVotes: number;
 };
 
 type TimelineItem = {
@@ -255,7 +259,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
               <div className="font-bold uppercase">Endorsements</div>
               <div className="flex justify-center">
                 <div className="rounded-full bg-slate-400 px-2 dark:bg-slate-500">
-                  <span>o</span>
+                  <span>{props.endorsements}</span>
                 </div>
               </div>
               <div className="flex justify-end">
@@ -264,7 +268,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
               <div className="font-bold uppercase">Undorsements</div>
               <div className="flex justify-center">
                 <div className="rounded-full bg-slate-400 px-2 dark:bg-slate-500">
-                  <span>24</span>
+                  <span>{props.undorsements}</span>
                 </div>
               </div>
               <div className="flex justify-end">
@@ -275,14 +279,14 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
                   <div className="font-bold uppercase">Yes Votes</div>
                   <div className="flex justify-center">
                     <div className="rounded-full bg-slate-400 px-2 dark:bg-slate-500">
-                      <span>4</span>
+                      <span>{props.yesVotes}</span>
                     </div>
                   </div>
                   <div></div>
                   <div className="font-bold uppercase">No Votes</div>
                   <div className="flex justify-center">
                     <div className="rounded-full bg-slate-400 px-2 dark:bg-slate-500">
-                      <span>4</span>
+                      <span>{props.noVotes}</span>
                     </div>
                   </div>
                   <div></div>

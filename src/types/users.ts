@@ -1,8 +1,6 @@
 import { APIResponse } from "./api";
-import { APIPredictions } from "./predictions";
+import { APIBets } from "./bets";
 
 export namespace APIUsers {
-  export type GetUserBetsByDiscordId = APIResponse<
-    Omit<APIPredictions.Bet, "better_id">[]
-  >;
+  export type GetUserBetsByDiscordId = APIResponse<APIBets.UserBet[]>;
 }
