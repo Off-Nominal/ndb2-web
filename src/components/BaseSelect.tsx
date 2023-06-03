@@ -7,6 +7,7 @@ export type SelectOption<T extends ReactNode> = {
 };
 
 export type BaseSelectProps<T extends ReactNode> = {
+  name: string;
   options: SelectOption<T>[];
   optionLimit?: number;
   value?: string;
@@ -65,6 +66,7 @@ export const BaseSelect = <T extends ReactNode>(props: BaseSelectProps<T>) => {
         })}
       </div>
       <select
+        name={props.name}
         value={props.value}
         onChange={props.onChange}
         className="visually-hide"

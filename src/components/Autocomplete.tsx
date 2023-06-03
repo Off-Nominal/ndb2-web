@@ -71,6 +71,7 @@ export const Autocomplete = <T extends ReactNode>(
 
   return (
     <BaseSelect
+      name={props.name}
       options={props.options}
       value={props.value}
       onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>

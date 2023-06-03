@@ -62,10 +62,14 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
 
   return (
     <div className="flex flex-col items-center">
-      <section className="md:w-[675px]">
+      <form
+        className="md:w-[675px]"
+        onSubmit={(event) => event.preventDefault()}
+      >
         <h2 className="text-center text-xl uppercase">Search Predictions</h2>
         <div className="mb-6 mt-4">
           <input
+            name="keyword"
             onChange={(event) => setKeyword(event.target.value)}
             value={keyword}
             placeholder="Keyword"
@@ -137,6 +141,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
           <div className="mt-4">
             <div>
               <Select<string>
+                name="sort_by"
                 value={sort_by}
                 onChange={handleSortBySelect}
                 options={[
@@ -198,6 +203,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
           <div className="flex flex-col justify-between md:flex-row md:gap-8">
             <div className="mt-4 grow basis-8">
               <Autocomplete<ReactNode>
+                name="predictor_id"
                 value={predictor_id}
                 onChange={(value: string) => setPredictorId(value)}
                 onSearch={(searchTerm: string) => {
@@ -263,7 +269,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
             <Button onClick={clearFilters}>Clear Filters</Button>
           </div>
         </details>
-      </section>
+      </form>
       <section className="my-8 flex w-full flex-col gap-4">
         {predictions.length > 0 &&
           predictions.map((p) => {

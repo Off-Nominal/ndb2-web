@@ -19,6 +19,7 @@ export const Select = <T extends ReactNode>(props: SelectProps<T>) => {
 
   return (
     <BaseSelect
+      name={props.name}
       options={props.options}
       value={props.value}
       onChange={props.onChange}

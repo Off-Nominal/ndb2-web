@@ -40,11 +40,15 @@ export const CheckboxButtonList = <
                 className={"peer absolute left-0 top-0 h-full w-full opacity-0"}
                 type="checkbox"
                 name={item.name}
+                id={"checkbox-list-item-" + i + "-" + item.name}
                 checked={item.checked}
                 value={item.value}
                 onChange={item.onChange}
               />
-              <label htmlFor={item.name} className={classes}>
+              <label
+                htmlFor={"checkbox-list-item-" + i + "-" + item.name}
+                className={classes}
+              >
                 {item.label.toUpperCase()}
               </label>
             </div>
