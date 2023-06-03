@@ -47,7 +47,7 @@ export const BaseSelect = <T extends ReactNode>(props: BaseSelectProps<T>) => {
         {props.options.slice(0, optionLimit).map((option) => {
           return (
             <div
-              className="break-words px-4 py-4 hover:bg-slate-100 dark:hover:bg-slate-600 md:py-2"
+              className="px-4 py-4 hover:bg-slate-100 dark:hover:bg-slate-600 md:py-2"
               key={option.value}
               onClick={(event) => {
                 event.stopPropagation();
@@ -59,7 +59,7 @@ export const BaseSelect = <T extends ReactNode>(props: BaseSelectProps<T>) => {
                 setOpen(false);
               }}
             >
-              <span className="">{option.label}</span>
+              {option.label}
             </div>
           );
         })}

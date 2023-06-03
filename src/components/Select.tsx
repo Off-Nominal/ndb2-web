@@ -13,7 +13,7 @@ export const Select = <T extends ReactNode>(props: SelectProps<T>) => {
             "Select a sorting method"}
         </span>
       </div>
-      <div className="clip-select-arrow h-5 w-5 bg-slate-800 dark:bg-white"></div>
+      <div className="clip-triangle h-5 w-5 bg-slate-800 dark:bg-white"></div>
     </>
   );
 

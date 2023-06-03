@@ -19,19 +19,21 @@ export const CheckboxButtonList = <
         {props.items.map((item, i) => {
           let classes = `after:-z-10 after:border after:border-slate-400 after:dark:border-slate-600 peer-checked:after:border-moonstone-blue peer-checked:after:bg-moonstone-blue font-bold after:absolute after:left-0 after:right-0 after:top-0 after:block after:h-full after:w-full after:dark:bg-slate-700 after:bg-slate-200`;
 
-          if (i === 0) {
-            classes +=
-              " after:rounded-tl-lg after:rounded-tr-lg md:after:rounded-tr-none md:after:rounded-bl-lg";
-          }
-
-          if (i === props.items.length - 1) {
-            classes +=
-              " after:rounded-br-lg after:rounded-bl-lg md:after:rounded-bl-none md:after:rounded-tr-lg";
+          if (props.items.length === 1) {
+            classes += " after:rounded-lg";
+          } else {
+            if (i === 0) {
+              classes +=
+                " after:rounded-tl-lg after:rounded-tr-lg md:after:rounded-tr-none md:after:rounded-bl-lg";
+            } else if (i === props.items.length - 1) {
+              classes +=
+                " after:rounded-br-lg after:rounded-bl-lg md:after:rounded-bl-none md:after:rounded-tr-lg";
+            }
           }
 
           return (
             <div
-              className={"relative flex grow px-6 py-3 md:justify-center"}
+              className={"relative flex grow px-6 py-2.5 md:justify-center"}
               key={item.name}
             >
               <input

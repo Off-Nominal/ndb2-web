@@ -1,6 +1,7 @@
 import { Button } from "@/components/Button";
 import { RiskPill } from "@/components/RiskPill";
 import { PredictionLifeCycle } from "@/types/predictions";
+import { format } from "date-fns";
 import Link from "next/link";
 
 type PredictionListItemProps = {
@@ -11,6 +12,109 @@ type PredictionListItemProps = {
   endorse_ratio: number;
   undorse_ratio: number;
   loading: boolean;
+  createdDate: Date;
+  dueDate: Date;
+  closedDate: Date | null;
+  triggeredDate: Date | null;
+  retiredDate: Date | null;
+  judgedDate: Date | null;
+};
+
+type TimelineItem = {
+  label: string;
+  value: string;
+  status:
+    | "complete"
+    | "complete_negative"
+    | "in_progress"
+    | "not_started"
+    | "cancelled";
+};
+
+const buildTimeline = (
+  status: PredictionLifeCycle,
+  createdDate: Date,
+  dueDate: Date,
+  closedDate: Date | null,
+  triggeredDate: Date | null,
+  retiredDate: Date | null,
+  judgedDate: Date | null
+): [TimelineItem, TimelineItem, TimelineItem, TimelineItem] => {
+  const dateFormat = "MMM do, yyyy";
+
+  const item1: TimelineItem = {
+    label: "Created",
+    value: format(createdDate, dateFormat),
+    status: "complete",
+  };
+
+  let item2: TimelineItem;
+
+  if (status === PredictionLifeCycle.OPEN) {
+    item2 = {
+      label: "Due",
+      value: format(dueDate, dateFormat),
+      status: "in_progress",
+    };
+  } else if (status === PredictionLifeCycle.RETIRED && retiredDate) {
+    item2 = {
+      label: "Retired",
+      value: format(retiredDate, dateFormat),
+      status: "complete_negative",
+    };
+  } else {
+    item2 = {
+      label: "Triggered",
+      value: triggeredDate ? format(triggeredDate, dateFormat) : "",
+      status: "complete",
+    };
+  }
+
+  let item3: TimelineItem;
+
+  if (status === PredictionLifeCycle.OPEN) {
+    item3 = {
+      label: "Close",
+      value: "",
+      status: "not_started",
+    };
+  } else if (status === PredictionLifeCycle.RETIRED) {
+    item3 = {
+      label: "Originally Due",
+      value: format(dueDate, dateFormat),
+      status: "cancelled",
+    };
+  } else {
+    item3 = {
+      label: "Effective Close",
+      value: closedDate ? format(closedDate, dateFormat) : "",
+      status: "complete",
+    };
+  }
+
+  let item4: TimelineItem;
+
+  if (status === PredictionLifeCycle.OPEN) {
+    item4 = {
+      label: "Judgement",
+      value: "",
+      status: "not_started",
+    };
+  } else if (status === PredictionLifeCycle.RETIRED) {
+    item4 = {
+      label: "Judgement",
+      value: "",
+      status: "cancelled",
+    };
+  } else {
+    item4 = {
+      label: "Judged",
+      value: judgedDate ? format(judgedDate, dateFormat) : "",
+      status: "complete",
+    };
+  }
+
+  return [item1, item2, item3, item4];
 };
 
 export const PredictionListItem = (props: PredictionListItemProps) => {
@@ -31,6 +135,24 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
   }
 
   const gridRows = showVotes ? "grid-rows-4" : "grid-rows-2";
+
+  const timeline = buildTimeline(
+    props.status,
+    props.createdDate,
+    props.dueDate,
+    props.closedDate,
+    props.triggeredDate,
+    props.retiredDate,
+    props.judgedDate
+  );
+
+  const timelineStatusClasses = {
+    complete: "bg-moss-green",
+    complete_negative: "bg-deep-chestnut-red",
+    in_progress: "bg-moonstone-blue",
+    not_started: "bg-silver-chalice-grey",
+    cancelled: "bg-slate-300 dark:bg-slate-500",
+  };
 
   return (
     <article className={props.loading ? "animate-pulse" : ""}>
@@ -66,8 +188,61 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
         </summary>
         <div className="mb-4 mt-8 flex gap-4">
           <div className=" grow-0 basis-12"></div>
-          <div className="flex grow flex-col md:flex-row">
-            <div className="grow basis-1/2 ">Timeline</div>
+          <div className="flex grow flex-col gap-8 md:flex-row md:items-start">
+            <div className="grid grow basis-1/2 grid-cols-[2rem,auto,auto] grid-rows-4 gap-4">
+              {/* Date 1 */}
+              <div className="flex justify-center">
+                <div
+                  className={
+                    "rounded-full px-2 " +
+                    timelineStatusClasses[timeline[0].status]
+                  }
+                >
+                  <span className="opacity-0">o</span>
+                </div>
+              </div>
+              <div className="font-bold uppercase">{timeline[0].label}</div>
+              <div className="flex justify-end">{timeline[0].value}</div>
+              {/* Date 2 */}
+              <div className="flex justify-center">
+                <div
+                  className={
+                    "rounded-full px-2 " +
+                    timelineStatusClasses[timeline[1].status]
+                  }
+                >
+                  <span className="opacity-0">o</span>
+                </div>
+              </div>
+              <div className="font-bold uppercase">{timeline[1].label}</div>
+              <div className="flex justify-end">{timeline[1].value}</div>
+              {/* Date 3 */}
+              <div className="flex justify-center">
+                <div
+                  className={
+                    "rounded-full px-2 " +
+                    timelineStatusClasses[timeline[2].status]
+                  }
+                >
+                  <span className="opacity-0">o</span>
+                </div>
+              </div>
+              <div className="font-bold uppercase">{timeline[2].label}</div>
+              <div className="flex justify-end">{timeline[2].value}</div>
+              {/* Date 4 */}
+              <div className="flex justify-center">
+                <div
+                  className={
+                    "rounded-full px-2 " +
+                    timelineStatusClasses[timeline[3].status]
+                  }
+                >
+                  <span className="opacity-0">o</span>
+                </div>
+              </div>
+              <div className="font-bold uppercase">{timeline[3].label}</div>
+              <div className="flex justify-end">{timeline[3].value}</div>
+            </div>
             <div
               className={
                 "grid grow basis-1/2 grid-cols-[auto,2rem,auto] gap-4 " +
@@ -77,7 +252,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
               <div className="font-bold uppercase">Endorsements</div>
               <div className="flex justify-center">
                 <div className="rounded-full bg-slate-400 px-2 dark:bg-slate-500">
-                  <span>14</span>
+                  <span>o</span>
                 </div>
               </div>
               <div className="flex justify-end">

@@ -29,6 +29,10 @@ const search = (
     }
   }
 
+  if (options.non_better_id) {
+    params.append("unbetter", options.non_better_id);
+  }
+
   if (options.predictor_id) {
     params.append("creator", options.predictor_id);
   }
@@ -75,7 +79,8 @@ export const usePredictionSearch = (
   const [predictor_id, setPredictorId] = useState<string | undefined>("");
   const [keyword, setKeyword] = useState("");
   const [statuses, setStatuses] = useState<PredictionLifeCycle[]>([]);
-  const [sort_by, setSortBy] = useState<SortByOption>(SortByOption.DUE_DESC);
+  const [sort_by, setSortBy] = useState<SortByOption>(SortByOption.DUE_ASC);
+  const [showBetOpportunities, setShowBetOpportunities] = useState(false);
 
   const timeout = useRef<ReturnType<typeof setTimeout> | undefined>();
   const keywordRef = useRef(keyword);
@@ -105,6 +110,7 @@ export const usePredictionSearch = (
       statuses,
       sort_by,
       predictor_id,
+      non_better_id: showBetOpportunities ? discordId : undefined,
     };
 
     if (keywordRef.current !== keyword) {
@@ -113,7 +119,15 @@ export const usePredictionSearch = (
     } else {
       handleSearch(options);
     }
-  }, [keyword, statuses, sort_by, predictor_id, debouncedSearch]);
+  }, [
+    keyword,
+    statuses,
+    sort_by,
+    predictor_id,
+    showBetOpportunities,
+    discordId,
+    debouncedSearch,
+  ]);
 
   const setStatus = (
     newStatus: PredictionLifeCycle | "all",
@@ -172,6 +186,8 @@ export const usePredictionSearch = (
         statuses
       ),
     },
+    showBetOpportunities,
+    setShowBetOpportunities,
     setStatus,
     sort_by,
     setSortBy,

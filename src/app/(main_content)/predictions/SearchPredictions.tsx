@@ -13,6 +13,7 @@ import { Select } from "@/components/Select";
 import { Autocomplete } from "@/components/Autocomplete";
 import { Avatar } from "@/components/Avatar";
 import { ReactNode, useState } from "react";
+import { Button } from "@/components/Button";
 
 export type SearchPredictionsProps = {
   discordId: string;
@@ -32,6 +33,8 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
     searching,
     predictor_id,
     setPredictorId,
+    showBetOpportunities,
+    setShowBetOpportunities,
   } = usePredictionSearch(props.discordId, props.bets);
   const [members, setMembers] = useState<ShortDiscordGuildMember[]>(
     props.members
@@ -66,13 +69,13 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
             <h3 className="text-center text-xl uppercase">
               Advanced Filter/Sort
             </h3>
-            <div className="clip-select-arrow h-5 w-5 translate-x-1 -rotate-90 bg-slate-500 transition ease-in-out group-open:-translate-y-0.5 group-open:rotate-0 dark:bg-slate-200"></div>
+            <div className="clip-triangle h-5 w-5 translate-x-1 -rotate-90 bg-slate-500 transition ease-in-out group-open:-translate-y-0.5 group-open:rotate-0 dark:bg-slate-200"></div>
           </summary>
+          <h4 className="mt-4 text-center text-base uppercase">
+            Filter By Status
+          </h4>
           <div className="mt-4 flex justify-center">
             <div className="w-full">
-              <h4 className="text-center text-base uppercase">
-                Filter By Status
-              </h4>
               <CheckboxButtonList<PredictionLifeCycle | "all">
                 items={[
                   {
@@ -122,10 +125,9 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
             </div>
           </div>
 
+          <h4 className="mt-4 text-center text-base uppercase">Sort By Date</h4>
           <div className="mt-4">
             <div>
-              <h4 className="text-center text-base uppercase">Sort By Date</h4>
-
               <Select<string>
                 value={sort_by}
                 onChange={handleSortBySelect}
@@ -182,49 +184,85 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
               />
             </div>
           </div>
-          <div className="mt-4">
-            <h4 className="text-center text-base uppercase">
-              Filter by Predictor
-            </h4>
-            <Autocomplete<ReactNode>
-              value={predictor_id}
-              onChange={(value: string) => setPredictorId(value)}
-              onSearch={(searchTerm: string) => {
-                setMembers(
-                  props.members.filter((m) =>
-                    m.name.toLowerCase().includes(searchTerm.toLowerCase())
-                  )
-                );
-              }}
-              options={members
-                .sort((a, b) => {
-                  const nameA = a.name.toUpperCase();
-                  const nameB = b.name.toUpperCase();
-                  if (nameA < nameB) {
-                    return -1;
-                  }
-                  if (nameA > nameB) {
-                    return 1;
-                  }
+          <h4 className="mt-4 text-center text-base uppercase">
+            Filter by Predictor
+          </h4>
+          <div className="flex flex-col justify-between md:flex-row md:gap-8">
+            <div className="mt-4 grow basis-8">
+              <Autocomplete<ReactNode>
+                value={predictor_id}
+                onChange={(value: string) => setPredictorId(value)}
+                onSearch={(searchTerm: string) => {
+                  setMembers(
+                    props.members.filter((m) => {
+                      if (searchTerm === "") {
+                        return true;
+                      }
+                      return m.name
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase());
+                    })
+                  );
+                }}
+                options={members
+                  .sort((a, b) => {
+                    const nameA = a.name.toUpperCase();
+                    const nameB = b.name.toUpperCase();
+                    if (nameA < nameB) {
+                      return -1;
+                    }
+                    if (nameA > nameB) {
+                      return 1;
+                    }
 
-                  return 0;
-                })
-                .map((m) => {
-                  return {
-                    label: (
-                      <div className="flex gap-2">
-                        <div className="shrink-0 grow-0 basis-8">
-                          <Avatar src={m.avatarUrl} alt={m.name} size={24} />
+                    return 0;
+                  })
+                  .map((m) => {
+                    return {
+                      label: (
+                        <div className="flex grow gap-2">
+                          <div className="shrink-0 grow-0 basis-8">
+                            <Avatar src={m.avatarUrl} alt={m.name} size={24} />
+                          </div>
+                          <div className="overflow-hidden">
+                            <p className="overflow-hidden">{m.name}</p>
+                          </div>
                         </div>
-                        <div className="overflow-hidden">
-                          <p className="">{m.name}</p>
-                        </div>
-                      </div>
-                    ),
-                    value: m.discordId,
-                  };
-                })}
-            />
+                      ),
+                      value: m.discordId,
+                    };
+                  })}
+              />
+            </div>
+            <div className="mt-4 grow basis-8">
+              <CheckboxButtonList<string>
+                items={[
+                  {
+                    name: "betOpps",
+                    value: "true",
+                    label: "Show My Bet Opportunities",
+                    checked: showBetOpportunities,
+                    onChange: (event) => {
+                      setStatus(PredictionLifeCycle.OPEN, true);
+                      setShowBetOpportunities(event.target.checked);
+                    },
+                  },
+                ]}
+              />
+            </div>
+          </div>
+          <div className="mt-4 flex justify-center md:mt-8 md:justify-end">
+            <Button
+              onClick={() => {
+                setKeyword("");
+                setStatus("all", true);
+                setSortBy(SortByOption.DUE_ASC);
+                setPredictorId("");
+                setShowBetOpportunities(false);
+              }}
+            >
+              Clear Filters
+            </Button>
           </div>
         </details>
       </section>
@@ -245,6 +283,20 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
                 endorsed={endorsed}
                 endorse_ratio={p.payouts.endorse}
                 undorse_ratio={p.payouts.undorse}
+                dueDate={new Date(p.due_date)}
+                createdDate={new Date(p.created_date)}
+                judgedDate={
+                  p.judged_date !== null ? new Date(p.judged_date) : null
+                }
+                triggeredDate={
+                  p.triggered_date !== null ? new Date(p.triggered_date) : null
+                }
+                closedDate={
+                  p.closed_date !== null ? new Date(p.closed_date) : null
+                }
+                retiredDate={
+                  p.retired_date !== null ? new Date(p.retired_date) : null
+                }
               />
             );
           })}
