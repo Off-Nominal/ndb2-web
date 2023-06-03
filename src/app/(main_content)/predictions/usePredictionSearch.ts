@@ -23,6 +23,10 @@ const search = (
 ): Promise<APIPredictions.EnhancedPrediction[]> => {
   const params = new URLSearchParams();
 
+  if (options.page) {
+    params.append("page", options.page.toString());
+  }
+
   if (options.statuses) {
     for (const status of options.statuses) {
       params.append("status", status);
@@ -74,8 +78,13 @@ export const usePredictionSearch = (
     APIPredictions.EnhancedPrediction[]
   >([]);
 
-  // Search Params States
+  // loading states
   const [searching, setSearching] = useState(false);
+  const [incrementallySearching, setIncrementallySearching] = useState(false);
+  const [reachedEndOfList, setReachedEndOfList] = useState(false);
+
+  // Search Params States
+  const [page, setPage] = useState(1);
   const [predictor_id, setPredictorId] = useState<string | undefined>("");
   const [keyword, setKeyword] = useState("");
   const [statuses, setStatuses] = useState<PredictionLifeCycle[]>([]);
@@ -84,6 +93,11 @@ export const usePredictionSearch = (
 
   const timeout = useRef<ReturnType<typeof setTimeout> | undefined>();
   const keywordRef = useRef(keyword);
+  const pageRef = useRef(page);
+
+  const incrementPage = () => {
+    setPage((prev) => prev + 1);
+  };
 
   const handleSearch = (options: SearchOptions) => {
     setSearching(true);
@@ -97,6 +111,28 @@ export const usePredictionSearch = (
       });
   };
 
+  const handleIncrementalSearch = useCallback(
+    (options: SearchOptions) => {
+      if (reachedEndOfList) {
+        return;
+      }
+      setIncrementallySearching(true);
+      search(options)
+        .then((predictions) => {
+          if (predictions.length === 0) {
+            setReachedEndOfList(true);
+            return;
+          }
+          setPredictions((prev) => [...prev, ...predictions]);
+        })
+        .catch((err) => console.error(err))
+        .finally(() => {
+          setIncrementallySearching(false);
+        });
+    },
+    [reachedEndOfList]
+  );
+
   const debouncedSearch = useCallback((options: SearchOptions) => {
     clearTimeout(timeout.current);
     timeout.current = setTimeout(() => {
@@ -107,6 +143,7 @@ export const usePredictionSearch = (
   useEffect(() => {
     const options: SearchOptions = {
       keyword,
+      page,
       statuses,
       sort_by,
       predictor_id,
@@ -116,6 +153,9 @@ export const usePredictionSearch = (
     if (keywordRef.current !== keyword) {
       keywordRef.current = keyword;
       debouncedSearch(options);
+    } else if (pageRef.current !== page && page !== 1) {
+      pageRef.current = page;
+      handleIncrementalSearch(options);
     } else {
       handleSearch(options);
     }
@@ -123,9 +163,11 @@ export const usePredictionSearch = (
     keyword,
     statuses,
     sort_by,
+    page,
     predictor_id,
     showBetOpportunities,
     discordId,
+    handleIncrementalSearch,
     debouncedSearch,
   ]);
 
@@ -161,8 +203,24 @@ export const usePredictionSearch = (
     setStatuses(newStatuses);
   };
 
+  const clearFilters = () => {
+    setKeyword("");
+    setStatus("all", true);
+    setSortBy(SortByOption.DUE_ASC);
+    setPredictorId("");
+    setShowBetOpportunities(false);
+    setPage(1);
+  };
+
+  const resetPages = () => {
+    setPage(1);
+    setReachedEndOfList(false);
+  };
+
   return {
     predictions,
+    searching,
+    incrementallySearching,
     statuses: {
       all: allStatuses(statuses),
       [PredictionLifeCycle.OPEN]: findStatus(
@@ -187,14 +245,31 @@ export const usePredictionSearch = (
       ),
     },
     showBetOpportunities,
-    setShowBetOpportunities,
-    setStatus,
+    setShowBetOpportunities: (value: boolean) => {
+      setShowBetOpportunities(value);
+      resetPages();
+    },
+    setStatus: (newStatus: PredictionLifeCycle | "all", value: boolean) => {
+      setStatus(newStatus, value);
+      resetPages();
+    },
     sort_by,
-    setSortBy,
+    setSortBy: (newSortBy: SortByOption) => {
+      setSortBy(newSortBy);
+      resetPages();
+    },
     keyword,
-    setKeyword,
-    searching,
+    setKeyword: (newKeyword: string) => {
+      setKeyword(newKeyword);
+      resetPages();
+    },
     predictor_id,
-    setPredictorId,
+    setPredictorId: (newPredictorId: string) => {
+      setPredictorId(newPredictorId);
+      resetPages();
+    },
+    clearFilters,
+    incrementPage,
+    reachedEndOfList,
   };
 };

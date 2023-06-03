@@ -14,6 +14,7 @@ import { Autocomplete } from "@/components/Autocomplete";
 import { Avatar } from "@/components/Avatar";
 import { ReactNode, useState } from "react";
 import { Button } from "@/components/Button";
+import { usePageIncrement } from "./usePageIncrement";
 
 export type SearchPredictionsProps = {
   discordId: string;
@@ -23,19 +24,26 @@ export type SearchPredictionsProps = {
 
 export const SearchPredictions = (props: SearchPredictionsProps) => {
   const {
-    keyword,
     predictions,
+    searching,
+    incrementallySearching,
+    keyword,
     statuses,
     setStatus,
     sort_by,
     setSortBy,
     setKeyword,
-    searching,
     predictor_id,
     setPredictorId,
     showBetOpportunities,
     setShowBetOpportunities,
+    clearFilters,
+    incrementPage,
+    reachedEndOfList,
   } = usePredictionSearch(props.discordId, props.bets);
+
+  usePageIncrement(predictions, incrementPage);
+
   const [members, setMembers] = useState<ShortDiscordGuildMember[]>(
     props.members
   );
@@ -252,21 +260,11 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
             </div>
           </div>
           <div className="mt-4 flex justify-center md:mt-8 md:justify-end">
-            <Button
-              onClick={() => {
-                setKeyword("");
-                setStatus("all", true);
-                setSortBy(SortByOption.DUE_ASC);
-                setPredictorId("");
-                setShowBetOpportunities(false);
-              }}
-            >
-              Clear Filters
-            </Button>
+            <Button onClick={clearFilters}>Clear Filters</Button>
           </div>
         </details>
       </section>
-      <section className="my-8 flex flex-col gap-4">
+      <section className="my-8 flex w-full flex-col gap-4">
         {predictions.length > 0 &&
           predictions.map((p) => {
             const endorsed = p.bets?.find(
@@ -301,11 +299,21 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
             );
           })}
       </section>
+      {incrementallySearching && <div>Loading more...</div>}
       {predictions.length === 0 && (
         <section className="md:w-[675px]">
           <div className="flex justify-center">
             <p className="text-center text-xl">
               No predictions found for your search criteria.
+            </p>
+          </div>
+        </section>
+      )}
+      {reachedEndOfList && (
+        <section className="md:w-[675px]">
+          <div className="flex justify-center">
+            <p className="text-center text-xl">
+              No more predictions for your search criteria.
             </p>
           </div>
         </section>

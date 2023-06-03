@@ -155,7 +155,10 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
   };
 
   return (
-    <article className={props.loading ? "animate-pulse" : ""}>
+    <article
+      id={"prediction-" + props.id}
+      className={props.loading ? "animate-pulse" : ""}
+    >
       <details className="group h-[7em] rounded-lg bg-slate-200 open:h-full dark:bg-slate-700">
         <summary className="flex h-full gap-4">
           <div
