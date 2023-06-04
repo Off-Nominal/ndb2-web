@@ -33,6 +33,13 @@ export async function POST(
     );
   }
 
+  if (discord_id !== payload.discordId) {
+    return NextResponse.json(
+      { error: "Can only make bets for yourself" },
+      { status: 401 }
+    );
+  }
+
   if (typeof endorsed !== "boolean") {
     return NextResponse.json(
       { error: "Missing required field: endorsed" },
