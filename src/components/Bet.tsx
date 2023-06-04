@@ -1,15 +1,19 @@
 'use client';
 
 import useBetState from "@/hooks/useBetState";
-import { APIPredictions } from "@/types/predictions";
+import { APIPredictions, PredictionLifeCycle } from "@/types/predictions";
 
 type BetProps = {
-  bets: APIPredictions.Bet[]
+  bets: APIPredictions.Bet[],
+  discord_id: string,
+  status: PredictionLifeCycle,
+  prediction_id: number
 }
 
 
 export const Bet = (props: BetProps) => {
-  // const {bet, bets, userBet} = useBetState(props.bets)
+  console.log("props", props)
+  const {bet, bets, userBet} = useBetState(props.bets, props.discord_id, props.status, props.prediction_id)
 
   return (
     <svg
@@ -34,6 +38,7 @@ export const Bet = (props: BetProps) => {
         stroke="black"
         strokeWidth="1"
         className="hover:fill-moss-green"
+        onClick={() => bet(true)}
       />
       <polygon
         points="40,50 20,10 60,10"
@@ -41,6 +46,7 @@ export const Bet = (props: BetProps) => {
         stroke="black"
         strokeWidth="1"
         className="hover:fill-moss-green"
+        onClick={() => bet(false)}
       />
     </svg>
   );

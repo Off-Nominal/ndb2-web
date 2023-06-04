@@ -164,11 +164,22 @@ const getPredictionById = (
   }).then((res) => res.json());
 };
 
+const postBet = (
+  id: number,
+  options?: RequestInit
+): Promise<APIPredictions.Bet> => {
+  return fetch(baseUrl + `/api/predictions/${id}/bets`, {
+    headers,
+    ...options,
+  }).then((res) => res.json());
+};
+
 const ndb2API = {
   getPointsLeaderboard,
   getBetsLeaderboard,
   getPredictionsLeaderboard,
   getPredictionById,
+  postBet
 };
 
 export default ndb2API;

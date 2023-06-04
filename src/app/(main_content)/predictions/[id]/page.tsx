@@ -154,7 +154,7 @@ export default async function Predictions({ params }: any) {
                 <p>BET ON SOME DAY</p>
               </div>
               <div>
-                <Bet bets={prediction.bets} />
+                <Bet bets={prediction.bets} discord_id={payload.discordId} status={prediction.status} prediction_id={prediction.id} />
               </div>
             </div>
             <div>
