@@ -24,15 +24,18 @@ type PredictionListItemProps = {
   noVotes: number;
 };
 
+enum TimelineStatus {
+  COMPLETE = "complete",
+  COMPLETE_NEGATIVE = "complete_negative",
+  IN_PROGRESS = "in_progress",
+  NOT_STARTED = "not_started",
+  CANCELLED = "cancelled",
+}
+
 type TimelineItem = {
   label: string;
   value: string;
-  status:
-    | "complete"
-    | "complete_negative"
-    | "in_progress"
-    | "not_started"
-    | "cancelled";
+  status: TimelineStatus;
 };
 
 const buildTimeline = (
@@ -49,7 +52,7 @@ const buildTimeline = (
   const item1: TimelineItem = {
     label: "Created",
     value: format(createdDate, dateFormat),
-    status: "complete",
+    status: TimelineStatus.COMPLETE,
   };
 
   let item2: TimelineItem;
@@ -58,19 +61,19 @@ const buildTimeline = (
     item2 = {
       label: "Due",
       value: format(dueDate, dateFormat),
-      status: "in_progress",
+      status: TimelineStatus.IN_PROGRESS,
     };
   } else if (status === PredictionLifeCycle.RETIRED && retiredDate) {
     item2 = {
       label: "Retired",
       value: format(retiredDate, dateFormat),
-      status: "complete_negative",
+      status: TimelineStatus.COMPLETE_NEGATIVE,
     };
   } else {
     item2 = {
       label: "Triggered",
       value: triggeredDate ? format(triggeredDate, dateFormat) : "",
-      status: "complete",
+      status: TimelineStatus.COMPLETE,
     };
   }
 
@@ -80,19 +83,19 @@ const buildTimeline = (
     item3 = {
       label: "Close",
       value: "",
-      status: "not_started",
+      status: TimelineStatus.NOT_STARTED,
     };
   } else if (status === PredictionLifeCycle.RETIRED) {
     item3 = {
       label: "Due",
       value: format(dueDate, dateFormat),
-      status: "cancelled",
+      status: TimelineStatus.CANCELLED,
     };
   } else {
     item3 = {
       label: "Eff. Close",
       value: closedDate ? format(closedDate, dateFormat) : "",
-      status: "complete",
+      status: TimelineStatus.COMPLETE,
     };
   }
 
@@ -102,19 +105,19 @@ const buildTimeline = (
     item4 = {
       label: "Judgement",
       value: "",
-      status: "not_started",
+      status: TimelineStatus.NOT_STARTED,
     };
   } else if (status === PredictionLifeCycle.RETIRED) {
     item4 = {
       label: "Judgement",
       value: "",
-      status: "cancelled",
+      status: TimelineStatus.CANCELLED,
     };
   } else {
     item4 = {
       label: "Judged",
       value: judgedDate ? format(judgedDate, dateFormat) : "",
-      status: "complete",
+      status: TimelineStatus.COMPLETE,
     };
   }
 

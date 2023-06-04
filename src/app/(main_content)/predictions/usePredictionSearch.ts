@@ -83,29 +83,29 @@ export const usePredictionSearch = (
 
   const [userBets, setUserBets] = useState<APIBets.UserBet[]>(bets);
 
-  const updateUserBet = (predictionId: number, endorsed: boolean) => {
-    return fetch("/api/predictions/" + predictionId + "/bets", {
-      method: "POST",
-      body: JSON.stringify({ discord_id: discordId, endorsed }),
-    })
-      .then((res) => {
-        return res.json();
+  const updateUserBet = useCallback(
+    (predictionId: number, endorsed: boolean) => {
+      return fetch("/api/predictions/" + predictionId + "/bets", {
+        method: "POST",
+        body: JSON.stringify({ discord_id: discordId, endorsed }),
       })
-      .then((res) => {
-        console.log("res", res);
-        const newBets = [...userBets];
-        const bet = newBets.find((b) => b.prediction_id === predictionId);
+        .then(responseHandler)
+        .then(() => {
+          const newBets = [...userBets];
+          const bet = newBets.find((b) => b.prediction_id === predictionId);
 
-        if (bet) {
-          bet.endorsed = endorsed;
-          setUserBets([...userBets]);
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        throw err;
-      });
-  };
+          if (bet) {
+            bet.endorsed = endorsed;
+            setUserBets([...userBets]);
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          throw err;
+        });
+    },
+    [discordId, userBets]
+  );
 
   // loading states
   const [searching, setSearching] = useState(false);
@@ -197,11 +197,11 @@ export const usePredictionSearch = (
     discordId,
   ]);
 
-  const incrementPage = () => {
+  const incrementPage = useCallback(() => {
     setPage((prev) => prev + 1);
-  };
+  }, []);
 
-  const handleSearch = (options: SearchOptions) => {
+  const handleSearch = useCallback((options: SearchOptions) => {
     setSearching(true);
     search(options)
       .then((predictions) => {
@@ -211,10 +211,28 @@ export const usePredictionSearch = (
       .finally(() => {
         setSearching(false);
       });
-  };
+  }, []);
 
-  const handleIncrementalSearch = useCallback(
-    (options: SearchOptions) => {
+  useEffect(() => {
+    const options: SearchOptions = {
+      keyword,
+      page,
+      statuses,
+      sort_by,
+      predictor_id,
+      season_id,
+      non_better_id: showBetOpportunities ? discordId : undefined,
+    };
+
+    if (keywordRef.current !== keyword) {
+      keywordRef.current = keyword;
+      clearTimeout(timeout.current);
+
+      timeout.current = setTimeout(() => {
+        handleSearch(options);
+      }, 500);
+    } else if (pageRef.current !== page && page !== 1) {
+      pageRef.current = page;
       if (reachedEndOfList) {
         return;
       }
@@ -231,34 +249,6 @@ export const usePredictionSearch = (
         .finally(() => {
           setIncrementallySearching(false);
         });
-    },
-    [reachedEndOfList]
-  );
-
-  const debouncedSearch = useCallback((options: SearchOptions) => {
-    clearTimeout(timeout.current);
-    timeout.current = setTimeout(() => {
-      handleSearch(options);
-    }, 500);
-  }, []);
-
-  useEffect(() => {
-    const options: SearchOptions = {
-      keyword,
-      page,
-      statuses,
-      sort_by,
-      predictor_id,
-      season_id,
-      non_better_id: showBetOpportunities ? discordId : undefined,
-    };
-
-    if (keywordRef.current !== keyword) {
-      keywordRef.current = keyword;
-      debouncedSearch(options);
-    } else if (pageRef.current !== page && page !== 1) {
-      pageRef.current = page;
-      handleIncrementalSearch(options);
     } else {
       handleSearch(options);
     }
@@ -271,43 +261,43 @@ export const usePredictionSearch = (
     showBetOpportunities,
     discordId,
     season_id,
-    handleIncrementalSearch,
-    debouncedSearch,
+    handleSearch,
+    reachedEndOfList,
   ]);
 
-  const setStatus = (
-    newStatus: PredictionLifeCycle | "all",
-    value: boolean
-  ) => {
-    const newStatuses: PredictionLifeCycle[] = [];
+  const setStatus = useCallback(
+    (newStatus: PredictionLifeCycle | "all", value: boolean) => {
+      const newStatuses: PredictionLifeCycle[] = [];
 
-    if (newStatus === "all") {
-      return setStatuses(newStatuses);
-    }
-
-    let found = false;
-
-    for (const status of statuses) {
-      if (status !== newStatus) {
-        newStatuses.push(status);
-        continue;
+      if (newStatus === "all") {
+        return setStatuses(newStatuses);
       }
 
-      found = true;
+      let found = false;
 
-      if (value) {
-        newStatuses.push(status);
+      for (const status of statuses) {
+        if (status !== newStatus) {
+          newStatuses.push(status);
+          continue;
+        }
+
+        found = true;
+
+        if (value) {
+          newStatuses.push(status);
+        }
       }
-    }
 
-    if (!found) {
-      newStatuses.push(newStatus);
-    }
+      if (!found) {
+        newStatuses.push(newStatus);
+      }
 
-    setStatuses(newStatuses);
-  };
+      setStatuses(newStatuses);
+    },
+    [statuses]
+  );
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setKeyword("");
     setStatus("all", true);
     setSortBy(SortByOption.DUE_ASC);
@@ -315,12 +305,12 @@ export const usePredictionSearch = (
     setShowBetOpportunities(false);
     setSeasonId(undefined);
     setPage(1);
-  };
+  }, [setStatus]);
 
-  const resetPages = () => {
+  const resetPages = useCallback(() => {
     setPage(1);
     setReachedEndOfList(false);
-  };
+  }, []);
 
   return {
     predictions: predictions.map((p) => ({
@@ -356,7 +346,6 @@ export const usePredictionSearch = (
     showBetOpportunities,
     setShowBetOpportunities: (value: boolean) => {
       setShowBetOpportunities(value);
-
       resetPages();
     },
     setStatus: (newStatus: PredictionLifeCycle | "all", value: boolean) => {
