@@ -344,7 +344,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
                       value: "true",
                       label: showBetOpportunities
                         ? "Showing Bet Opportunities"
-                        : "Hiding Bet Opportunites",
+                        : "Showing All",
                       checked: showBetOpportunities,
                       onChange: (event) => {
                         setStatus(PredictionLifeCycle.OPEN, true);
