@@ -1,3 +1,6 @@
+import { APIResponse } from "./api";
+import { APIPredictions } from "./predictions";
+
 export namespace APIBets {
   export type Bet = {
     id: string;
@@ -14,4 +17,6 @@ export namespace APIBets {
   };
 
   export type UserBet = Omit<Bet, "better_id"> & { prediction_id: number };
+
+  export type AddBet = APIResponse<APIPredictions.EnhancedPrediction>;
 }

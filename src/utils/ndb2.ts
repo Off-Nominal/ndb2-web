@@ -1,13 +1,10 @@
-import {
-  APIPredictions,
-  SearchOptions,
-  SortByOption,
-} from "@/types/predictions";
+import { APIPredictions, SearchOptions } from "@/types/predictions";
 import { APIScores } from "@/types/scores";
 import { RequestInit } from "next/dist/server/web/spec-extension/request";
 import { responseHandler } from "./misc";
 import { APIUsers } from "@/types/users";
 import { APISeasons } from "@/types/seasons";
+import { APIBets } from "@/types/bets";
 
 const API_URL = process.env.NDB2_API_BASEURL;
 const API_KEY = process.env.NDB2_API_KEY;
@@ -15,6 +12,7 @@ const API_KEY = process.env.NDB2_API_KEY;
 const baseUrl = API_URL || "http://localhost:8000";
 const headers = new Headers({
   Authorization: `Bearer ${API_KEY}`,
+  "content-type": "application/json",
 });
 
 export type GetLeaderboardOptions = RequestInit & {
@@ -230,6 +228,24 @@ const getSeasons = (): Promise<APISeasons.GetSeasons> => {
     .catch(errorHandler);
 };
 
+const addBet = (
+  predictionId: number,
+  endorsed: boolean,
+  discord_id: string
+): Promise<APIBets.AddBet> => {
+  const body = {
+    endorsed,
+    discord_id,
+  };
+  return fetch(baseUrl + `/api/predictions/${predictionId}/bets`, {
+    method: "POST",
+    body: JSON.stringify(body),
+    headers,
+  })
+    .then(responseHandler)
+    .catch(errorHandler);
+};
+
 const ndb2API = {
   getPointsLeaderboard,
   getBetsLeaderboard,
@@ -238,6 +254,7 @@ const ndb2API = {
   searchPredictions,
   getUserBetsByDiscordId,
   getSeasons,
+  addBet,
 };
 
 export default ndb2API;

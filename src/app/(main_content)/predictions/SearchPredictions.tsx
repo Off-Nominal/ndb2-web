@@ -29,6 +29,7 @@ export type SearchPredictionsProps = {
 export const SearchPredictions = (props: SearchPredictionsProps) => {
   const {
     predictions,
+    updateUserBet,
     searching,
     incrementallySearching,
     keyword,
@@ -376,6 +377,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
 
             return (
               <PredictionListItem
+                updateUserBet={updateUserBet}
                 loading={searching}
                 key={p.id}
                 text={p.text}
@@ -390,6 +392,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
                 noVotes={p.votes.no}
                 dueDate={new Date(p.due_date)}
                 createdDate={new Date(p.created_date)}
+                discordId={props.discordId}
                 judgedDate={
                   p.judged_date !== null ? new Date(p.judged_date) : null
                 }

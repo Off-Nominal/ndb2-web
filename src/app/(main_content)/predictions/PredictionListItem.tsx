@@ -1,10 +1,9 @@
-import { Button } from "@/components/Button";
 import { RiskPill } from "@/components/RiskPill";
 import { PredictionLifeCycle } from "@/types/predictions";
 import { format } from "date-fns";
-import Link from "next/link";
 
 type PredictionListItemProps = {
+  updateUserBet: (predictionId: number, endorsed: boolean) => Promise<void>;
   status: PredictionLifeCycle;
   id: number;
   text: string;
@@ -12,6 +11,7 @@ type PredictionListItemProps = {
   endorse_ratio: number;
   undorse_ratio: number;
   loading: boolean;
+  discordId: string;
   createdDate: Date;
   dueDate: Date;
   closedDate: Date | null;
@@ -158,6 +158,17 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
     cancelled: "bg-slate-300 dark:bg-slate-500",
   };
 
+  const handleBet = (endorsed: boolean) => {
+    props
+      .updateUserBet(props.id, endorsed)
+      .then(() => {
+        console.log("success!");
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  };
+
   return (
     <article
       id={"prediction-" + props.id}
@@ -188,9 +199,16 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
               {props.text}
             </p>
           </div>
-          <div className="flex h-[7em] shrink-0 grow-0 basis-12 flex-col">
-            <div className="grow rounded-tr-lg bg-silver-chalice-grey"></div>
-            <div className="grow rounded-br-lg bg-silver-chalice-grey group-open:rounded-bl-lg group-open:rounded-br-none"></div>
+          <div className="relative flex h-[7em] shrink-0 grow-0 basis-12 flex-col rounded-br-lg rounded-tr-lg bg-silver-chalice-grey group-open:rounded-bl-lg group-open:rounded-br-none">
+            <p className="absolute left-1/2 top-1/2 w-[7em] -translate-x-1/2 -translate-y-1/2 -rotate-90 text-center uppercase leading-4">
+              Bet Here Soon!
+            </p>
+            {/* <div className="grow rounded-tr-lg bg-silver-chalice-grey">
+              <button onClick={() => handleBet(true)}>E</button>
+            </div>
+            <div className="grow rounded-br-lg bg-silver-chalice-grey group-open:rounded-bl-lg group-open:rounded-br-none">
+              <button onClick={() => handleBet(false)}>U</button>
+            </div> */}
           </div>
         </summary>
         <div className="mb-4 mt-8 flex gap-4">

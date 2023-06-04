@@ -81,6 +81,32 @@ export const usePredictionSearch = (
     APIPredictions.ShortEnhancedPrediction[]
   >([]);
 
+  const [userBets, setUserBets] = useState<APIBets.UserBet[]>(bets);
+
+  const updateUserBet = (predictionId: number, endorsed: boolean) => {
+    return fetch("/api/predictions/" + predictionId + "/bets", {
+      method: "POST",
+      body: JSON.stringify({ discord_id: discordId, endorsed }),
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((res) => {
+        console.log("res", res);
+        const newBets = [...userBets];
+        const bet = newBets.find((b) => b.prediction_id === predictionId);
+
+        if (bet) {
+          bet.endorsed = endorsed;
+          setUserBets([...userBets]);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        throw err;
+      });
+  };
+
   // loading states
   const [searching, setSearching] = useState(false);
   const [incrementallySearching, setIncrementallySearching] = useState(false);
@@ -93,7 +119,8 @@ export const usePredictionSearch = (
     predictorId: searchParams.get("creator") || undefined,
     keyword: searchParams.get("keyword") || "",
     statuses: searchParams.getAll("status") as PredictionLifeCycle[],
-    sort_by: searchParams.get("sort_by") as SortByOption,
+    sort_by:
+      (searchParams.get("sort_by") as SortByOption) || SortByOption.DUE_ASC,
     season_id: searchParams.get("season_id") || undefined,
     showBetOpportunities: searchParams.get("show_bet_opportunities") === "true",
   };
@@ -296,7 +323,11 @@ export const usePredictionSearch = (
   };
 
   return {
-    predictions,
+    predictions: predictions.map((p) => ({
+      ...p,
+      userBet: userBets.find((b) => b.prediction_id === p.id) || false,
+    })),
+    updateUserBet,
     searching,
     incrementallySearching,
     statuses: {
