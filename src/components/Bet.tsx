@@ -1,10 +1,11 @@
 'use client';
 
 import useBetState from "@/hooks/useBetState";
-import { APIPredictions, PredictionLifeCycle } from "@/types/predictions";
+import { APIBets } from "@/types/bets";
+import { PredictionLifeCycle } from "@/types/predictions";
 
 type BetProps = {
-  bets: APIPredictions.Bet[],
+  bets: APIBets.Bet[],
   discord_id: string,
   status: PredictionLifeCycle,
   prediction_id: number
@@ -12,7 +13,6 @@ type BetProps = {
 
 
 export const Bet = (props: BetProps) => {
-  console.log("props", props)
   const {bet, bets, userBet} = useBetState(props.bets, props.discord_id, props.status, props.prediction_id)
 
   return (

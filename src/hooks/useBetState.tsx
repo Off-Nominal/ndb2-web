@@ -1,39 +1,37 @@
-import { APIPredictions, PredictionLifeCycle } from "@/types/predictions";
-import ndb2API from "@/utils/ndb2";
+import { APIBets } from "@/types/bets";
+import { PredictionLifeCycle } from "@/types/predictions";
 import { useState } from "react";
+import {add, isBefore} from "date-fns";
 
-const useBetState = (predictionBets:APIPredictions.Bet[], discord_id: string, status: PredictionLifeCycle, prediction_id: number) => {
+const useBetState = (predictionBets:APIBets.Bet[], discord_id: string, status: PredictionLifeCycle, prediction_id: number) => {
   const [bets, setBets] = useState(predictionBets)
-  let userBet = bets.find((bet) => bet.better.discord_id === discord_id);
+  const userBet = bets.find((bet) => bet.better.discord_id === discord_id);
   const bet = async (type: boolean) => {
+    //prediction cannot be bet on
     if (status !== PredictionLifeCycle.OPEN) {
       console.log("Prediction is not open for bet")
-      return false
+      throw new Error("Prediction is not open for bet")
     }
+
     const today = new Date()
     if (userBet) {
-      const betTime = new Date(userBet.date)
-      const betTimeDiffInSeconds = (today.getTime() - betTime.getTime())/1000;
-      const betTimeDiffInHours = betTimeDiffInSeconds/3600;
-      if(betTimeDiffInHours > 12 ) {
+      //bet is the same as existing bet
+      if (userBet.endorsed === type) {
+        console.log("Bet is the same as current bet")
+        throw new Error("Bet is the same as current bet")
+      }
+      // already bet, check if within 12 hours of bet being made
+      const maxTime = add(new Date(userBet.date), {hours: 12})
+      if(isBefore(maxTime, today) ) {
         console.log("Can't beat after 12 hours")
-        return false
+        throw new Error("Can't bet after 12 hours")
       }
     }
-    userBet = {
-      better: {id: 'test-thing', discord_id},
-      date: today.toString(),
-      endorsed: type,
-      payout: 100,
-      season_payout: 100,
-      valid: true,
-      wager: 14,
-      id: "test"
-    }
-    const response = await ndb2API.postBet(prediction_id, {method: 'POST', body: JSON.stringify(userBet)})
-    console.log(response)
-    // already bet, check if within 12 hours of bet being made
-    // otherwise make bet
+    
+    const response = await fetch(`/api/predictions/${prediction_id}/bets`, {method: 'POST', body: JSON.stringify({discord_id, endorsed: type})})
+    const currentBetState = await response.json()
+
+    setBets(currentBetState.bets)
   }
 
   return {bet, bets, userBet}

@@ -14,8 +14,9 @@ import { ShortDiscordGuildMember } from "@/types/discord";
 import { format } from "date-fns";
 import Image from "next/image";
 import { APIPredictions, PredictionLifeCycle } from "@/types/predictions";
+import { APIBets } from "@/types/bets";
 
-type ListBet = Omit<APIPredictions.Bet, "better"> & {
+type ListBet = Omit<APIBets.Bet, "better"> & {
   name: string;
   avatarUrl: string;
 };
@@ -25,7 +26,7 @@ const formatDate = (date: string) => {
 };
 
 const generateBet = (
-  bet: APIPredictions.Bet,
+  bet: APIBets.Bet,
   member: ShortDiscordGuildMember
 ): ListBet => {
   return {
