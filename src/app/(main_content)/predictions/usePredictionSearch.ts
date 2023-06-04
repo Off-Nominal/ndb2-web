@@ -63,7 +63,7 @@ const search = (
   }
 
   if (options.season_id) {
-    params.append("season", options.season_id);
+    params.append("season_id", options.season_id);
   }
 
   return fetch("/api/predictions/search?" + params.toString()).then(

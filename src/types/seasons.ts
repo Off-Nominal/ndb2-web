@@ -9,5 +9,9 @@ export namespace APISeasons {
     wager_cap: number;
   };
 
-  export type GetSeasons = APIResponse<Season[]>;
+  export type EnhancedSeason = Season & {
+    identifier: "current" | "past" | "future";
+  };
+
+  export type GetSeasons = APIResponse<EnhancedSeason[]>;
 }

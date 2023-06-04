@@ -17,12 +17,13 @@ import { usePageIncrement } from "./usePageIncrement";
 import { APIBets } from "@/types/bets";
 import { APISeasons } from "@/types/seasons";
 import { format } from "date-fns";
+import { ScrollToTop } from "./ScrollToTop";
 
 export type SearchPredictionsProps = {
   discordId: string;
   bets: APIBets.UserBet[];
   members: ShortDiscordGuildMember[];
-  seasons: APISeasons.Season[];
+  seasons: APISeasons.EnhancedSeason[];
 };
 
 export const SearchPredictions = (props: SearchPredictionsProps) => {
@@ -63,6 +64,10 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
       return;
     }
     setSortBy(event.target.value);
+  };
+
+  const handleSeasonSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSeasonId(event.target.value);
   };
 
   return (
@@ -142,168 +147,215 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
             </div>
           </div>
 
-          <h4 className="mt-4 text-center text-base uppercase">Sort By Date</h4>
-          <div className="mt-4">
-            <div>
-              <Select<string>
-                name="sort_by"
-                value={sort_by}
-                onChange={handleSortBySelect}
-                options={[
-                  {
-                    label: "Created Date, Most Recent first",
-                    value: SortByOption.CREATED_DESC,
-                  },
-                  {
-                    label: "Created Date, Oldest first",
-                    value: SortByOption.CREATED_ASC,
-                  },
-                  {
-                    label: "Due Date, Soonest first",
-                    value: SortByOption.DUE_ASC,
-                  },
-                  {
-                    label: "Due Date, Furthest first",
-                    value: SortByOption.DUE_DESC,
-                  },
-                  {
-                    label: "Retired Date, Most Recent first",
-                    value: SortByOption.RETIRED_DESC,
-                  },
-                  {
-                    label: "Retired Date, Oldest first",
-                    value: SortByOption.RETIRED_ASC,
-                  },
-                  {
-                    label: "Triggered Date, Most Recent first",
-                    value: SortByOption.TRIGGERED_DESC,
-                  },
-                  {
-                    label: "Triggered Date, Oldest first",
-                    value: SortByOption.TRIGGERED_ASC,
-                  },
-                  {
-                    label: "Closed Date, Most Recent first",
-                    value: SortByOption.CLOSED_DESC,
-                  },
-                  {
-                    label: "Closed Date, Oldest first",
-                    value: SortByOption.CLOSED_ASC,
-                  },
-                  {
-                    label: "Judged Date, Most Recent first",
-                    value: SortByOption.JUDGED_DESC,
-                  },
-                  {
-                    label: "Judged Date, Oldest first",
-                    value: SortByOption.JUDGED_ASC,
-                  },
-                ]}
-              />
-            </div>
-          </div>
-          <h4 className="mt-4 text-center text-base uppercase">
-            Filter by Season
-          </h4>
-          <div className="flex flex-col justify-between md:flex-row md:gap-8">
-            <div className="mt-4 grow basis-8">
-              <Select<ReactNode>
-                name="season_id"
-                value={season_id}
-                placeholder="Select a season"
-                onChange={(event) => setSeasonId(event.target.value)}
-                options={props.seasons.map((s) => {
-                  return {
-                    label: (
-                      <div className="flex grow justify-between gap-2">
-                        <div className="">
-                          <span>{s.name}</span>
-                        </div>
-                        <div className="">
-                          <p className=""></p>
-                        </div>
-                        <div className="">
-                          <p className="">
-                            {format(new Date(s.start), "MMM d, yyyy")} -{" "}
-                            {format(new Date(s.end), "MMM d, yyyy")}
-                          </p>
-                        </div>
-                      </div>
-                    ),
-                    value: s.id.toString(),
-                  };
-                })}
-              />
-            </div>
-          </div>
-          <h4 className="mt-4 text-center text-base uppercase">
-            Filter by Predictor
-          </h4>
-          <div className="flex flex-col justify-between md:flex-row md:gap-8">
-            <div className="mt-4 grow basis-8">
-              <Autocomplete<ReactNode>
-                name="predictor_id"
-                value={predictor_id}
-                onChange={(value: string) => setPredictorId(value)}
-                onSearch={(searchTerm: string) => {
-                  setMembers(
-                    props.members.filter((m) => {
-                      if (searchTerm === "") {
-                        return true;
-                      }
-                      return m.name
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase());
-                    })
-                  );
-                }}
-                options={members
-                  .sort((a, b) => {
-                    const nameA = a.name.toUpperCase();
-                    const nameB = b.name.toUpperCase();
-                    if (nameA < nameB) {
-                      return -1;
-                    }
-                    if (nameA > nameB) {
-                      return 1;
-                    }
+          <div className="flex flex-col justify-between gap-4 md:flex-row">
+            <div className="grow basis-24">
+              <h4 className="mt-4 text-center text-base uppercase">
+                Sort By Date
+              </h4>
 
-                    return 0;
-                  })
-                  .map((m) => {
-                    return {
-                      label: (
-                        <div className="flex grow gap-2">
-                          <div className="shrink-0 grow-0 basis-8">
-                            <Avatar src={m.avatarUrl} alt={m.name} size={24} />
-                          </div>
-                          <div className="overflow-hidden">
-                            <p className="overflow-hidden">{m.name}</p>
-                          </div>
-                        </div>
-                      ),
-                      value: m.discordId,
-                    };
-                  })}
-              />
+              <div className="mt-4">
+                <div>
+                  <Select<string>
+                    name="sort_by"
+                    value={sort_by}
+                    onChange={handleSortBySelect}
+                    options={[
+                      {
+                        label: "Created Date, Most Recent first",
+                        value: SortByOption.CREATED_DESC,
+                      },
+                      {
+                        label: "Created Date, Oldest first",
+                        value: SortByOption.CREATED_ASC,
+                      },
+                      {
+                        label: "Due Date, Soonest first",
+                        value: SortByOption.DUE_ASC,
+                      },
+                      {
+                        label: "Due Date, Furthest first",
+                        value: SortByOption.DUE_DESC,
+                      },
+                      {
+                        label: "Retired Date, Most Recent first",
+                        value: SortByOption.RETIRED_DESC,
+                      },
+                      {
+                        label: "Retired Date, Oldest first",
+                        value: SortByOption.RETIRED_ASC,
+                      },
+                      {
+                        label: "Triggered Date, Most Recent first",
+                        value: SortByOption.TRIGGERED_DESC,
+                      },
+                      {
+                        label: "Triggered Date, Oldest first",
+                        value: SortByOption.TRIGGERED_ASC,
+                      },
+                      {
+                        label: "Closed Date, Most Recent first",
+                        value: SortByOption.CLOSED_DESC,
+                      },
+                      {
+                        label: "Closed Date, Oldest first",
+                        value: SortByOption.CLOSED_ASC,
+                      },
+                      {
+                        label: "Judged Date, Most Recent first",
+                        value: SortByOption.JUDGED_DESC,
+                      },
+                      {
+                        label: "Judged Date, Oldest first",
+                        value: SortByOption.JUDGED_ASC,
+                      },
+                    ]}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="mt-4 grow basis-8">
-              <CheckboxButtonList<string>
-                items={[
-                  {
-                    name: "betOpps",
-                    value: "true",
-                    label: "Show My Bet Opportunities",
-                    checked: showBetOpportunities,
-                    onChange: (event) => {
-                      setStatus(PredictionLifeCycle.OPEN, true);
-                      setShowBetOpportunities(event.target.checked);
-                    },
-                  },
-                ]}
-              />
+            <div className="grow basis-24">
+              <div className="mt-4 flex justify-evenly">
+                <h4 className="text-center text-base uppercase">
+                  Filter by Season
+                </h4>
+                <Button
+                  onClick={() => setSeasonId(undefined)}
+                  color="secondary"
+                  size="xs"
+                >
+                  Clear
+                </Button>
+              </div>
+              <div className="mt-4">
+                <div className="grow basis-8">
+                  <Select<ReactNode>
+                    name="season_id"
+                    value={season_id}
+                    placeholder="Select a season"
+                    onChange={handleSeasonSelect}
+                    options={props.seasons.map((s) => {
+                      return {
+                        label: (
+                          <div>
+                            <div className="flex grow justify-between gap-2">
+                              <div className="">
+                                <span>{s.name}</span>
+                              </div>
+                              <div className="">
+                                <p className="text-xs uppercase text-slate-500 dark:text-slate-300">
+                                  ( {s.identifier} )
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex justify-end">
+                              <div>
+                                <p className="text-sm">
+                                  {format(new Date(s.start), "MMM d, yyyy")} -{" "}
+                                  {format(new Date(s.end), "MMM d, yyyy")}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ),
+                        value: s.id.toString(),
+                      };
+                    })}
+                  />
+                </div>
+              </div>
             </div>
           </div>
+          <div className="flex flex-col justify-between gap-4 md:flex-row">
+            <div className="grow basis-24">
+              <div className="mt-4 flex justify-evenly">
+                <h4 className="text-center text-base uppercase">
+                  Filter by Predictor
+                </h4>
+                <Button
+                  onClick={() => setPredictorId(props.discordId)}
+                  color="secondary"
+                  size="xs"
+                >
+                  Me
+                </Button>
+              </div>
+              <div className="mt-4">
+                <Autocomplete<ReactNode>
+                  name="predictor_id"
+                  value={predictor_id}
+                  onChange={(value: string) => setPredictorId(value)}
+                  onSearch={(searchTerm: string) => {
+                    setMembers(
+                      props.members.filter((m) => {
+                        if (searchTerm === "") {
+                          return true;
+                        }
+                        return m.name
+                          .toLowerCase()
+                          .includes(searchTerm.toLowerCase());
+                      })
+                    );
+                  }}
+                  options={members
+                    .sort((a, b) => {
+                      const nameA = a.name.toUpperCase();
+                      const nameB = b.name.toUpperCase();
+                      if (nameA < nameB) {
+                        return -1;
+                      }
+                      if (nameA > nameB) {
+                        return 1;
+                      }
+
+                      return 0;
+                    })
+                    .map((m) => {
+                      return {
+                        label: (
+                          <div className="flex grow gap-2">
+                            <div className="shrink-0 grow-0 basis-8">
+                              <Avatar
+                                src={m.avatarUrl}
+                                alt={m.name}
+                                size={24}
+                              />
+                            </div>
+                            <div className="overflow-hidden">
+                              <p className="overflow-hidden">{m.name}</p>
+                            </div>
+                          </div>
+                        ),
+                        value: m.discordId,
+                      };
+                    })}
+                />
+              </div>
+            </div>
+            <div className="grow basis-24">
+              <h4 className="mt-4 text-center text-base uppercase">
+                Filter by Betting Opportunities
+              </h4>
+              <div className="mt-4">
+                <CheckboxButtonList<string>
+                  items={[
+                    {
+                      name: "betOpps",
+                      value: "true",
+                      label: showBetOpportunities
+                        ? "Showing Bet Opportunities"
+                        : "Hiding Bet Opportunites",
+                      checked: showBetOpportunities,
+                      onChange: (event) => {
+                        setStatus(PredictionLifeCycle.OPEN, true);
+                        setShowBetOpportunities(event.target.checked);
+                      },
+                    },
+                  ]}
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="mt-4 flex justify-center md:mt-8 md:justify-end">
             <Button
               type="reset"
@@ -312,7 +364,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
                 clearFilters();
               }}
             >
-              Clear Filters
+              Clear All Filters
             </Button>
           </div>
         </details>
@@ -373,6 +425,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
           </div>
         </section>
       )}
+      <ScrollToTop text={"To Top"} />
     </div>
   );
 };

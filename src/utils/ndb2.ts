@@ -202,7 +202,7 @@ const searchPredictions = (
   }
 
   if (options.season_id) {
-    url.searchParams.append("season", options.season_id.toString());
+    url.searchParams.append("season_id", options.season_id.toString());
   }
 
   return fetch(url, {

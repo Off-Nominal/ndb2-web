@@ -2,7 +2,6 @@ import authAPI from "@/utils/auth";
 import { SearchPredictions } from "./SearchPredictions";
 import { redirect } from "next/navigation";
 import ndb2API from "@/utils/ndb2";
-import { APIPredictions } from "@/types/predictions";
 import discordAPI from "@/utils/discord";
 import { ShortDiscordGuildMember } from "@/types/discord";
 import { APIBets } from "@/types/bets";
@@ -19,7 +18,7 @@ const getPredictionSearchData = async () => {
     discordId: string;
     bets: APIBets.UserBet[];
     members: ShortDiscordGuildMember[];
-    seasons: APISeasons.Season[];
+    seasons: APISeasons.EnhancedSeason[];
   } = { discordId: payload.discordId, bets: [], members: [], seasons: [] };
   const guildMemberManager = new discordAPI.GuildMemberManager();
 
