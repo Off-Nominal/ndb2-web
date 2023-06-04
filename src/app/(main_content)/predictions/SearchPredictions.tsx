@@ -18,7 +18,58 @@ import { usePageIncrement } from "./usePageIncrement";
 import { APIBets } from "@/types/bets";
 import { APISeasons } from "@/types/seasons";
 import { format } from "date-fns";
-import { ScrollToTop } from "./ScrollToTop";
+import { ScrollToTop } from "../../../components/ScrollToTop";
+
+const sortByOptions = [
+  {
+    label: "Created Date, Most Recent first",
+    value: SortByOption.CREATED_DESC,
+  },
+  {
+    label: "Created Date, Oldest first",
+    value: SortByOption.CREATED_ASC,
+  },
+  {
+    label: "Due Date, Soonest first",
+    value: SortByOption.DUE_ASC,
+  },
+  {
+    label: "Due Date, Furthest first",
+    value: SortByOption.DUE_DESC,
+  },
+  {
+    label: "Retired Date, Most Recent first",
+    value: SortByOption.RETIRED_DESC,
+  },
+  {
+    label: "Retired Date, Oldest first",
+    value: SortByOption.RETIRED_ASC,
+  },
+  {
+    label: "Triggered Date, Most Recent first",
+    value: SortByOption.TRIGGERED_DESC,
+  },
+  {
+    label: "Triggered Date, Oldest first",
+    value: SortByOption.TRIGGERED_ASC,
+  },
+  {
+    label: "Closed Date, Most Recent first",
+    value: SortByOption.CLOSED_DESC,
+  },
+  {
+    label: "Closed Date, Oldest first",
+    value: SortByOption.CLOSED_ASC,
+  },
+  {
+    label: "Judged Date, Most Recent first",
+    value: SortByOption.JUDGED_DESC,
+  },
+  {
+    label: "Judged Date, Oldest first",
+    value: SortByOption.JUDGED_ASC,
+  },
+];
 
 export type SearchPredictionsProps = {
   discordId: string;
@@ -154,63 +205,13 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
               <h4 className="mt-4 text-center text-base uppercase">
                 Sort By Date
               </h4>
-
               <div className="mt-4">
                 <div>
                   <Select<string>
                     name="sort_by"
                     value={sort_by}
                     onChange={handleSortBySelect}
-                    options={[
-                      {
-                        label: "Created Date, Most Recent first",
-                        value: SortByOption.CREATED_DESC,
-                      },
-                      {
-                        label: "Created Date, Oldest first",
-                        value: SortByOption.CREATED_ASC,
-                      },
-                      {
-                        label: "Due Date, Soonest first",
-                        value: SortByOption.DUE_ASC,
-                      },
-                      {
-                        label: "Due Date, Furthest first",
-                        value: SortByOption.DUE_DESC,
-                      },
-                      {
-                        label: "Retired Date, Most Recent first",
-                        value: SortByOption.RETIRED_DESC,
-                      },
-                      {
-                        label: "Retired Date, Oldest first",
-                        value: SortByOption.RETIRED_ASC,
-                      },
-                      {
-                        label: "Triggered Date, Most Recent first",
-                        value: SortByOption.TRIGGERED_DESC,
-                      },
-                      {
-                        label: "Triggered Date, Oldest first",
-                        value: SortByOption.TRIGGERED_ASC,
-                      },
-                      {
-                        label: "Closed Date, Most Recent first",
-                        value: SortByOption.CLOSED_DESC,
-                      },
-                      {
-                        label: "Closed Date, Oldest first",
-                        value: SortByOption.CLOSED_ASC,
-                      },
-                      {
-                        label: "Judged Date, Most Recent first",
-                        value: SortByOption.JUDGED_DESC,
-                      },
-                      {
-                        label: "Judged Date, Oldest first",
-                        value: SortByOption.JUDGED_ASC,
-                      },
-                    ]}
+                    options={sortByOptions}
                   />
                 </div>
               </div>

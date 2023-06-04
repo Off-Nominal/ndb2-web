@@ -1,5 +1,5 @@
 import { APIPredictions } from "@/types/predictions";
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 export const usePageIncrement = (
   predictions: APIPredictions.ShortEnhancedPrediction[],
