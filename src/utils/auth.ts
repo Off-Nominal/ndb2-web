@@ -31,7 +31,7 @@ const isAppJWTPayload = (val: jose.JWTPayload): val is AppJWTPayload => {
 
 const sign = (payload: any): Promise<string> => {
   const iat = Math.floor(Date.now() / 1000);
-  const exp = iat + 24 * 60 * 60; // one day
+  const exp = iat + 24 * 60 * 60 * 30; // Thirty days
 
   return new jose.SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })

@@ -182,7 +182,7 @@ const getGuildMemberByDiscordId = (discordId: string) => {
         return body;
       }
 
-      if (res.status === 404 && body.code === 10013) {
+      if (res.status === 404 && "code" in body) {
         const fakeUser = {
           user: {
             id: discordId,
@@ -203,6 +203,10 @@ export class GuildMemberManager {
   public initialize = (): Promise<void> => {
     return getGuildMembers().then((members) => {
       for (const member of members) {
+        if (!hasCorrectRole(member.roles)) {
+          continue;
+        }
+
         this.members[member.user.id] = {
           name: member.nick || member.user.username || "Unknown User",
           avatarUrl: buildAvatarUrl(
@@ -215,6 +219,10 @@ export class GuildMemberManager {
         };
       }
     });
+  };
+
+  public getMembers = (): Record<string, ShortDiscordGuildMember> => {
+    return this.members;
   };
 
   public getMemberByDiscordId = (

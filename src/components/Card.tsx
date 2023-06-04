@@ -10,7 +10,7 @@ export const Card = (props: CardProps) => {
   return (
     <div
       className={
-        "rounded-3xl bg-slate-200 shadow-md dark:bg-slate-700 " +
+        "rounded-3xl bg-gradient-to-r from-slate-200 to-slate-300 shadow-md dark:from-slate-700 dark:to-slate-600 " +
         props.className
       }
     >
