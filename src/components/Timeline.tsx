@@ -1,13 +1,21 @@
+import { TimelineItem } from "./TimelineItem";
+
 export const Timeline = () => {
+  const dates = [
+    { label: "Created", date: "May 22nd, 2023", status: "complete", top: false, bottom: true },
+    { label: "Due", date: "Jun 5th, 2023", status: "in_progress", top: true, bottom: true },
+    { label: "Effective Close", date: "-", status: "not_started", top: true, bottom: true },
+    { label: "Judgement", date: "-", status: "not_started", top: true, bottom: false },
+  ];
+  const circlePiece = dates.map((date, index) => {
+    return (
+      <TimelineItem dateObject={date} key={index} />
+    )
+  });
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 200" className="relative w-14 ">
-    <line x1="50" y1="25" x2="50" y2="180" stroke="gray" strokeWidth="2" />
-    <circle cx="50" cy="25" r="12" fill="green" stroke="green" strokeWidth="2" />
-    <circle cx="50" cy="75" r="12" fill="black" stroke="green" strokeWidth="2" />
-    <circle cx="50" cy="125" r="12" fill="gray" />
-    <circle cx="50" cy="180" r="12" fill="gray" />
-  </svg>
-
-  )
-
-}
+    <div className="grid grid-cols-3 gap-y-0">
+     
+    {circlePiece}
+    </div>
+  );
+};

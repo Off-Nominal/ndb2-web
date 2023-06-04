@@ -1,6 +1,7 @@
 import { APIPredictions } from "@/types/predictions";
 import { APIScores } from "@/types/scores";
 import { RequestInit } from "next/dist/server/web/spec-extension/request";
+import { responseHandler } from "./misc";
 
 const API_URL = process.env.NDB2_API_BASEURL;
 const API_KEY = process.env.NDB2_API_KEY;
@@ -12,6 +13,91 @@ const headers = new Headers({
 
 export type GetLeaderboardOptions = RequestInit & {
   seasonIdentifier?: "current" | "last" | number;
+};
+
+export enum ErrorCode {
+  SERVER_ERROR = 0,
+  AUTHENTICATION_ERROR = 1,
+  BAD_REQUEST = 2,
+  MALFORMED_BODY_DATA = 3,
+  MALFORMED_QUERY_PARAMS = 4,
+}
+
+type NDB2Response = {
+  success: boolean;
+  errorCode: ErrorCode;
+  message: string | null;
+  data: any;
+};
+
+const isNDB2Error = (body: any): body is NDB2Response => {
+  if (typeof body !== "object") {
+    return false;
+  }
+
+  if (
+    !("success" in body) ||
+    !("errorCode" in body) ||
+    !("message" in body) ||
+    !("data" in body)
+  ) {
+    return false;
+  }
+
+  const { success, errorCode, message } = body;
+
+  if (
+    typeof success !== "boolean" ||
+    typeof errorCode !== "number" ||
+    (typeof message !== "string" && message !== null)
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
+const handleNDB2Error = (res: Response, body: any) => {
+  if (res.status === 404) {
+    return new Error("Resource Not Found");
+  }
+
+  if (!isNDB2Error(body) || !body.message) {
+    return new Error(
+      `Unexpected response from server, HTTP Status ${res.status}.`
+    );
+  }
+
+  switch (body.errorCode) {
+    case ErrorCode.AUTHENTICATION_ERROR:
+      return new Error(`Authentication Error`);
+    case ErrorCode.BAD_REQUEST:
+      return new Error(
+        `Bad Request, HTTP Status ${res.status}. Server Message: ${body.message}`
+      );
+    case ErrorCode.MALFORMED_BODY_DATA:
+      return new Error(
+        `Malformed Body Data, HTTP Status ${res.status}. Server Message: ${body.message}`
+      );
+    case ErrorCode.MALFORMED_QUERY_PARAMS:
+      return new Error(
+        `Malformed Query Params, HTTP Status ${res.status}. Server Message: ${body.message}`
+      );
+    case ErrorCode.SERVER_ERROR:
+      return new Error(
+        `Server Error, HTTP Status ${res.status}. Server Message: ${body.message}`
+      );
+    default:
+      return new Error(
+        `Unexpected response from server, HTTP Status ${res.status}.`
+      );
+  }
+};
+
+const errorHandler = (res: Response) => {
+  return res.json().then((body) => {
+    throw handleNDB2Error(res, body);
+  });
 };
 
 const getPointsLeaderboard = (
@@ -27,7 +113,9 @@ const getPointsLeaderboard = (
     headers,
     cache: options?.cache,
     next: options?.next,
-  }).then((res) => res.json());
+  })
+    .then(responseHandler)
+    .catch(errorHandler);
 };
 
 const getBetsLeaderboard = (
@@ -43,7 +131,9 @@ const getBetsLeaderboard = (
     headers,
     cache: options?.cache,
     next: options?.next,
-  }).then((res) => res.json());
+  })
+    .then(responseHandler)
+    .catch(errorHandler);
 };
 
 const getPredictionsLeaderboard = (
@@ -59,7 +149,9 @@ const getPredictionsLeaderboard = (
     headers,
     cache: options?.cache,
     next: options?.next,
-  }).then((res) => res.json());
+  })
+    .then(responseHandler)
+    .catch(errorHandler);
 };
 
 const getPredictionById = (
