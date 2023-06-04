@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { Navigation } from "../../Navigation";
 
 import React from "react";
 
@@ -15,7 +14,6 @@ import { ShortDiscordGuildMember } from "@/types/discord";
 import { format } from "date-fns";
 import Image from "next/image";
 import { APIPredictions, PredictionLifeCycle } from "@/types/predictions";
-
 
 type ListBet = Omit<APIPredictions.Bet, "better"> & {
   name: string;
@@ -97,7 +95,6 @@ export default async function Predictions({ params }: any) {
   const { prediction, predictor, endorsements, undorsements } =
     await fetchPrediction(params.id);
 
-
   const statusColor = {
     [PredictionLifeCycle.RETIRED]: "bg-button-gray",
     [PredictionLifeCycle.SUCCESSFUL]: "bg-moss-green",
@@ -128,7 +125,27 @@ export default async function Predictions({ params }: any) {
         </div>
         <div className="flex justify-evenly">
           <div>
-            <Timeline />
+            <Timeline
+              status={prediction.status}
+              created_date={new Date(prediction.created_date)}
+              due_date={new Date(prediction.due_date)}
+              closed_date={
+                prediction.closed_date ? new Date(prediction.closed_date) : null
+              }
+              triggered_date={
+                prediction.triggered_date
+                  ? new Date(prediction.triggered_date)
+                  : null
+              }
+              retired_date={
+                prediction.retired_date
+                  ? new Date(prediction.retired_date)
+                  : null
+              }
+              judged_date={
+                prediction.judged_date ? new Date(prediction.judged_date) : null
+              }
+            />
           </div>
           <div>
             <div>
@@ -137,7 +154,7 @@ export default async function Predictions({ params }: any) {
                 <p>BET ON SOME DAY</p>
               </div>
               <div>
-                <Bet bets={prediction.bets}/>
+                <Bet bets={prediction.bets} />
               </div>
             </div>
             <div>
