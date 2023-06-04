@@ -63,7 +63,7 @@ const search = (
   }
 
   if (options.season_id) {
-    params.append("season", options.season_id.toString());
+    params.append("season", options.season_id);
   }
 
   return fetch("/api/predictions/search?" + params.toString()).then(
@@ -92,6 +92,7 @@ export const usePredictionSearch = (
     PredictionLifeCycle.OPEN,
   ]);
   const [sort_by, setSortBy] = useState<SortByOption>(SortByOption.DUE_ASC);
+  const [season_id, setSeasonId] = useState<string | undefined>(undefined);
   const [showBetOpportunities, setShowBetOpportunities] = useState(false);
 
   const timeout = useRef<ReturnType<typeof setTimeout> | undefined>();
@@ -150,6 +151,7 @@ export const usePredictionSearch = (
       statuses,
       sort_by,
       predictor_id,
+      season_id,
       non_better_id: showBetOpportunities ? discordId : undefined,
     };
 
@@ -170,6 +172,7 @@ export const usePredictionSearch = (
     predictor_id,
     showBetOpportunities,
     discordId,
+    season_id,
     handleIncrementalSearch,
     debouncedSearch,
   ]);
@@ -212,6 +215,7 @@ export const usePredictionSearch = (
     setSortBy(SortByOption.DUE_ASC);
     setPredictorId("");
     setShowBetOpportunities(false);
+    setSeasonId(undefined);
     setPage(1);
   };
 
@@ -269,6 +273,11 @@ export const usePredictionSearch = (
     predictor_id,
     setPredictorId: (newPredictorId: string) => {
       setPredictorId(newPredictorId);
+      resetPages();
+    },
+    season_id,
+    setSeasonId: (newSeasonId: string | undefined) => {
+      setSeasonId(newSeasonId);
       resetPages();
     },
     clearFilters,

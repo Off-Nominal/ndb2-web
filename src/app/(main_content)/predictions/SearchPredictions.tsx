@@ -1,6 +1,5 @@
 "use client";
 import {
-  APIPredictions,
   PredictionLifeCycle,
   SortByOption,
   isSortByOption,
@@ -16,11 +15,14 @@ import { ReactNode, useState } from "react";
 import { Button } from "@/components/Button";
 import { usePageIncrement } from "./usePageIncrement";
 import { APIBets } from "@/types/bets";
+import { APISeasons } from "@/types/seasons";
+import { format } from "date-fns";
 
 export type SearchPredictionsProps = {
   discordId: string;
   bets: APIBets.UserBet[];
   members: ShortDiscordGuildMember[];
+  seasons: APISeasons.Season[];
 };
 
 export const SearchPredictions = (props: SearchPredictionsProps) => {
@@ -41,6 +43,8 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
     clearFilters,
     incrementPage,
     reachedEndOfList,
+    season_id,
+    setSeasonId,
   } = usePredictionSearch(props.discordId, props.bets);
 
   usePageIncrement(predictions, incrementPage);
@@ -195,6 +199,40 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
                     value: SortByOption.JUDGED_ASC,
                   },
                 ]}
+              />
+            </div>
+          </div>
+          <h4 className="mt-4 text-center text-base uppercase">
+            Filter by Season
+          </h4>
+          <div className="flex flex-col justify-between md:flex-row md:gap-8">
+            <div className="mt-4 grow basis-8">
+              <Select<ReactNode>
+                name="season_id"
+                value={season_id}
+                placeholder="Select a season"
+                onChange={(event) => setSeasonId(event.target.value)}
+                options={props.seasons.map((s) => {
+                  return {
+                    label: (
+                      <div className="flex grow justify-between gap-2">
+                        <div className="">
+                          <span>{s.name}</span>
+                        </div>
+                        <div className="">
+                          <p className=""></p>
+                        </div>
+                        <div className="">
+                          <p className="">
+                            {format(new Date(s.start), "MMM d, yyyy")} -{" "}
+                            {format(new Date(s.end), "MMM d, yyyy")}
+                          </p>
+                        </div>
+                      </div>
+                    ),
+                    value: s.id.toString(),
+                  };
+                })}
               />
             </div>
           </div>

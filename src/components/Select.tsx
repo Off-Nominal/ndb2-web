@@ -2,7 +2,9 @@ import { ReactNode } from "react";
 import { BaseSelect, BaseSelectProps } from "./BaseSelect";
 
 export interface SelectProps<T extends ReactNode>
-  extends Omit<BaseSelectProps<T>, "input"> {}
+  extends Omit<BaseSelectProps<T>, "input"> {
+  placeholder?: string;
+}
 
 export const Select = <T extends ReactNode>(props: SelectProps<T>) => {
   const input = (
@@ -10,7 +12,8 @@ export const Select = <T extends ReactNode>(props: SelectProps<T>) => {
       <div>
         <span>
           {props.options.find((o) => o.value === props.value)?.label ||
-            "Select a sorting method"}
+            props.placeholder ||
+            "Select an option"}
         </span>
       </div>
       <div className="clip-triangle h-5 w-5 bg-slate-800 dark:bg-white"></div>

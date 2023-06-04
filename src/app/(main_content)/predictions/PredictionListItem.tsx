@@ -84,13 +84,13 @@ const buildTimeline = (
     };
   } else if (status === PredictionLifeCycle.RETIRED) {
     item3 = {
-      label: "Originally Due",
+      label: "Due",
       value: format(dueDate, dateFormat),
       status: "cancelled",
     };
   } else {
     item3 = {
-      label: "Effective Close",
+      label: "Eff. Close",
       value: closedDate ? format(closedDate, dateFormat) : "",
       status: "complete",
     };
@@ -196,9 +196,9 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
         <div className="mb-4 mt-8 flex gap-4">
           <div className=" grow-0 basis-12"></div>
           <div className="flex grow flex-col gap-8 md:flex-row md:items-start">
-            <div className="grid grow basis-1/2 grid-cols-[2rem,auto,auto] grid-rows-4 gap-4">
+            <div className="grid grow basis-1/2 grid-cols-[2rem,auto,130px] grid-rows-4 gap-4">
               {/* Date 1 */}
-              <div className="flex justify-center">
+              <div className="flex items-start justify-center">
                 <div
                   className={
                     "rounded-full px-2 " +
@@ -211,7 +211,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
               <div className="font-bold uppercase">{timeline[0].label}</div>
               <div className="flex justify-end">{timeline[0].value}</div>
               {/* Date 2 */}
-              <div className="flex justify-center">
+              <div className="flex items-start justify-center">
                 <div
                   className={
                     "rounded-full px-2 " +
@@ -224,7 +224,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
               <div className="font-bold uppercase">{timeline[1].label}</div>
               <div className="flex justify-end">{timeline[1].value}</div>
               {/* Date 3 */}
-              <div className="flex justify-center">
+              <div className="flex items-start justify-center">
                 <div
                   className={
                     "rounded-full px-2 " +
@@ -237,7 +237,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
               <div className="font-bold uppercase">{timeline[2].label}</div>
               <div className="flex justify-end">{timeline[2].value}</div>
               {/* Date 4 */}
-              <div className="flex justify-center">
+              <div className="flex items-start justify-center">
                 <div
                   className={
                     "rounded-full px-2 " +

@@ -6,6 +6,7 @@ import { APIPredictions } from "@/types/predictions";
 import discordAPI from "@/utils/discord";
 import { ShortDiscordGuildMember } from "@/types/discord";
 import { APIBets } from "@/types/bets";
+import { APISeasons } from "@/types/seasons";
 
 const getPredictionSearchData = async () => {
   const payload = await authAPI.verify();
@@ -18,7 +19,8 @@ const getPredictionSearchData = async () => {
     discordId: string;
     bets: APIBets.UserBet[];
     members: ShortDiscordGuildMember[];
-  } = { discordId: payload.discordId, bets: [], members: [] };
+    seasons: APISeasons.Season[];
+  } = { discordId: payload.discordId, bets: [], members: [], seasons: [] };
   const guildMemberManager = new discordAPI.GuildMemberManager();
 
   const promises = Promise.all([
@@ -30,6 +32,10 @@ const getPredictionSearchData = async () => {
       console.error(err);
       throw new Error("Unable to fetch user's bets");
     }),
+    ndb2API.getSeasons().catch((err) => {
+      console.error(err);
+      throw new Error("Unable to fetch seasons");
+    }),
   ]);
 
   return promises
@@ -37,6 +43,7 @@ const getPredictionSearchData = async () => {
       data.bets = responses[1].data;
       const members = guildMemberManager.getMembers();
       data.members = Object.values(members);
+      data.seasons = responses[2].data;
       return data;
     })
     .catch((err) => {
@@ -45,11 +52,16 @@ const getPredictionSearchData = async () => {
 };
 
 export default async function Predictions() {
-  const { discordId, bets, members } = await getPredictionSearchData();
+  const { discordId, bets, members, seasons } = await getPredictionSearchData();
 
   return (
     <>
-      <SearchPredictions discordId={discordId} bets={bets} members={members} />
+      <SearchPredictions
+        discordId={discordId}
+        bets={bets}
+        members={members}
+        seasons={seasons}
+      />
     </>
   );
 }

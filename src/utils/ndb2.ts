@@ -7,6 +7,7 @@ import { APIScores } from "@/types/scores";
 import { RequestInit } from "next/dist/server/web/spec-extension/request";
 import { responseHandler } from "./misc";
 import { APIUsers } from "@/types/users";
+import { APISeasons } from "@/types/seasons";
 
 const API_URL = process.env.NDB2_API_BASEURL;
 const API_KEY = process.env.NDB2_API_KEY;
@@ -221,6 +222,14 @@ const getUserBetsByDiscordId = (
     .catch(errorHandler);
 };
 
+const getSeasons = (): Promise<APISeasons.GetSeasons> => {
+  return fetch(baseUrl + `/api/seasons`, {
+    headers,
+  })
+    .then(responseHandler)
+    .catch(errorHandler);
+};
+
 const ndb2API = {
   getPointsLeaderboard,
   getBetsLeaderboard,
@@ -228,6 +237,7 @@ const ndb2API = {
   getPredictionById,
   searchPredictions,
   getUserBetsByDiscordId,
+  getSeasons,
 };
 
 export default ndb2API;
