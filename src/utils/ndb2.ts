@@ -1,7 +1,10 @@
-import { APIPredictions } from "@/types/predictions";
+import { APIPredictions, SearchOptions } from "@/types/predictions";
 import { APIScores } from "@/types/scores";
 import { RequestInit } from "next/dist/server/web/spec-extension/request";
 import { responseHandler } from "./misc";
+import { APIUsers } from "@/types/users";
+import { APISeasons } from "@/types/seasons";
+import { APIBets } from "@/types/bets";
 
 const API_URL = process.env.NDB2_API_BASEURL;
 const API_KEY = process.env.NDB2_API_KEY;
@@ -9,6 +12,7 @@ const API_KEY = process.env.NDB2_API_KEY;
 const baseUrl = API_URL || "http://localhost:8000";
 const headers = new Headers({
   Authorization: `Bearer ${API_KEY}`,
+  "content-type": "application/json",
 });
 
 export type GetLeaderboardOptions = RequestInit & {
@@ -164,11 +168,93 @@ const getPredictionById = (
   }).then((res) => res.json());
 };
 
+const searchPredictions = (
+  options: SearchOptions
+): Promise<APIPredictions.SearchPredictions> => {
+  const url = new URL(`/api/predictions/search`, baseUrl);
+
+  if (options.statuses) {
+    for (const status of options.statuses) {
+      url.searchParams.append("status", status);
+    }
+  }
+
+  if (options.keyword) {
+    url.searchParams.append("keyword", options.keyword);
+  }
+
+  if (options.sort_by) {
+    url.searchParams.append("sort_by", options.sort_by);
+  }
+
+  if (options.predictor_id) {
+    url.searchParams.append("creator", options.predictor_id);
+  }
+
+  if (options.non_better_id) {
+    url.searchParams.append("unbetter", options.non_better_id);
+  }
+
+  if (options.page) {
+    url.searchParams.append("page", options.page.toString());
+  }
+
+  if (options.season_id) {
+    url.searchParams.append("season_id", options.season_id.toString());
+  }
+
+  return fetch(url, {
+    headers,
+  })
+    .then(responseHandler)
+    .catch(errorHandler);
+};
+
+const getUserBetsByDiscordId = (
+  discordId: string
+): Promise<APIUsers.GetUserBetsByDiscordId> => {
+  return fetch(baseUrl + `/api/users/discord_id/${discordId}/bets`, {
+    headers,
+  })
+    .then(responseHandler)
+    .catch(errorHandler);
+};
+
+const getSeasons = (): Promise<APISeasons.GetSeasons> => {
+  return fetch(baseUrl + `/api/seasons`, {
+    headers,
+  })
+    .then(responseHandler)
+    .catch(errorHandler);
+};
+
+const addBet = (
+  predictionId: number,
+  endorsed: boolean,
+  discord_id: string
+): Promise<APIBets.AddBet> => {
+  const body = {
+    endorsed,
+    discord_id,
+  };
+  return fetch(baseUrl + `/api/predictions/${predictionId}/bets`, {
+    method: "POST",
+    body: JSON.stringify(body),
+    headers,
+  })
+    .then(responseHandler)
+    .catch(errorHandler);
+};
+
 const ndb2API = {
   getPointsLeaderboard,
   getBetsLeaderboard,
   getPredictionsLeaderboard,
   getPredictionById,
+  searchPredictions,
+  getUserBetsByDiscordId,
+  getSeasons,
+  addBet,
 };
 
 export default ndb2API;
