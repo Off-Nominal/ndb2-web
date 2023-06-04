@@ -6,6 +6,8 @@ import {
   SortByOption,
 } from "@/types/predictions";
 import { responseHandler } from "@/utils/misc";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const findStatus = (
@@ -84,20 +86,89 @@ export const usePredictionSearch = (
   const [incrementallySearching, setIncrementallySearching] = useState(false);
   const [reachedEndOfList, setReachedEndOfList] = useState(false);
 
+  const searchParams = useSearchParams();
+
+  // Initial search params
+  const initialParams = {
+    predictorId: searchParams.get("creator") || undefined,
+    keyword: searchParams.get("keyword") || "",
+    statuses: searchParams.getAll("status") as PredictionLifeCycle[],
+    sort_by: searchParams.get("sort_by") as SortByOption,
+    season_id: searchParams.get("season_id") || undefined,
+    showBetOpportunities: searchParams.get("show_bet_opportunities") === "true",
+  };
+
   // Search Params States
   const [page, setPage] = useState(1);
-  const [predictor_id, setPredictorId] = useState<string | undefined>("");
-  const [keyword, setKeyword] = useState("");
-  const [statuses, setStatuses] = useState<PredictionLifeCycle[]>([
-    PredictionLifeCycle.OPEN,
-  ]);
-  const [sort_by, setSortBy] = useState<SortByOption>(SortByOption.DUE_ASC);
-  const [season_id, setSeasonId] = useState<string | undefined>(undefined);
-  const [showBetOpportunities, setShowBetOpportunities] = useState(false);
+  const [predictor_id, setPredictorId] = useState<string | undefined>(
+    initialParams.predictorId
+  );
+  const [keyword, setKeyword] = useState(initialParams.keyword);
+  const [statuses, setStatuses] = useState<PredictionLifeCycle[]>(
+    initialParams.statuses
+  );
+  const [sort_by, setSortBy] = useState<SortByOption>(initialParams.sort_by);
+  const [season_id, setSeasonId] = useState<string | undefined>(
+    initialParams.season_id
+  );
+  const [showBetOpportunities, setShowBetOpportunities] = useState(
+    initialParams.showBetOpportunities
+  );
 
   const timeout = useRef<ReturnType<typeof setTimeout> | undefined>();
   const keywordRef = useRef(keyword);
   const pageRef = useRef(page);
+
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (keyword) {
+      params.set("keyword", keyword);
+    } else {
+      params.delete("keyword");
+    }
+
+    params.delete("status");
+    for (const status of statuses) {
+      params.append("status", status);
+    }
+
+    params.set("sort_by", sort_by);
+
+    if (predictor_id) {
+      params.set("creator", predictor_id);
+    } else {
+      params.delete("creator");
+    }
+
+    if (season_id) {
+      params.set("season_id", season_id);
+    } else {
+      params.delete("season_id");
+    }
+
+    if (showBetOpportunities) {
+      params.set("unbetter", discordId);
+    } else {
+      params.delete("unbetter");
+    }
+
+    history.pushState(null, "", `${pathname}?${params.toString()}`);
+  }, [
+    router,
+    pathname,
+    searchParams,
+    keyword,
+    statuses,
+    sort_by,
+    predictor_id,
+    showBetOpportunities,
+    season_id,
+    discordId,
+  ]);
 
   const incrementPage = () => {
     setPage((prev) => prev + 1);
@@ -254,6 +325,7 @@ export const usePredictionSearch = (
     showBetOpportunities,
     setShowBetOpportunities: (value: boolean) => {
       setShowBetOpportunities(value);
+
       resetPages();
     },
     setStatus: (newStatus: PredictionLifeCycle | "all", value: boolean) => {
