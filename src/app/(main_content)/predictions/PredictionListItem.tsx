@@ -1,4 +1,5 @@
 import { RiskPill } from "@/components/RiskPill";
+import { Triangle } from "@/components/Triangle";
 import { PredictionLifeCycle } from "@/types/predictions";
 import { format } from "date-fns";
 
@@ -203,15 +204,24 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
             </p>
           </div>
           <div className="relative flex h-[7em] shrink-0 grow-0 basis-12 flex-col rounded-br-lg rounded-tr-lg bg-silver-chalice-grey group-open:rounded-bl-lg group-open:rounded-br-none">
-            <p className="absolute left-1/2 top-1/2 w-[7em] -translate-x-1/2 -translate-y-1/2 -rotate-90 text-center uppercase leading-4">
-              Bet Here Soon!
-            </p>
-            {/* <div className="grow rounded-tr-lg bg-silver-chalice-grey">
-              <button onClick={() => handleBet(true)}>E</button>
+            <div className="flex grow items-center justify-center rounded-tr-lg bg-silver-chalice-grey">
+              <Triangle
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleBet(true);
+                }}
+                className=" scale-90"
+              />
             </div>
-            <div className="grow rounded-br-lg bg-silver-chalice-grey group-open:rounded-bl-lg group-open:rounded-br-none">
-              <button onClick={() => handleBet(false)}>U</button>
-            </div> */}
+            <div className="flex grow items-center justify-center rounded-br-lg bg-silver-chalice-grey group-open:rounded-bl-lg group-open:rounded-br-none">
+              <Triangle
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleBet(false);
+                }}
+                className="rotate-180 scale-90"
+              />
+            </div>
           </div>
         </summary>
         <div className="mb-4 mt-8 flex gap-4">
