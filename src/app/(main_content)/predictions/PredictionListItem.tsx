@@ -208,6 +208,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
               <Triangle
                 onClick={(event) => {
                   event.stopPropagation();
+                  event.preventDefault();
                   handleBet(true);
                 }}
                 className=" scale-90"
@@ -217,6 +218,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
               <Triangle
                 onClick={(event) => {
                   event.stopPropagation();
+                  event.preventDefault();
                   handleBet(false);
                 }}
                 className="rotate-180 scale-90"
