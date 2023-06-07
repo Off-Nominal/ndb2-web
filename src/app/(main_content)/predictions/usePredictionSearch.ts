@@ -89,7 +89,15 @@ export const usePredictionSearch = (
         method: "POST",
         body: JSON.stringify({ discord_id: discordId, endorsed }),
       })
-        .then(responseHandler)
+        .then((res) => {
+          return res.json().then((error) => {
+            if (res.ok) {
+              return;
+            } else {
+              throw error.error;
+            }
+          });
+        })
         .then(() => {
           const newBets = [...userBets];
           const bet = newBets.find((b) => b.prediction_id === predictionId);
@@ -98,10 +106,6 @@ export const usePredictionSearch = (
             bet.endorsed = endorsed;
             setUserBets([...userBets]);
           }
-        })
-        .catch((err) => {
-          console.error(err);
-          throw err;
         });
     },
     [discordId, userBets]

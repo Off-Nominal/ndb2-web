@@ -1,6 +1,6 @@
 "use client";
 import { useContext, useEffect, useRef, useState } from "react";
-import { ToastContext, ToastItemControlProps } from "../contexts/toast";
+import { ToastContext, ToastItemControlProps } from "../app/contexts/toast";
 
 type ToastItemProps = Omit<ToastItemControlProps, "id">;
 
@@ -12,8 +12,6 @@ const ToastItem = (props: ToastItemProps) => {
   useEffect(() => {
     if (startFade && ref.current !== null) {
       ref.current.addEventListener("animationend", () => {
-        console.log("animationend");
-
         close();
       });
     }
@@ -32,11 +30,11 @@ const ToastItem = (props: ToastItemProps) => {
   return (
     <div
       ref={ref}
-      onAnimationEnd={(event) => {
+      onAnimationEnd={() => {
         setFadingIn(false);
       }}
       className={[
-        "max-w-90 relative flex w-[350px] justify-between rounded-lg px-6 py-3",
+        "max-w-90 relative flex w-[350px] content-start justify-between rounded-lg px-6 py-3",
         fadeInClass,
         fadeOutClass,
         colors[props.type],
@@ -46,7 +44,7 @@ const ToastItem = (props: ToastItemProps) => {
       <p>{props.message}</p>
       <div
         aria-label="Clear message"
-        className="after:clip-x relative left-2  h-[24px] w-[24px] scale-75 rounded-full bg-slate-200 after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:scale-75 after:bg-slate-400 hover:bg-slate-300 after:hover:bg-slate-500"
+        className="after:clip-x relative left-2 h-[24px] w-[24px] shrink-0 grow-0 scale-75 rounded-full bg-slate-200 after:absolute after:left-0.5 after:top-0.5 after:h-5 after:w-5 after:scale-75 after:bg-slate-400 hover:bg-slate-300 after:hover:bg-slate-500"
       ></div>
     </div>
   );

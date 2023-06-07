@@ -19,17 +19,20 @@ export type GetLeaderboardOptions = RequestInit & {
   seasonIdentifier?: "current" | "last" | number;
 };
 
-export enum ErrorCode {
-  SERVER_ERROR = 0,
-  AUTHENTICATION_ERROR = 1,
-  BAD_REQUEST = 2,
-  MALFORMED_BODY_DATA = 3,
-  MALFORMED_QUERY_PARAMS = 4,
+export enum NDB2APIErrorCode {
+  SERVER_ERROR = 90000,
+  AUTHENTICATION_ERROR = 90001,
+  BAD_REQUEST = 90002,
+  MALFORMED_BODY_DATA = 90003,
+  MALFORMED_QUERY_PARAMS = 90004,
+  INVALID_PREDICTION_STATUS = 90010,
+  BETS_NO_CHANGE = 90501,
+  BETS_UNCHANGEABLE = 90502,
 }
 
 type NDB2Response = {
   success: boolean;
-  errorCode: ErrorCode;
+  errorCode: NDB2APIErrorCode;
   message: string | null;
   data: any;
 };
@@ -62,6 +65,7 @@ const isNDB2Error = (body: any): body is NDB2Response => {
 };
 
 const handleNDB2Error = (res: Response, body: any) => {
+  // console.log(body);
   if (res.status === 404) {
     return new Error("Resource Not Found");
   }
@@ -73,23 +77,33 @@ const handleNDB2Error = (res: Response, body: any) => {
   }
 
   switch (body.errorCode) {
-    case ErrorCode.AUTHENTICATION_ERROR:
+    case NDB2APIErrorCode.AUTHENTICATION_ERROR:
       return new Error(`Authentication Error`);
-    case ErrorCode.BAD_REQUEST:
+    case NDB2APIErrorCode.BAD_REQUEST:
       return new Error(
         `Bad Request, HTTP Status ${res.status}. Server Message: ${body.message}`
       );
-    case ErrorCode.MALFORMED_BODY_DATA:
+    case NDB2APIErrorCode.MALFORMED_BODY_DATA:
       return new Error(
         `Malformed Body Data, HTTP Status ${res.status}. Server Message: ${body.message}`
       );
-    case ErrorCode.MALFORMED_QUERY_PARAMS:
+    case NDB2APIErrorCode.MALFORMED_QUERY_PARAMS:
       return new Error(
         `Malformed Query Params, HTTP Status ${res.status}. Server Message: ${body.message}`
       );
-    case ErrorCode.SERVER_ERROR:
+    case NDB2APIErrorCode.SERVER_ERROR:
       return new Error(
         `Server Error, HTTP Status ${res.status}. Server Message: ${body.message}`
+      );
+    case NDB2APIErrorCode.INVALID_PREDICTION_STATUS:
+      return new Error(
+        `You can't perform this action on a prediction with this status.`
+      );
+    case NDB2APIErrorCode.BETS_NO_CHANGE:
+      return new Error(`You've already made this same bet.`);
+    case NDB2APIErrorCode.BETS_UNCHANGEABLE:
+      return new Error(
+        `Bets cannot be changed once twelve hours have passed since the original bet.`
       );
     default:
       return new Error(

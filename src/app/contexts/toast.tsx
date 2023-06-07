@@ -43,7 +43,6 @@ const generateId = () => Math.random().toString(36).substring(7);
 
 export default function ToastProvider(props: ToastProviderProps) {
   const [items, setItems] = useState<ToastItemControlProps[]>([]);
-  console.log(items);
 
   const unMountToast = (id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id));

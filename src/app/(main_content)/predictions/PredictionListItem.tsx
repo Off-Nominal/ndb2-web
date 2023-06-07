@@ -169,10 +169,16 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
     props
       .updateUserBet(props.id, endorsed)
       .then(() => {
-        console.log("success!");
+        addToast({
+          message: "Bet successfully added",
+          type: "success",
+        });
       })
       .catch((err) => {
-        console.error(err);
+        addToast({
+          message: err,
+          type: "error",
+        });
       });
   };
 
@@ -212,11 +218,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
                 onClick={(event) => {
                   event.stopPropagation();
                   event.preventDefault();
-                  // handleBet(true);
-                  addToast({
-                    message: "This feature is not yet implemented",
-                    type: "error",
-                  });
+                  handleBet(true);
                 }}
                 className=" scale-90"
               />
@@ -226,11 +228,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
                 onClick={(event) => {
                   event.stopPropagation();
                   event.preventDefault();
-                  // handleBet(false);
-                  addToast({
-                    message: "This feature is implemented",
-                    type: "success",
-                  });
+                  handleBet(false);
                 }}
                 className="rotate-180 scale-90"
               />
