@@ -20,7 +20,7 @@ const ToastItem = (props: ToastItemProps) => {
   const colors = {
     success: "bg-moss-green",
     error: "bg-deep-chestnut-red",
-    warning: "bg-california-yellow",
+    warning: "bg-warning-yellow",
   };
 
   const fadeOutClass = startFade ? "opacity-0 height-0 animate-fade-out" : "";

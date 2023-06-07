@@ -90,21 +90,33 @@ export const usePredictionSearch = (
         body: JSON.stringify({ discord_id: discordId, endorsed }),
       })
         .then((res) => {
-          return res.json().then((error) => {
+          return res.json().then((response) => {
             if (res.ok) {
-              return;
+              return response;
             } else {
-              throw error.error;
+              throw response.error;
             }
           });
         })
-        .then(() => {
+        .then((prediction: APIPredictions.EnhancedPrediction) => {
           const newBets = [...userBets];
-          const bet = newBets.find((b) => b.prediction_id === predictionId);
+          const existingBet = newBets.find(
+            (b) => b.prediction_id === predictionId
+          );
 
-          if (bet) {
-            bet.endorsed = endorsed;
+          if (existingBet) {
+            existingBet.endorsed = endorsed;
             setUserBets([...userBets]);
+          } else {
+            const newBet = prediction.bets.find(
+              (b) => b.better.discord_id === discordId
+            );
+            if (newBet) {
+              setUserBets([
+                ...newBets,
+                { ...newBet, prediction_id: prediction.id },
+              ]);
+            }
           }
         });
     },

@@ -3,6 +3,7 @@ import { RiskPill } from "@/components/RiskPill";
 import { Triangle } from "@/components/Triangle";
 import { PredictionLifeCycle } from "@/types/predictions";
 import { format } from "date-fns";
+import { BetInterface } from "./BetInterface";
 
 type PredictionListItemProps = {
   updateUserBet: (predictionId: number, endorsed: boolean) => Promise<void>;
@@ -212,28 +213,11 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
               {props.text}
             </p>
           </div>
-          <div className="relative flex h-[7em] shrink-0 grow-0 basis-12 flex-col rounded-br-lg rounded-tr-lg bg-silver-chalice-grey group-open:rounded-bl-lg group-open:rounded-br-none">
-            <div className="flex grow items-center justify-center rounded-tr-lg bg-silver-chalice-grey">
-              <Triangle
-                onClick={(event) => {
-                  event.stopPropagation();
-                  event.preventDefault();
-                  handleBet(true);
-                }}
-                className=" scale-90"
-              />
-            </div>
-            <div className="flex grow items-center justify-center rounded-br-lg bg-silver-chalice-grey group-open:rounded-bl-lg group-open:rounded-br-none">
-              <Triangle
-                onClick={(event) => {
-                  event.stopPropagation();
-                  event.preventDefault();
-                  handleBet(false);
-                }}
-                className="rotate-180 scale-90"
-              />
-            </div>
-          </div>
+          <BetInterface
+            handleBet={handleBet}
+            disabled={props.status !== PredictionLifeCycle.OPEN}
+            currentBet={props.endorsed}
+          />
         </summary>
         <div className="mb-4 mt-8 flex gap-4">
           <div className=" grow-0 basis-12"></div>

@@ -21,6 +21,7 @@ module.exports = {
       "silver-chalice-grey": "#B2AFA1",
       "deep-chestnut-red": "#B64E45",
       "california-gold": "#B2893A",
+      "warning-yellow": "#facc15",
       "discord-purple": "#7983f5",
       black: "#000000",
       "button-gray": "#b2afa1",
