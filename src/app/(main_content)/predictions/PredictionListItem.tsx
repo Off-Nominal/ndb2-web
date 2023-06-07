@@ -1,3 +1,4 @@
+import { useToast } from "@/app/contexts/toast";
 import { RiskPill } from "@/components/RiskPill";
 import { Triangle } from "@/components/Triangle";
 import { PredictionLifeCycle } from "@/types/predictions";
@@ -126,6 +127,8 @@ const buildTimeline = (
 };
 
 export const PredictionListItem = (props: PredictionListItemProps) => {
+  const { addToast } = useToast();
+
   let statusBackground = "bg-moonstone-blue";
   let showVotes = false;
 
@@ -209,7 +212,11 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
                 onClick={(event) => {
                   event.stopPropagation();
                   event.preventDefault();
-                  handleBet(true);
+                  // handleBet(true);
+                  addToast({
+                    message: "This feature is not yet implemented",
+                    type: "error",
+                  });
                 }}
                 className=" scale-90"
               />
@@ -219,7 +226,11 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
                 onClick={(event) => {
                   event.stopPropagation();
                   event.preventDefault();
-                  handleBet(false);
+                  // handleBet(false);
+                  addToast({
+                    message: "This feature is implemented",
+                    type: "success",
+                  });
                 }}
                 className="rotate-180 scale-90"
               />
