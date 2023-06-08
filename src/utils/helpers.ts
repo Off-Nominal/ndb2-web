@@ -95,6 +95,12 @@ export const buildTimeline = (
       value: "",
       status: "cancelled",
     };
+  } else if (status === PredictionLifeCycle.FAILED) {
+    item4 = {
+      label: "Judgement",
+      value: judgedDate ? format(judgedDate, dateFormat) : "",
+      status: "complete_negative",
+    };
   } else {
     item4 = {
       label: "Judged",

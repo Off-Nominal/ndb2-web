@@ -1,65 +1,33 @@
 type TimelineCircleProps = {
-  dateObject: {
-    label: string;
-    value: string;
-    status: string;
-  };
-  top: boolean;
-  bottom: boolean;
+  width: number;
+  stemLength?: number;
+  circleClasses?: string;
+  stemClasses?: string;
 };
 
 export const TimelineCircle = (props: TimelineCircleProps) => {
-  const radius = 12;
-  const length = 25;
-  let y = length - (length + length / 2);
-  const filled =
-    props.dateObject.status === "not_started"
-      ? "#B2AFA1"
-      : props.dateObject.status === "complete"
-      ? "#8AA644"
-      : "none";
-  const stroke =
-    props.dateObject.status === "not_started"
-      ? "#B2AFA1"
-      : "#8AA644";
-  y += length;
+  const stemClasses = props.stemClasses || "";
+  const circleClasses = props.circleClasses || "";
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="50"
-      height="50"
-      viewBox="0 0 100 75"
-      className="relative w-14 "
+      viewBox="-50 -50 100 100"
+      width={props.width}
+      height={props.width}
+      className="overflow-visible"
     >
-      {props.top && (
+      {props.stemLength && (
         <line
-          x1="50"
-          y1="-10"
-          x2="50"
-          y2={y - radius}
-          stroke="#B2AFA1"
-          strokeWidth="4"
+          x1={0}
+          y1={(props.stemLength / props.width) * 100 + 50}
+          x2={0}
+          y2={62}
+          strokeWidth={12}
+          className={stemClasses}
         />
       )}
-
-      <circle
-        cx="50"
-        cy={y}
-        r={radius}
-        fill={filled}
-        stroke={stroke}
-        strokeWidth="4"
-      />
-      {props.bottom && (
-        <line
-          x1="50"
-          y1={y + radius}
-          x2="50"
-          y2="200"
-          stroke="#B2AFA1"
-          strokeWidth="4"
-        />
-      )}
+      <circle r={44} strokeWidth={12} className={circleClasses} />
     </svg>
   );
 };
