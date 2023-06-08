@@ -1,15 +1,18 @@
 import { useToast } from "@/app/contexts/toast";
 import { RiskPill } from "@/components/RiskPill";
 import { PredictionLifeCycle } from "@/types/predictions";
-import { format } from "date-fns";
+import { add, format, isAfter } from "date-fns";
 import { BetInterface } from "./BetInterface";
+import { APIBets } from "@/types/bets";
+import Link from "next/link";
+import { Button } from "@/components/Button";
 
 type PredictionListItemProps = {
   updateUserBet: (predictionId: number, endorsed: boolean) => Promise<void>;
   status: PredictionLifeCycle;
   id: number;
   text: string;
-  endorsed: boolean | undefined;
+  userBet: APIBets.UserBet | undefined;
   endorse_ratio: number;
   undorse_ratio: number;
   loading: boolean;
@@ -166,6 +169,21 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
   };
 
   const handleBet = (endorsed: boolean) => {
+    if (props.userBet) {
+      if (props.userBet.endorsed === endorsed) {
+        return;
+      }
+
+      if (
+        isAfter(new Date(), add(new Date(props.userBet?.date), { hours: 12 }))
+      ) {
+        return addToast({
+          message: "Bets can only be changed within 12 hours of being made.",
+          type: "error",
+        });
+      }
+    }
+
     props
       .updateUserBet(props.id, endorsed)
       .then(() => {
@@ -221,7 +239,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
           <BetInterface
             handleBet={handleBet}
             disabledMessage={betMessage}
-            currentBet={props.endorsed}
+            currentBet={props.userBet?.endorsed}
           />
         </summary>
         <div className="mb-4 mt-8 flex gap-4">
@@ -328,9 +346,9 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
           <div className=" grow-0 basis-12"></div>
         </div>
         <div className="flex justify-end p-6">
-          {/* <Link href={`/predictions/${props.id}`}>
+          <Link href={`/predictions/${props.id}`}>
             <Button size="sm">More Details</Button>
-          </Link> */}
+          </Link>
         </div>
       </details>
     </article>

@@ -153,48 +153,43 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
           <div className="mt-4 flex justify-center">
             <div className="w-full">
               <CheckboxButtonList<PredictionLifeCycle | "all">
+                onChange={handleStatusChange}
                 items={[
                   {
                     name: "all",
                     value: "all",
                     label: "All",
                     checked: statuses.all,
-                    onChange: handleStatusChange,
                   },
                   {
                     name: "open",
                     value: PredictionLifeCycle.OPEN,
                     label: "Open",
                     checked: statuses.open,
-                    onChange: handleStatusChange,
                   },
                   {
                     name: "closed",
                     value: PredictionLifeCycle.CLOSED,
                     label: "Voting",
                     checked: statuses.closed,
-                    onChange: handleStatusChange,
                   },
                   {
                     name: "retired",
                     value: PredictionLifeCycle.RETIRED,
                     label: "Retired",
                     checked: statuses.retired,
-                    onChange: handleStatusChange,
                   },
                   {
                     name: "successful",
                     value: PredictionLifeCycle.SUCCESSFUL,
                     label: "Successful",
                     checked: statuses.successful,
-                    onChange: handleStatusChange,
                   },
                   {
                     name: "failed",
                     value: PredictionLifeCycle.FAILED,
                     label: "Failed",
                     checked: statuses.failed,
-                    onChange: handleStatusChange,
                   },
                 ]}
               />
@@ -341,6 +336,10 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
               </h4>
               <div className="mt-4">
                 <CheckboxButtonList<string>
+                  onChange={(event) => {
+                    setStatus(PredictionLifeCycle.OPEN, true);
+                    setShowBetOpportunities(event.target.checked);
+                  }}
                   items={[
                     {
                       name: "betOpps",
@@ -349,10 +348,6 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
                         ? "Showing Bet Opportunities"
                         : "Showing All",
                       checked: showBetOpportunities,
-                      onChange: (event) => {
-                        setStatus(PredictionLifeCycle.OPEN, true);
-                        setShowBetOpportunities(event.target.checked);
-                      },
                     },
                   ]}
                 />
@@ -386,7 +381,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
                 text={p.text}
                 id={p.id}
                 status={p.status}
-                endorsed={userBet?.endorsed}
+                userBet={userBet}
                 endorse_ratio={p.payouts.endorse}
                 undorse_ratio={p.payouts.undorse}
                 endorsements={p.bets.endorsements}

@@ -100,10 +100,9 @@ export const usePredictionSearch = (
         })
         .then((prediction: APIPredictions.EnhancedPrediction) => {
           const newBets = [...userBets];
-          const existingBetIndex = newBets.findIndex(
+          const existingBetIndex = userBets.findIndex(
             (b) => b.prediction_id === predictionId
           );
-
           if (existingBetIndex >= 0) {
             const updatedBet = { ...newBets[existingBetIndex], endorsed };
             newBets[existingBetIndex] = updatedBet;
