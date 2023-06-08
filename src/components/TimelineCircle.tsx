@@ -14,16 +14,14 @@ export const TimelineCircle = (props: TimelineCircleProps) => {
   let y = length - (length + length / 2);
   const filled =
     props.dateObject.status === "not_started"
-      ? "gray"
+      ? "#B2AFA1"
       : props.dateObject.status === "complete"
-      ? "green"
+      ? "#8AA644"
       : "none";
   const stroke =
     props.dateObject.status === "not_started"
-      ? "gray"
-      : props.dateObject.status === "complete"
-      ? "green"
-      : "black";
+      ? "#B2AFA1"
+      : "#8AA644";
   y += length;
   return (
     <svg
@@ -39,8 +37,8 @@ export const TimelineCircle = (props: TimelineCircleProps) => {
           y1="-10"
           x2="50"
           y2={y - radius}
-          stroke="gray"
-          strokeWidth="2"
+          stroke="#B2AFA1"
+          strokeWidth="4"
         />
       )}
 
@@ -50,7 +48,7 @@ export const TimelineCircle = (props: TimelineCircleProps) => {
         r={radius}
         fill={filled}
         stroke={stroke}
-        strokeWidth="2"
+        strokeWidth="4"
       />
       {props.bottom && (
         <line
@@ -58,8 +56,8 @@ export const TimelineCircle = (props: TimelineCircleProps) => {
           y1={y + radius}
           x2="50"
           y2="200"
-          stroke="gray"
-          strokeWidth="2"
+          stroke="#B2AFA1"
+          strokeWidth="4"
         />
       )}
     </svg>
