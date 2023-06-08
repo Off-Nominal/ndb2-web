@@ -190,10 +190,12 @@ export default async function Predictions({ params }: any) {
 
   return (
     <>
-      <div className="flex justify-between">
-        <div className="flex flex-col">
-          <h2 className="text-xl uppercase">Prediction # {prediction.id}</h2>
-          <div className="flex gap-2">
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-xl uppercase sm:text-2xl">
+            Prediction # {prediction.id}
+          </h2>
+          <div className="flex items-start gap-2">
             <Avatar src={predictor.avatarUrl} size={24} alt={predictor.name} />
             <span className="text-slate-600 dark:text-slate-300">
               {predictor.name}
