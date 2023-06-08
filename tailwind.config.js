@@ -23,10 +23,7 @@ module.exports = {
       "california-gold": "#B2893A",
       "warning-yellow": "#facc15",
       "discord-purple": "#7983f5",
-      black: "#000000",
-      "button-gray": "#b2afa1",
       transparent: "transparent",
-      "line-grey": "#a0a0a0",
       slate: {
         50: "#f8fafc",
         100: "#f1f5f9",
