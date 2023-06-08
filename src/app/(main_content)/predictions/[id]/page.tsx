@@ -11,10 +11,12 @@ import authAPI from "@/utils/auth";
 import ndb2API from "@/utils/ndb2";
 import discordAPI from "@/utils/discord";
 import { ShortDiscordGuildMember } from "@/types/discord";
-import { format } from "date-fns";
+import { differenceInDays, format } from "date-fns";
 import Image from "next/image";
 import { APIPredictions, PredictionLifeCycle } from "@/types/predictions";
 import { APIBets } from "@/types/bets";
+import { Avatar } from "@/components/Avatar";
+import { List } from "@/components/List";
 
 type ListBet = Omit<APIBets.Bet, "better"> & {
   name: string;
@@ -96,31 +98,107 @@ export default async function Predictions({ params }: any) {
   const { prediction, predictor, endorsements, undorsements } =
     await fetchPrediction(params.id);
 
+  const userBet = prediction.bets.find(
+    (bet) => bet.better.discord_id === payload.discordId
+  );
+
+  const payoutRatio = userBet
+    ? userBet.endorsed
+      ? prediction.payouts.endorse
+      : prediction.payouts.undorse
+    : 1;
+
   const statusColor = {
-    [PredictionLifeCycle.RETIRED]: "bg-button-gray",
+    [PredictionLifeCycle.RETIRED]: "bg-silver-chalice-grey",
     [PredictionLifeCycle.SUCCESSFUL]: "bg-moss-green",
     [PredictionLifeCycle.FAILED]: "bg-deep-chestnut-red",
     [PredictionLifeCycle.OPEN]: "bg-moonstone-blue",
-    [PredictionLifeCycle.CLOSED]: "bg-button-gray",
+    [PredictionLifeCycle.CLOSED]: "bg-silver-chalice-grey",
   };
+
+  type PredictionsEntryProps = {
+    date: string;
+    avatarUrl: string;
+    name: string;
+    value: number | string;
+  };
+
+  const defaultAvatarUrl = "https://cdn.discordapp.com/embed/avatars/0.png";
+
+  const PredictionsEntry = (props: PredictionsEntryProps) => {
+    return (
+      <div className="flex items-center">
+        <div className="flex grow">
+          <div className="mx-2 shrink-0 grow-0 basis-8">
+            <Avatar
+              src={props.avatarUrl || defaultAvatarUrl}
+              alt={`Avatar photo for user ${props.name}`}
+              size={30}
+            />
+          </div>
+          <div className="mx-2 grow">
+            <span>{props.name}</span>
+          </div>
+        </div>
+        <div className="flex shrink-0 grow-0 basis-32">
+          <span>{props.date}</span>
+        </div>
+        <div className="ml-2 shrink-0 grow-0 basis-10">
+          <span>{props.value.toLocaleString("en-US")}</span>
+        </div>
+      </div>
+    );
+  };
+
+  const endorseArray = endorsements.map((bet) => {
+    return (
+      <PredictionsEntry
+        key={bet.id}
+        date={formatDate(bet.date)}
+        avatarUrl={bet.avatarUrl}
+        name={bet.name}
+        value={bet.wager}
+      />
+    );
+  });
+
+  const listHeader = (
+    <div className="flex">
+      <p className="grow">User</p>
+      <p className="text-left shrink-0 grow-0 basis-32">Bet Date</p>
+      <p className="shrink-0 grow-0 basis-10">Wager</p>
+    </div>
+  );
+
+  endorseArray.unshift(listHeader);
+  const undorseArray = undorsements.map((bet) => {
+    return (
+      <PredictionsEntry
+        key={bet.id}
+        date={formatDate(bet.date)}
+        avatarUrl={bet.avatarUrl}
+        name={bet.name}
+        value={bet.wager}
+      />
+    );
+  });
+  undorseArray.unshift(listHeader);
 
   return (
     <div className="flex flex-col content-center w-full h-full p-8 align-middle">
-      <main className="flex flex-col">
-        <div className="flex flex-col">
+      <main className="flex flex-col w-full gap-10">
+        <div className="flex flex-col gap-10">
           <div className="flex flex-row justify-between">
-            <div>
-              Prediction # {prediction.id}
-              <br />
-              by {predictor.name}
-              <br />
+            <div className="flex flex-col">
+              <p>Prediction # {prediction.id}</p>
+              <p>by {predictor.name}</p>
             </div>
             <PillDisplay
               text={prediction.status.toUpperCase()}
               color={statusColor[prediction.status]}
             />
           </div>
-          <div className="justify-center w-full h-full p-2 text-left rounded-lg bg-silver-chalice-grey">
+          <div className="justify-center w-full h-auto p-2 text-left rounded-lg bg-silver-chalice-grey">
             <p>{prediction.text}</p>
           </div>
         </div>
@@ -148,100 +226,61 @@ export default async function Predictions({ params }: any) {
               }
             />
           </div>
-          <div>
-            <div>
-              <div>
-                <p>YOUR BET</p>
-                <p>BET ON SOME DAY</p>
-              </div>
-              <div>
-                <Bet bets={prediction.bets} discord_id={payload.discordId} status={prediction.status} prediction_id={prediction.id} />
-              </div>
+          <div className="flex flex-col gap-10">
+            <div className="flex justify-between">
+              {userBet ? (
+                <div>
+                  <p>YOUR BET</p>
+                  <p>{`BET ON ${formatDate(userBet.date).toUpperCase()}`}</p>
+                </div>
+              ) : (
+                <div>
+                  <p>ADD YOUR BET</p>
+                  <p>{`WAGER ${differenceInDays(new Date(prediction.due_date), new Date())}`}</p>
+                </div>
+                )}
+
+              <Bet
+                bets={prediction.bets}
+                discord_id={payload.discordId}
+                status={prediction.status}
+                prediction_id={prediction.id}
+              />
             </div>
-            <div>
+            {userBet &&(
+            <div className="flex justify-between">
               <div>
                 <p>POTENTIAL POINTS</p>
-                <p>GIVEN DUE DATE OF SOME DAY</p>
+                <p>GIVEN DUE DATE OF</p>
+                <p>{formatDate(prediction.due_date).toUpperCase()}</p>
               </div>
-              <div>
-                <PillDisplay text={"+/- 278"} color={"bg-button-gray"} />
+              <div className="flex h-12">
+                <PillDisplay
+                  text={`+/- ${Math.min(Math.floor(userBet.wager * payoutRatio),1)}`}
+                  color={"bg-silver-chalice-grey"}
+                />
               </div>
             </div>
+            )}
           </div>
         </div>
         <div>BETS</div>
-        <div className="flex justify-evenly">
-          <Card title="Endorsements">
+        <div className="flex justify-between gap-x-10">
+          <Card title="Endorsements" className="grow basis-4">
             {endorsements.length > 0 ? (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Better </th>
-                    <th>Date </th>
-                    <th>Wager </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {endorsements.map((bet) => {
-                    return (
-                      <tr key={bet.id}>
-                        <td>
-                          <Image
-                            src={bet.avatarUrl}
-                            alt={bet.name}
-                            width={25}
-                            height={25}
-                          />
-                        </td>
-                        <td>{bet.name}</td>
-                        <td>{formatDate(bet.date)}</td>
-                        <td>{bet.wager}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <List items={endorseArray} />
             ) : (
-              "Nothing to see here"
+              "No Endorsements were found!"
             )}
           </Card>
-          <Card title="Undorsements">
+          <Card title="Undorsements" className="grow basis-4">
             {undorsements.length > 0 ? (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Better </th>
-                    <th>Date </th>
-                    <th>Wager </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {undorsements.map((bet) => {
-                    return (
-                      <tr key={bet.id}>
-                        <td>
-                          <Image
-                            src={bet.avatarUrl}
-                            alt={bet.name}
-                            width={25}
-                            height={25}
-                          />
-                        </td>
-                        <td>{bet.name}</td>
-                        <td>{formatDate(bet.date)}</td>
-                        <td>{bet.wager}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <List items={undorseArray} />
             ) : (
-              "Nothing to see here"
+              "No Endorsements were found!"
             )}
           </Card>
         </div>
-        <br />
-        <br />
       </main>
     </div>
   );
