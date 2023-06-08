@@ -207,7 +207,7 @@ export default async function Predictions({ params }: any) {
           color={statusColor[prediction.status]}
         />
       </div>
-      <div className="mt-8 rounded-xl bg-silver-chalice-grey p-4">
+      <div className="mt-8 rounded-xl bg-slate-300 p-4 dark:bg-slate-600">
         <p>{prediction.text}</p>
       </div>
       <div className="mt-8 flex flex-col md:flex-row md:justify-between">
