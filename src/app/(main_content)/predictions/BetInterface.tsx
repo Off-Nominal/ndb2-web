@@ -10,69 +10,86 @@ type BetInterfaceProps = {
 export const BetInterface = (props: BetInterfaceProps) => {
   const { addToast } = useToast();
 
-  const backgroundColor = props.disabledMessage
-    ? "bg-slate-300 stroke-slate-500"
-    : "bg-silver-chalice-grey stroke-slate-700";
+  const parentClasses =
+    props.disabledMessage !== undefined
+      ? "cursor-not-allowed opacity-50"
+      : "cursor-pointer";
 
-  const polyClasses = props.disabledMessage
-    ? "cursor-not-allowed stroke-slate-400 fill-slate-400"
-    : "cursor-pointer hover:fill-moss-green fill-slate-300 stroke-slate-700";
+  const endorsedHoverClasses =
+    props.disabledMessage !== undefined ? "" : "hover:bg-moss-green";
+  const undorsedHoverClasses =
+    props.disabledMessage !== undefined ? "" : "hover:bg-deep-chestnut-red";
 
-  const endorsedBetStateClasses =
-    props.currentBet === true ? "bg-moss-green" : "";
+  let endorsedPolyClasses = props.currentBet === true ? "fill-moss-green" : "";
 
-  const undorsedBetStateClasses =
-    props.currentBet === false ? "bg-deep-chestnut-red" : "";
+  if (!props.disabledMessage) {
+    endorsedPolyClasses += " group-hover/endorse:fill-slate-300";
+  }
+
+  let undorsedPolyClasses =
+    props.currentBet === false ? "fill-deep-chestnut-red" : "";
+
+  if (!props.disabledMessage) {
+    undorsedPolyClasses += " group-hover/undorse:fill-slate-300";
+  }
 
   return (
     <div
       className={[
-        "relative flex h-[7em] shrink-0 grow-0 basis-12 flex-col rounded-br-lg rounded-tr-lg group-open:rounded-bl-lg group-open:rounded-br-none ",
-        backgroundColor,
+        "relative flex h-[7em] shrink-0 grow-0 basis-12 flex-col rounded-br-lg rounded-tr-lg bg-slate-400 group-open:rounded-bl-lg group-open:rounded-br-none dark:bg-slate-500 ",
+        parentClasses,
       ].join(" ")}
     >
       <div
         className={[
-          "flex grow items-center justify-center rounded-tr-lg",
-          endorsedBetStateClasses,
+          endorsedHoverClasses,
+          "group/endorse flex grow items-center justify-center rounded-tr-lg",
         ].join(" ")}
+        onClick={(event) => {
+          event.stopPropagation();
+          event.preventDefault();
+          if (props.disabledMessage) {
+            addToast({
+              message: props.disabledMessage,
+              type: "error",
+            });
+            return;
+          }
+          props.handleBet(true);
+        }}
       >
         <Triangle
-          onClick={(event) => {
-            event.stopPropagation();
-            event.preventDefault();
-            if (props.disabledMessage) {
-              addToast({
-                message: props.disabledMessage,
-                type: "error",
-              });
-              return;
-            }
-            props.handleBet(true);
-          }}
-          polyClassName={[polyClasses].join(" ")}
+          canvasClassName="scale-75"
+          polyClassName={[
+            "fill-slate-300 stroke-slate-600 ",
+            endorsedPolyClasses,
+          ].join(" ")}
         />
       </div>
       <div
         className={[
-          "flex grow items-center justify-center rounded-br-lg group-open:rounded-bl-lg group-open:rounded-br-none",
-          undorsedBetStateClasses,
+          undorsedHoverClasses,
+          "group/undorse flex grow items-center justify-center rounded-br-lg group-open:rounded-bl-lg group-open:rounded-br-none",
         ].join(" ")}
+        onClick={(event) => {
+          event.stopPropagation();
+          event.preventDefault();
+          if (props.disabledMessage) {
+            addToast({
+              message: props.disabledMessage,
+              type: "error",
+            });
+            return;
+          }
+          props.handleBet(false);
+        }}
       >
         <Triangle
-          onClick={(event) => {
-            event.stopPropagation();
-            event.preventDefault();
-            if (props.disabledMessage) {
-              addToast({
-                message: props.disabledMessage,
-                type: "error",
-              });
-              return;
-            }
-            props.handleBet(false);
-          }}
-          polyClassName={["origin-center rotate-180", polyClasses].join(" ")}
+          canvasClassName="scale-75"
+          polyClassName={[
+            "fill-slate-300 stroke-slate-600 origin-center rotate-180",
+            undorsedPolyClasses,
+          ].join(" ")}
         />
       </div>
     </div>

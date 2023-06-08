@@ -1,7 +1,7 @@
 import { MouseEventHandler } from "react";
 
 type TriangleProps = {
-  onClick: MouseEventHandler<SVGSVGElement>;
+  onClick?: MouseEventHandler<SVGSVGElement>;
   canvasClassName?: string;
   polyClassName?: string;
 };

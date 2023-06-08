@@ -375,7 +375,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
       <section className="my-8 flex w-full flex-col gap-4">
         {predictions.length > 0 &&
           predictions.map((p) => {
-            const endorsed = !!props.bets.find((b) => b.prediction_id === p.id);
+            const userBet = props.bets.find((b) => b.prediction_id === p.id);
 
             return (
               <PredictionListItem
@@ -385,7 +385,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
                 text={p.text}
                 id={p.id}
                 status={p.status}
-                endorsed={endorsed}
+                endorsed={userBet?.endorsed}
                 endorse_ratio={p.payouts.endorse}
                 undorse_ratio={p.payouts.undorse}
                 endorsements={p.bets.endorsements}

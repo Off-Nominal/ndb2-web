@@ -1,6 +1,5 @@
 import { useToast } from "@/app/contexts/toast";
 import { RiskPill } from "@/components/RiskPill";
-import { Triangle } from "@/components/Triangle";
 import { PredictionLifeCycle } from "@/types/predictions";
 import { format } from "date-fns";
 import { BetInterface } from "./BetInterface";

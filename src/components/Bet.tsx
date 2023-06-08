@@ -21,14 +21,17 @@ export const Bet = (props: BetProps) => {
   );
 
   return (
-    <div className="flex w-32 h-12 rounded-full bg-silver-chalice-grey">
-      <div className="flex items-center justify-center border-r-1 grow border-r-slate-600">
-        <Triangle endorse={true} onClick={() => console.log("Click")} />
-      </div>
-      <div className="flex items-center justify-center border-l-2 grow border-l-slate-600">
+    <div className="flex h-12 w-32 rounded-full bg-silver-chalice-grey">
+      <div className="border-r-1 flex grow items-center justify-center border-r-slate-600">
         <Triangle
-          className="rotate-180"
-          endorse={false}
+          polyClassName={"hover:fill-moss-green"}
+          onClick={() => console.log("Click")}
+        />
+      </div>
+      <div className="flex grow items-center justify-center border-l-2 border-l-slate-600">
+        <Triangle
+          canvasClassName="rotate-180"
+          polyClassName={"hover:fill-deep-chestnut-red"}
           onClick={() => console.log("Click")}
         />
       </div>
