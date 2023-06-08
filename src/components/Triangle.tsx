@@ -1,31 +1,28 @@
 import { MouseEventHandler } from "react";
 
 type TriangleProps = {
-  endorse: boolean;
   onClick: MouseEventHandler<SVGSVGElement>;
-  className?: string;
+  canvasClassName?: string;
+  polyClassName?: string;
 };
 
 export const Triangle = (props: TriangleProps) => {
+  const canvasClassName = props.canvasClassName || "";
+  const polyClassName = props.polyClassName || "";
 
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 40 40"
-      className={`relative h-8 w-8 ${props.className}`}
-      onClick={(e) => props.onClick(e)}
+      viewBox="0 0 10 10"
+      className={["h-10 w-10", canvasClassName].join(" ")}
+      onClick={props.onClick}
     >
       <polygon
-        points="20,0 40,40 0,40"
+        points="5,0 0,10 10,10"
         fill={"white"}
         stroke={"black"}
-        strokeWidth="1"
-        className={
-          props.endorse
-            ? "hover:fill-moss-green"
-            : "hover:fill-deep-chestnut-red"
-        }
-        
+        strokeWidth="0.25"
+        className={polyClassName}
       />
     </svg>
   );

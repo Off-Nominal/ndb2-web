@@ -3,18 +3,26 @@ import { Triangle } from "@/components/Triangle";
 
 type BetInterfaceProps = {
   handleBet: (endorsed: boolean) => void;
-  disabled: boolean;
+  disabledMessage: string | undefined;
   currentBet: boolean | undefined;
 };
 
 export const BetInterface = (props: BetInterfaceProps) => {
   const { addToast } = useToast();
 
-  const backgroundColor = props.disabled
-    ? "bg-slate-300"
-    : "bg-silver-chalice-grey";
+  const backgroundColor = props.disabledMessage
+    ? "bg-slate-300 stroke-slate-500"
+    : "bg-silver-chalice-grey stroke-slate-700";
 
-  const cursor = props.disabled ? "cursor-not-allowed" : "cursor-pointer";
+  const polyClasses = props.disabledMessage
+    ? "cursor-not-allowed stroke-slate-400 fill-slate-400"
+    : "cursor-pointer hover:fill-moss-green fill-slate-300 stroke-slate-700";
+
+  const endorsedBetStateClasses =
+    props.currentBet === true ? "bg-moss-green" : "";
+
+  const undorsedBetStateClasses =
+    props.currentBet === false ? "bg-deep-chestnut-red" : "";
 
   return (
     <div
@@ -23,42 +31,48 @@ export const BetInterface = (props: BetInterfaceProps) => {
         backgroundColor,
       ].join(" ")}
     >
-      <div className="flex grow items-center justify-center rounded-tr-lg">
+      <div
+        className={[
+          "flex grow items-center justify-center rounded-tr-lg",
+          endorsedBetStateClasses,
+        ].join(" ")}
+      >
         <Triangle
-          hoverColor={props.disabled ? "none" : "moss-green"}
-          fillColor={props.disabled ? "slate-400" : "white"}
           onClick={(event) => {
             event.stopPropagation();
             event.preventDefault();
-            if (props.disabled) {
+            if (props.disabledMessage) {
               addToast({
-                message: "You cannot bet on this prediction.",
-                type: "warning",
+                message: props.disabledMessage,
+                type: "error",
               });
               return;
             }
             props.handleBet(true);
           }}
-          className={["scale-90", cursor].join(" ")}
+          polyClassName={[polyClasses].join(" ")}
         />
       </div>
-      <div className="flex grow items-center justify-center rounded-br-lg group-open:rounded-bl-lg group-open:rounded-br-none">
+      <div
+        className={[
+          "flex grow items-center justify-center rounded-br-lg group-open:rounded-bl-lg group-open:rounded-br-none",
+          undorsedBetStateClasses,
+        ].join(" ")}
+      >
         <Triangle
-          hoverColor={props.disabled ? "none" : "moss-green"}
-          fillColor={props.disabled ? "slate-200" : "white"}
           onClick={(event) => {
             event.stopPropagation();
             event.preventDefault();
-            if (props.disabled) {
+            if (props.disabledMessage) {
               addToast({
-                message: "You cannot bet on this prediction.",
-                type: "warning",
+                message: props.disabledMessage,
+                type: "error",
               });
               return;
             }
             props.handleBet(false);
           }}
-          className={["rotate-180 scale-90", cursor].join(" ")}
+          polyClassName={["origin-center rotate-180", polyClasses].join(" ")}
         />
       </div>
     </div>

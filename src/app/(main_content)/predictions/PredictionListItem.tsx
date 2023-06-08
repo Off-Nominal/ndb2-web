@@ -183,6 +183,12 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
       });
   };
 
+  let betMessage;
+
+  if (props.status !== PredictionLifeCycle.OPEN) {
+    betMessage = "Predictions must be in OPEN status for bets to be made.";
+  }
+
   return (
     <article
       id={"prediction-" + props.id}
@@ -215,7 +221,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
           </div>
           <BetInterface
             handleBet={handleBet}
-            disabled={props.status !== PredictionLifeCycle.OPEN}
+            disabledMessage={betMessage}
             currentBet={props.endorsed}
           />
         </summary>
