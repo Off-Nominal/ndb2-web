@@ -164,9 +164,13 @@ export default async function Predictions({ params }: any) {
 
   const listHeader = (
     <div className="flex">
-      <p className="grow">User</p>
-      <p className="shrink-0 grow-0 basis-32 text-left">Bet Date</p>
-      <p className="shrink-0 grow-0 basis-10">Wager</p>
+      <p className="grow text-sm font-bold uppercase">User</p>
+      <p className="shrink-0 grow-0 basis-32 text-left text-sm font-bold uppercase">
+        Bet Date
+      </p>
+      <p className="shrink-0 grow-0 basis-10 text-sm font-bold uppercase">
+        Wager
+      </p>
     </div>
   );
 
@@ -185,109 +189,110 @@ export default async function Predictions({ params }: any) {
   undorseArray.unshift(listHeader);
 
   return (
-    <div className="flex h-full w-full flex-col content-center p-8 align-middle">
-      <main className="flex w-full flex-col gap-10">
-        <div className="flex flex-col gap-10">
-          <div className="flex flex-row justify-between">
-            <div className="flex flex-col">
-              <p>Prediction # {prediction.id}</p>
-              <p>by {predictor.name}</p>
-            </div>
-            <PillDisplay
-              text={prediction.status.toUpperCase()}
-              color={statusColor[prediction.status]}
-            />
-          </div>
-          <div className="h-auto w-full justify-center rounded-lg bg-silver-chalice-grey p-2 text-left">
-            <p>{prediction.text}</p>
+    <>
+      <div className="flex justify-between">
+        <div className="flex flex-col">
+          <h2 className="text-xl uppercase">Prediction # {prediction.id}</h2>
+          <div className="flex gap-2">
+            <Avatar src={predictor.avatarUrl} size={24} alt={predictor.name} />
+            <span className="text-slate-600 dark:text-slate-300">
+              {predictor.name}
+            </span>
           </div>
         </div>
-        <div className="flex justify-between">
-          <div>
-            <Timeline
-              status={prediction.status}
-              created_date={new Date(prediction.created_date)}
-              due_date={new Date(prediction.due_date)}
-              closed_date={
-                prediction.closed_date ? new Date(prediction.closed_date) : null
-              }
-              triggered_date={
-                prediction.triggered_date
-                  ? new Date(prediction.triggered_date)
-                  : null
-              }
-              retired_date={
-                prediction.retired_date
-                  ? new Date(prediction.retired_date)
-                  : null
-              }
-              judged_date={
-                prediction.judged_date ? new Date(prediction.judged_date) : null
-              }
-            />
-          </div>
-          <div className="flex flex-col gap-10">
-            <div className="flex justify-between">
-              {userBet ? (
-                <div>
-                  <p>YOUR BET</p>
-                  <p>{`BET ON ${formatDate(userBet.date).toUpperCase()}`}</p>
-                </div>
-              ) : (
-                <div>
-                  <p>ADD YOUR BET</p>
-                  <p>{`WAGER ${differenceInDays(
-                    new Date(prediction.due_date),
-                    new Date()
-                  )}`}</p>
-                </div>
-              )}
-
-              <Bet
-                bets={prediction.bets}
-                discord_id={payload.discordId}
-                status={prediction.status}
-                prediction_id={prediction.id}
-              />
-            </div>
-            {userBet && (
-              <div className="flex justify-between">
-                <div>
-                  <p>POTENTIAL POINTS</p>
-                  <p>GIVEN DUE DATE OF</p>
-                  <p>{formatDate(prediction.due_date).toUpperCase()}</p>
-                </div>
-                <div className="flex h-12">
-                  <PillDisplay
-                    text={`+/- ${Math.min(
-                      Math.floor(userBet.wager * payoutRatio),
-                      1
-                    )}`}
-                    color={"bg-silver-chalice-grey"}
-                  />
-                </div>
+        <PillDisplay
+          text={prediction.status.toUpperCase().slice(0, 7)}
+          color={statusColor[prediction.status]}
+        />
+      </div>
+      <div className="mt-8 rounded-xl bg-silver-chalice-grey p-4">
+        <p>{prediction.text}</p>
+      </div>
+      <div className="mt-8 flex flex-col md:flex-row md:justify-between">
+        <div>
+          <Timeline
+            status={prediction.status}
+            created_date={new Date(prediction.created_date)}
+            due_date={new Date(prediction.due_date)}
+            closed_date={
+              prediction.closed_date ? new Date(prediction.closed_date) : null
+            }
+            triggered_date={
+              prediction.triggered_date
+                ? new Date(prediction.triggered_date)
+                : null
+            }
+            retired_date={
+              prediction.retired_date ? new Date(prediction.retired_date) : null
+            }
+            judged_date={
+              prediction.judged_date ? new Date(prediction.judged_date) : null
+            }
+          />
+        </div>
+        <div className="mt-8 flex flex-col gap-10">
+          <div className="flex justify-between">
+            {userBet ? (
+              <div>
+                <p>YOUR BET</p>
+                <p>{`BET ON ${formatDate(userBet.date).toUpperCase()}`}</p>
+              </div>
+            ) : (
+              <div>
+                <p>ADD YOUR BET</p>
+                <p>{`WAGER ${differenceInDays(
+                  new Date(prediction.due_date),
+                  new Date()
+                )}`}</p>
               </div>
             )}
+
+            <Bet
+              bets={prediction.bets}
+              discord_id={payload.discordId}
+              status={prediction.status}
+              prediction_id={prediction.id}
+            />
           </div>
+          {userBet && (
+            <div className="flex justify-between">
+              <div>
+                <p>POTENTIAL POINTS</p>
+                <p>GIVEN DUE DATE OF</p>
+                <p>{formatDate(prediction.due_date).toUpperCase()}</p>
+              </div>
+              <div className="flex h-12">
+                <PillDisplay
+                  text={`+/- ${Math.min(
+                    Math.floor(userBet.wager * payoutRatio),
+                    1
+                  )}`}
+                  color={"bg-silver-chalice-grey"}
+                />
+              </div>
+            </div>
+          )}
         </div>
-        <div>BETS</div>
-        <div className="flex justify-between gap-x-10">
-          <Card title="Endorsements" className="grow basis-4">
-            {endorsements.length > 0 ? (
-              <List items={endorseArray} />
-            ) : (
-              "No Endorsements were found!"
-            )}
-          </Card>
-          <Card title="Undorsements" className="grow basis-4">
-            {undorsements.length > 0 ? (
-              <List items={undorseArray} />
-            ) : (
-              "No Endorsements were found!"
-            )}
-          </Card>
-        </div>
-      </main>
-    </div>
+      </div>
+      <div className="mt-8">
+        <h3>BETS</h3>
+      </div>
+      <div className="mt-4 flex flex-col gap-8 md:flex-row">
+        <Card title="Endorsements" className="grow basis-4">
+          {endorsements.length > 0 ? (
+            <List items={endorseArray} />
+          ) : (
+            "No Endorsements were found!"
+          )}
+        </Card>
+        <Card title="Undorsements" className="grow basis-4">
+          {undorsements.length > 0 ? (
+            <List items={undorseArray} />
+          ) : (
+            "No Endorsements were found!"
+          )}
+        </Card>
+      </div>
+    </>
   );
 }
