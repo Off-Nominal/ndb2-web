@@ -165,7 +165,7 @@ export default async function Predictions({ params }: any) {
   const listHeader = (
     <div className="flex">
       <p className="grow">User</p>
-      <p className="text-left shrink-0 grow-0 basis-32">Bet Date</p>
+      <p className="shrink-0 grow-0 basis-32 text-left">Bet Date</p>
       <p className="shrink-0 grow-0 basis-10">Wager</p>
     </div>
   );
@@ -185,8 +185,8 @@ export default async function Predictions({ params }: any) {
   undorseArray.unshift(listHeader);
 
   return (
-    <div className="flex flex-col content-center w-full h-full p-8 align-middle">
-      <main className="flex flex-col w-full gap-10">
+    <div className="flex h-full w-full flex-col content-center p-8 align-middle">
+      <main className="flex w-full flex-col gap-10">
         <div className="flex flex-col gap-10">
           <div className="flex flex-row justify-between">
             <div className="flex flex-col">
@@ -198,11 +198,11 @@ export default async function Predictions({ params }: any) {
               color={statusColor[prediction.status]}
             />
           </div>
-          <div className="justify-center w-full h-auto p-2 text-left rounded-lg bg-silver-chalice-grey">
+          <div className="h-auto w-full justify-center rounded-lg bg-silver-chalice-grey p-2 text-left">
             <p>{prediction.text}</p>
           </div>
         </div>
-        <div className="flex justify-evenly">
+        <div className="flex justify-between">
           <div>
             <Timeline
               status={prediction.status}
@@ -236,9 +236,12 @@ export default async function Predictions({ params }: any) {
               ) : (
                 <div>
                   <p>ADD YOUR BET</p>
-                  <p>{`WAGER ${differenceInDays(new Date(prediction.due_date), new Date())}`}</p>
+                  <p>{`WAGER ${differenceInDays(
+                    new Date(prediction.due_date),
+                    new Date()
+                  )}`}</p>
                 </div>
-                )}
+              )}
 
               <Bet
                 bets={prediction.bets}
@@ -247,20 +250,23 @@ export default async function Predictions({ params }: any) {
                 prediction_id={prediction.id}
               />
             </div>
-            {userBet &&(
-            <div className="flex justify-between">
-              <div>
-                <p>POTENTIAL POINTS</p>
-                <p>GIVEN DUE DATE OF</p>
-                <p>{formatDate(prediction.due_date).toUpperCase()}</p>
+            {userBet && (
+              <div className="flex justify-between">
+                <div>
+                  <p>POTENTIAL POINTS</p>
+                  <p>GIVEN DUE DATE OF</p>
+                  <p>{formatDate(prediction.due_date).toUpperCase()}</p>
+                </div>
+                <div className="flex h-12">
+                  <PillDisplay
+                    text={`+/- ${Math.min(
+                      Math.floor(userBet.wager * payoutRatio),
+                      1
+                    )}`}
+                    color={"bg-silver-chalice-grey"}
+                  />
+                </div>
               </div>
-              <div className="flex h-12">
-                <PillDisplay
-                  text={`+/- ${Math.min(Math.floor(userBet.wager * payoutRatio),1)}`}
-                  color={"bg-silver-chalice-grey"}
-                />
-              </div>
-            </div>
             )}
           </div>
         </div>
