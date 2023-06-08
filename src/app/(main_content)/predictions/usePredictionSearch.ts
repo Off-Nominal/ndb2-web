@@ -100,13 +100,14 @@ export const usePredictionSearch = (
         })
         .then((prediction: APIPredictions.EnhancedPrediction) => {
           const newBets = [...userBets];
-          const existingBet = newBets.find(
+          const existingBetIndex = newBets.findIndex(
             (b) => b.prediction_id === predictionId
           );
 
-          if (existingBet) {
-            existingBet.endorsed = endorsed;
-            setUserBets([...userBets]);
+          if (existingBetIndex >= 0) {
+            const updatedBet = { ...newBets[existingBetIndex], endorsed };
+            newBets[existingBetIndex] = updatedBet;
+            setUserBets(newBets);
           } else {
             const newBet = prediction.bets.find(
               (b) => b.better.discord_id === discordId
@@ -334,6 +335,7 @@ export const usePredictionSearch = (
       userBet: userBets.find((b) => b.prediction_id === p.id) || false,
     })),
     updateUserBet,
+    userBets,
     searching,
     incrementallySearching,
     statuses: {

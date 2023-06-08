@@ -61,7 +61,7 @@ export const BetInterface = (props: BetInterfaceProps) => {
         <Triangle
           canvasClassName="scale-75"
           polyClassName={[
-            "fill-slate-300 stroke-slate-600 ",
+            "fill-slate-300 stroke-slate-200 dark:stroke-slate-300 stroke-[0.5px]",
             endorsedPolyClasses,
           ].join(" ")}
         />
@@ -87,7 +87,7 @@ export const BetInterface = (props: BetInterfaceProps) => {
         <Triangle
           canvasClassName="scale-75"
           polyClassName={[
-            "fill-slate-300 stroke-slate-600 origin-center rotate-180",
+            "fill-slate-300 stroke-slate-200 dark:stroke-slate-300 stroke-[0.5px] origin-center rotate-180",
             undorsedPolyClasses,
           ].join(" ")}
         />

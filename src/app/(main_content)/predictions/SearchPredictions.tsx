@@ -99,6 +99,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
     reachedEndOfList,
     season_id,
     setSeasonId,
+    userBets,
   } = usePredictionSearch(props.discordId, props.bets);
 
   usePageIncrement(predictions, incrementPage);
@@ -375,7 +376,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
       <section className="my-8 flex w-full flex-col gap-4">
         {predictions.length > 0 &&
           predictions.map((p) => {
-            const userBet = props.bets.find((b) => b.prediction_id === p.id);
+            const userBet = userBets.find((b) => b.prediction_id === p.id);
 
             return (
               <PredictionListItem

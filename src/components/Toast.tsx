@@ -18,9 +18,9 @@ const ToastItem = (props: ToastItemProps) => {
   }, [startFade, close, fadingIn]);
 
   const colors = {
-    success: "bg-moss-green",
-    error: "bg-deep-chestnut-red",
-    warning: "bg-warning-yellow",
+    success: "bg-moss-green text-white",
+    error: "bg-deep-chestnut-red text-white",
+    warning: "bg-warning-yellow dark:text-slate-900",
   };
 
   const fadeOutClass = startFade ? "opacity-0 height-0 animate-fade-out" : "";
@@ -34,7 +34,7 @@ const ToastItem = (props: ToastItemProps) => {
         setFadingIn(false);
       }}
       className={[
-        "max-w-90 relative flex w-[350px] content-start justify-between rounded-lg px-6 py-3",
+        "max-w-90 relative flex w-[350px] content-start justify-between rounded-lg px-6 py-3 shadow-lg",
         fadeInClass,
         fadeOutClass,
         colors[props.type],

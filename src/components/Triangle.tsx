@@ -14,7 +14,7 @@ export const Triangle = (props: TriangleProps) => {
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 10 10"
-      className={["h-10 w-10", canvasClassName].join(" ")}
+      className={["h-10 w-10 overflow-visible", canvasClassName].join(" ")}
       onClick={props.onClick}
     >
       <polygon
