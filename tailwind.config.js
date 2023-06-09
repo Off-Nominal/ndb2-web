@@ -24,6 +24,8 @@ module.exports = {
       "warning-yellow": "#facc15",
       "discord-purple": "#7983f5",
       transparent: "transparent",
+      "discord-mention-foreground": "#c9cdfb",
+      "discord-mention-background": "#5865f2",
       slate: {
         50: "#f8fafc",
         100: "#f1f5f9",

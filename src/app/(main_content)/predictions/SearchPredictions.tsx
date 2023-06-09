@@ -19,6 +19,7 @@ import { APIBets } from "@/types/bets";
 import { APISeasons } from "@/types/seasons";
 import { format } from "date-fns";
 import { ScrollToTop } from "../../../components/ScrollToTop";
+import { hydrateTextWithMemberHandles } from "./hydrateTextWithMemberHandles";
 
 const sortByOptions = [
   {
@@ -378,7 +379,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
                 updateUserBet={updateUserBet}
                 loading={searching}
                 key={p.id}
-                text={p.text}
+                text={hydrateTextWithMemberHandles(p.text, props.members)}
                 id={p.id}
                 status={p.status}
                 userBet={userBet}

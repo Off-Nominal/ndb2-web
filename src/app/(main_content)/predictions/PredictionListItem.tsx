@@ -1,19 +1,19 @@
 import { useToast } from "@/app/contexts/toast";
 import { RiskPill } from "@/components/RiskPill";
 import { PredictionLifeCycle } from "@/types/predictions";
-import { add, format, isAfter } from "date-fns";
+import { add, isAfter } from "date-fns";
 import { BetInterface } from "./BetInterface";
 import { APIBets } from "@/types/bets";
 import Link from "next/link";
 import { Button } from "@/components/Button";
 import { Timeline } from "@/components/Timeline";
-import { buildTimeline } from "@/utils/helpers";
+import { ReactNode } from "react";
 
 type PredictionListItemProps = {
   updateUserBet: (predictionId: number, endorsed: boolean) => Promise<void>;
   status: PredictionLifeCycle;
   id: number;
-  text: string;
+  text: ReactNode[];
   userBet: APIBets.UserBet | undefined;
   endorse_ratio: number;
   undorse_ratio: number;
@@ -29,20 +29,6 @@ type PredictionListItemProps = {
   undorsements: number;
   yesVotes: number;
   noVotes: number;
-};
-
-enum TimelineStatus {
-  COMPLETE = "complete",
-  COMPLETE_NEGATIVE = "complete_negative",
-  IN_PROGRESS = "in_progress",
-  NOT_STARTED = "not_started",
-  CANCELLED = "cancelled",
-}
-
-type TimelineItem = {
-  label: string;
-  value: string;
-  status: TimelineStatus;
 };
 
 export const PredictionListItem = (props: PredictionListItemProps) => {
@@ -65,24 +51,6 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
   }
 
   const gridRows = showVotes ? "grid-rows-4" : "grid-rows-2";
-
-  const timeline = buildTimeline(
-    props.status,
-    props.createdDate,
-    props.dueDate,
-    props.closedDate,
-    props.triggeredDate,
-    props.retiredDate,
-    props.judgedDate
-  );
-
-  const timelineStatusClasses = {
-    complete: "bg-moss-green",
-    complete_negative: "bg-deep-chestnut-red",
-    in_progress: "bg-moonstone-blue",
-    not_started: "bg-silver-chalice-grey",
-    cancelled: "bg-slate-300 dark:bg-slate-500",
-  };
 
   const handleBet = (endorsed: boolean) => {
     if (props.userBet) {
@@ -145,12 +113,12 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
             </div>
           </div>
           <div className="relative h-[6em] grow basis-24 self-center overflow-hidden after:absolute after:bottom-0 after:right-0 after:h-[1.5em] after:w-3/4 after:bg-gradient-to-r after:from-white/0 after:to-slate-200/100 after:text-right group-open:mt-2 group-open:h-full group-open:self-start group-open:overflow-visible group-open:after:hidden dark:after:to-slate-700/100">
-            <p className="w-full">
+            <div className="w-full">
               <span className="mr-2 rounded-md bg-slate-300 px-1.5 py-0.5 dark:bg-slate-500 md:hidden">
                 #{props.id}
               </span>
               {props.text}
-            </p>
+            </div>
           </div>
           <BetInterface
             handleBet={handleBet}

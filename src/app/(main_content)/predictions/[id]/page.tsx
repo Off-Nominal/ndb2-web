@@ -12,11 +12,11 @@ import ndb2API from "@/utils/ndb2";
 import discordAPI from "@/utils/discord";
 import { ShortDiscordGuildMember } from "@/types/discord";
 import { differenceInDays, format } from "date-fns";
-import Image from "next/image";
 import { APIPredictions, PredictionLifeCycle } from "@/types/predictions";
 import { APIBets } from "@/types/bets";
 import { Avatar } from "@/components/Avatar";
 import { List } from "@/components/List";
+import { hydrateTextWithMemberHandles } from "../hydrateTextWithMemberHandles";
 
 type ListBet = Omit<APIBets.Bet, "better"> & {
   name: string;
@@ -45,11 +45,12 @@ const generateBet = (
 };
 
 // SERVER SIDE DATA FETCHING
-async function fetchPrediction(id: number): Promise<{
+async function fetchData(id: number): Promise<{
   prediction: APIPredictions.EnhancedPrediction;
   predictor: ShortDiscordGuildMember;
   endorsements: ListBet[];
   undorsements: ListBet[];
+  members: ShortDiscordGuildMember[];
 }> {
   const headers: RequestInit["headers"] = { cache: "no-store" };
   const guildMemberManager = new discordAPI.GuildMemberManager();
@@ -73,6 +74,7 @@ async function fetchPrediction(id: number): Promise<{
     const userLookup = await guildMemberManager.buildUserLookup(
       prediction.bets.map((bet) => bet.better.discord_id)
     );
+    const members = guildMemberManager.getMembers();
     const predictor = userLookup[prediction.predictor.discord_id];
     const endorsements = prediction.bets
       .filter((bet) => bet.endorsed)
@@ -81,7 +83,13 @@ async function fetchPrediction(id: number): Promise<{
       .filter((bet) => !bet.endorsed)
       .map((bet) => generateBet(bet, userLookup[bet.better.discord_id]));
 
-    return { prediction, predictor, endorsements, undorsements };
+    return {
+      prediction,
+      predictor,
+      endorsements,
+      undorsements,
+      members: Object.values(members),
+    };
   } catch (err) {
     console.error(err);
     throw new Error("Failed to fetch user infor");
@@ -95,8 +103,8 @@ export default async function Predictions({ params }: any) {
     return redirect("/signin");
   }
 
-  const { prediction, predictor, endorsements, undorsements } =
-    await fetchPrediction(params.id);
+  const { prediction, predictor, endorsements, undorsements, members } =
+    await fetchData(params.id);
 
   const userBet = prediction.bets.find(
     (bet) => bet.better.discord_id === payload.discordId
@@ -208,7 +216,7 @@ export default async function Predictions({ params }: any) {
         />
       </div>
       <div className="mt-8 rounded-xl bg-slate-300 p-4 dark:bg-slate-600">
-        <p>{prediction.text}</p>
+        <p>{hydrateTextWithMemberHandles(prediction.text, members)}</p>
       </div>
       <div className="mt-8 flex flex-col md:flex-row md:justify-between">
         <div>
