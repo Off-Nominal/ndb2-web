@@ -1,8 +1,6 @@
 import authAPI from "@/utils/auth";
 import { Navigation } from "./Navigation";
 import { redirect } from "next/navigation";
-import { Toast } from "../../components/Toast";
-import ToastProvider from "../contexts/toast";
 
 export default async function MainLayout({
   children, // will be a page or nested layout

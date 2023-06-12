@@ -6,6 +6,30 @@ import discordAPI from "@/utils/discord";
 import { ShortDiscordGuildMember } from "@/types/discord";
 import { APIBets } from "@/types/bets";
 import { APISeasons } from "@/types/seasons";
+import { Metadata } from "next";
+
+const title = "Nostradambot2 - Predictions";
+const description =
+  "A fun predictions betting game for the Off-Nominal Discord.";
+
+export const metadata: Metadata = {
+  title: "Predictions",
+  openGraph: {
+    title,
+    description,
+    url: "https://ndb2.offnom.com/predictions",
+    siteName: title,
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title,
+    description,
+    site: "@offnom",
+    creator: "@JakeOnOrbit",
+  },
+};
 
 const getPredictionSearchData = async () => {
   const payload = await authAPI.verify();
