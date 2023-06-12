@@ -39,6 +39,17 @@ export const metadata: Metadata = {
     site: "@offnom",
     creator: "@JakeOnOrbit",
   },
+  manifest: "/site.webmanifest",
+  themeColor: "#020617",
+  icons: {
+    other: {
+      rel: "mask-icon",
+      url: "/safari-pinned-tab.svg",
+    },
+  },
+  other: {
+    "msapplication-Tilecolor": "#2b5797",
+  },
 };
 
 export default function RootLayout({
