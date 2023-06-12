@@ -199,7 +199,7 @@ export const usePredictionSearch = (
       params.delete("unbetter");
     }
 
-    history.pushState(null, "", `${pathname}?${params.toString()}`);
+    history.replaceState(history.state, "", `${pathname}?${params.toString()}`);
   }, [
     router,
     pathname,

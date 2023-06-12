@@ -231,7 +231,6 @@ export default async function Predictions(props: PredictionsPageProps) {
     </div>
   );
 
-  endorseArray.unshift(listHeader);
   const undorseArray = undorsements.map((bet) => {
     return (
       <PredictionsEntry
@@ -243,7 +242,6 @@ export default async function Predictions(props: PredictionsPageProps) {
       />
     );
   });
-  undorseArray.unshift(listHeader);
 
   return (
     <>
@@ -339,14 +337,14 @@ export default async function Predictions(props: PredictionsPageProps) {
       <div className="mt-4 flex flex-col gap-8 md:flex-row">
         <Card title="Endorsements" className="grow basis-4">
           {endorsements.length > 0 ? (
-            <List items={endorseArray} />
+            <List items={endorseArray} headerElement={listHeader} />
           ) : (
             "No Endorsements were found!"
           )}
         </Card>
         <Card title="Undorsements" className="grow basis-4">
           {undorsements.length > 0 ? (
-            <List items={undorseArray} />
+            <List items={undorseArray} headerElement={listHeader} />
           ) : (
             "No Endorsements were found!"
           )}
