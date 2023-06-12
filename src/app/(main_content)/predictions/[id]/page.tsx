@@ -18,6 +18,8 @@ import { Avatar } from "@/components/Avatar";
 import { List } from "@/components/List";
 import { hydrateTextWithMemberHandles } from "../hydrateTextWithMemberHandles";
 import { Metadata } from "next";
+import Image from "next/image";
+import { Empty } from "@/components/Empty";
 
 type ListBet = Omit<APIBets.Bet, "better"> & {
   name: string;
@@ -339,14 +341,14 @@ export default async function Predictions(props: PredictionsPageProps) {
           {endorsements.length > 0 ? (
             <List items={endorseArray} headerElement={listHeader} />
           ) : (
-            "No Endorsements were found!"
+            <Empty text="No Endorsements for this bet" className="w-1/5 py-2" />
           )}
         </Card>
         <Card title="Undorsements" className="grow basis-4">
           {undorsements.length > 0 ? (
             <List items={undorseArray} headerElement={listHeader} />
           ) : (
-            "No Endorsements were found!"
+            <Empty text="No Undorsements for this bet" className="w-1/5 py-2" />
           )}
         </Card>
       </div>
