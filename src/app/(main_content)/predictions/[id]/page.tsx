@@ -9,7 +9,7 @@ import { Bet } from "@/components/Bet";
 
 import authAPI from "@/utils/auth";
 import ndb2API from "@/utils/ndb2";
-import discordAPI from "@/utils/discord";
+import discordAPI, { GuildMemberManager } from "@/utils/discord";
 import { ShortDiscordGuildMember } from "@/types/discord";
 import { differenceInDays, format } from "date-fns";
 import { APIPredictions, PredictionLifeCycle } from "@/types/predictions";
@@ -17,6 +17,7 @@ import { APIBets } from "@/types/bets";
 import { Avatar } from "@/components/Avatar";
 import { List } from "@/components/List";
 import { hydrateTextWithMemberHandles } from "../hydrateTextWithMemberHandles";
+import { Metadata } from "next";
 
 type ListBet = Omit<APIBets.Bet, "better"> & {
   name: string;
@@ -44,14 +45,13 @@ const generateBet = (
   };
 };
 
+type PredictionsPageProps = {
+  params: { id: string };
+};
+
 // SERVER SIDE DATA FETCHING
-async function fetchData(id: number): Promise<{
-  prediction: APIPredictions.EnhancedPrediction;
-  predictor: ShortDiscordGuildMember;
-  endorsements: ListBet[];
-  undorsements: ListBet[];
-  members: ShortDiscordGuildMember[];
-}> {
+
+async function baseFetch(id: number) {
   const headers: RequestInit["headers"] = { cache: "no-store" };
   const guildMemberManager = new discordAPI.GuildMemberManager();
 
@@ -60,13 +60,57 @@ async function fetchData(id: number): Promise<{
     ndb2API.getPredictionById(id, headers),
   ];
 
+  const results = await Promise.all(promises);
+  const prediction = results[1].data;
+  return { prediction, guildMemberManager };
+}
+
+export async function generateMetadata(
+  props: PredictionsPageProps
+): Promise<Metadata> {
+  const id = parseInt(props.params.id);
+  const { prediction, guildMemberManager } = await baseFetch(id);
+
+  const member = await guildMemberManager.getMemberByDiscordId(
+    prediction.predictor.discord_id
+  );
+
+  return {
+    title: `Prediction #${prediction.id}`,
+    description: `Predictions detail page for prediction #${prediction.id} by ${member.name}`,
+    openGraph: {
+      title: `Prediction #${prediction.id} by ${member.name}`,
+      description: prediction.text,
+      url: `https://ndb2.offnom.com/predictions/${id}`,
+      siteName: "Nostradambot2",
+      locale: "en_US",
+      type: "website",
+    },
+    twitter: {
+      card: "summary",
+      title: `Prediction #${prediction.id}`,
+      description: `Predictions detail page for prediction #${prediction.id} by ${member.name}`,
+      site: "@offnom",
+      creator: "@JakeOnOrbit",
+    },
+  };
+}
+
+async function fetchData(id: number): Promise<{
+  prediction: APIPredictions.EnhancedPrediction;
+  predictor: ShortDiscordGuildMember;
+  endorsements: ListBet[];
+  undorsements: ListBet[];
+  members: ShortDiscordGuildMember[];
+}> {
   let prediction: APIPredictions.EnhancedPrediction;
+  let guildMemberManager: GuildMemberManager;
 
   try {
-    const results = await Promise.all(promises);
-    prediction = results[1].data;
+    const baseData = await baseFetch(id);
+    prediction = baseData.prediction;
+    guildMemberManager = baseData.guildMemberManager;
   } catch (err) {
-    console.error(err);
     throw new Error("Failed to fetch prediction data");
   }
 
@@ -96,7 +140,12 @@ async function fetchData(id: number): Promise<{
   }
 }
 
-export default async function Predictions({ params }: any) {
+export default async function Predictions(props: PredictionsPageProps) {
+  const id = parseInt(props.params.id);
+  if (isNaN(id)) {
+    return redirect("/predictions");
+  }
+
   const payload = await authAPI.verify();
 
   if (!payload) {
@@ -104,7 +153,7 @@ export default async function Predictions({ params }: any) {
   }
 
   const { prediction, predictor, endorsements, undorsements, members } =
-    await fetchData(params.id);
+    await fetchData(id);
 
   const userBet = prediction.bets.find(
     (bet) => bet.better.discord_id === payload.discordId
