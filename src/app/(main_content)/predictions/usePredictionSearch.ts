@@ -162,7 +162,6 @@ export const usePredictionSearch = (
   const keywordRef = useRef(keyword);
   const pageRef = useRef(page);
 
-  const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -201,7 +200,6 @@ export const usePredictionSearch = (
 
     history.replaceState(history.state, "", `${pathname}?${params.toString()}`);
   }, [
-    router,
     pathname,
     searchParams,
     keyword,
