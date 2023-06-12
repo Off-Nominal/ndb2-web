@@ -11,7 +11,7 @@ export const hydrateTextWithMemberHandles = (
   return reactStringReplace(text, regex, (match, i) => {
     const matchId = match.slice(2, -1);
     const member = memberHandles.find((member) => member.discordId === matchId);
-    console.log(member);
+
     if (!member) {
       return <span key={i}>{match}</span>;
     }
