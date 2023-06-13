@@ -123,10 +123,10 @@ async function fetchData(id: number): Promise<{
     const members = guildMemberManager.getMembers();
     const predictor = userLookup[prediction.predictor.discord_id];
     const endorsements = prediction.bets
-      .filter((bet) => bet.endorsed)
+      .filter((bet) => bet.endorsed && bet.valid)
       .map((bet) => generateBet(bet, userLookup[bet.better.discord_id]));
     const undorsements = prediction.bets
-      .filter((bet) => !bet.endorsed)
+      .filter((bet) => !bet.endorsed && bet.valid)
       .map((bet) => generateBet(bet, userLookup[bet.better.discord_id]));
 
     return {
@@ -186,23 +186,25 @@ export default async function Predictions(props: PredictionsPageProps) {
 
   const PredictionsEntry = (props: PredictionsEntryProps) => {
     return (
-      <div className="flex items-center">
-        <div className="flex grow">
-          <div className="mx-2 shrink-0 grow-0 basis-8">
-            <Avatar
-              src={props.avatarUrl || defaultAvatarUrl}
-              alt={`Avatar photo for user ${props.name}`}
-              size={30}
-            />
-          </div>
-          <div className="mx-2 grow">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 lg:flex-nowrap">
+        <div className="mt-1 shrink-0 grow-0 basis-9">
+          <Avatar
+            src={props.avatarUrl || defaultAvatarUrl}
+            alt={`Avatar photo for user ${props.name}`}
+            size={36}
+          />
+        </div>
+        <div className="flex grow basis-32 flex-col lg:flex-row">
+          <div className="basis-full lg:grow lg:basis-1/2">
             <span>{props.name}</span>
           </div>
+          <div className="basis-full lg:basis-24">
+            <span className="text-xs uppercase text-slate-500 dark:text-slate-400">
+              {props.date}
+            </span>
+          </div>
         </div>
-        <div className="flex shrink-0 grow-0 basis-32">
-          <span>{props.date}</span>
-        </div>
-        <div className="ml-2 shrink-0 grow-0 basis-10">
+        <div className="ml-2 flex shrink-0 grow-0 basis-8 justify-end lg:order-3">
           <span>{props.value.toLocaleString("en-US")}</span>
         </div>
       </div>
@@ -222,11 +224,9 @@ export default async function Predictions(props: PredictionsPageProps) {
   });
 
   const listHeader = (
-    <div className="flex">
+    <div className="flex gap-x-4 gap-y-1">
+      <div className="mt-1 shrink-0 grow-0 basis-9"></div>
       <p className="grow text-sm font-bold uppercase">User</p>
-      <p className="shrink-0 grow-0 basis-32 text-left text-sm font-bold uppercase">
-        Bet Date
-      </p>
       <p className="shrink-0 grow-0 basis-10 text-sm font-bold uppercase">
         Wager
       </p>
