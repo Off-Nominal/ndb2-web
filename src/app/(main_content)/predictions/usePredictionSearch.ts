@@ -7,7 +7,6 @@ import {
 } from "@/types/predictions";
 import { responseHandler } from "@/utils/misc";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const findStatus = (

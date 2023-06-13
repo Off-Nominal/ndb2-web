@@ -1,33 +1,20 @@
 import { redirect } from "next/navigation";
-
-import React from "react";
-
-import { Card } from "@/components/Card";
-import { Timeline } from "@/components/Timeline";
 import { PillDisplay } from "@/components/PillDisplay";
-import { Bet } from "@/components/Bet";
-
 import authAPI from "@/utils/auth";
 import ndb2API from "@/utils/ndb2";
 import discordAPI, { GuildMemberManager } from "@/utils/discord";
 import { ShortDiscordGuildMember } from "@/types/discord";
-import { differenceInDays, format } from "date-fns";
 import { APIPredictions, PredictionLifeCycle } from "@/types/predictions";
 import { APIBets } from "@/types/bets";
 import { Avatar } from "@/components/Avatar";
-import { List } from "@/components/List";
 import { hydrateTextWithMemberHandles } from "../hydrateTextWithMemberHandles";
 import { Metadata } from "next";
-import Image from "next/image";
-import { Empty } from "@/components/Empty";
+import ViewPrediction from "./ViewPrediction";
 
-type ListBet = Omit<APIBets.Bet, "better"> & {
+export type ListBet = Omit<APIBets.Bet, "better"> & {
   name: string;
   avatarUrl: string;
-};
-
-const formatDate = (date: string) => {
-  return format(new Date(date), "LLL do, yyyy");
+  better_discordId: string;
 };
 
 const generateBet = (
@@ -44,6 +31,7 @@ const generateBet = (
     season_payout: bet.season_payout,
     name: member.name,
     avatarUrl: member.avatarUrl,
+    better_discordId: member.discordId,
   };
 };
 
@@ -101,8 +89,7 @@ export async function generateMetadata(
 async function fetchData(id: number): Promise<{
   prediction: APIPredictions.EnhancedPrediction;
   predictor: ShortDiscordGuildMember;
-  endorsements: ListBet[];
-  undorsements: ListBet[];
+  bets: ListBet[];
   members: ShortDiscordGuildMember[];
 }> {
   let prediction: APIPredictions.EnhancedPrediction;
@@ -122,18 +109,14 @@ async function fetchData(id: number): Promise<{
     );
     const members = guildMemberManager.getMembers();
     const predictor = userLookup[prediction.predictor.discord_id];
-    const endorsements = prediction.bets
-      .filter((bet) => bet.endorsed && bet.valid)
-      .map((bet) => generateBet(bet, userLookup[bet.better.discord_id]));
-    const undorsements = prediction.bets
-      .filter((bet) => !bet.endorsed && bet.valid)
+    const bets = prediction.bets
+      .filter((bet) => bet.valid)
       .map((bet) => generateBet(bet, userLookup[bet.better.discord_id]));
 
     return {
       prediction,
       predictor,
-      endorsements,
-      undorsements,
+      bets,
       members: Object.values(members),
     };
   } catch (err) {
@@ -154,18 +137,7 @@ export default async function Predictions(props: PredictionsPageProps) {
     return redirect("/signin");
   }
 
-  const { prediction, predictor, endorsements, undorsements, members } =
-    await fetchData(id);
-
-  const userBet = prediction.bets.find(
-    (bet) => bet.better.discord_id === payload.discordId
-  );
-
-  const payoutRatio = userBet
-    ? userBet.endorsed
-      ? prediction.payouts.endorse
-      : prediction.payouts.undorse
-    : 1;
+  const { prediction, predictor, bets, members } = await fetchData(id);
 
   const statusColor = {
     [PredictionLifeCycle.RETIRED]: "bg-silver-chalice-grey",
@@ -174,74 +146,6 @@ export default async function Predictions(props: PredictionsPageProps) {
     [PredictionLifeCycle.OPEN]: "bg-moonstone-blue",
     [PredictionLifeCycle.CLOSED]: "bg-silver-chalice-grey",
   };
-
-  type PredictionsEntryProps = {
-    date: string;
-    avatarUrl: string;
-    name: string;
-    value: number | string;
-  };
-
-  const defaultAvatarUrl = "https://cdn.discordapp.com/embed/avatars/0.png";
-
-  const PredictionsEntry = (props: PredictionsEntryProps) => {
-    return (
-      <div className="flex gap-x-4 gap-y-1">
-        <div className="mt-1 basis-9">
-          <Avatar
-            src={props.avatarUrl || defaultAvatarUrl}
-            alt={`Avatar photo for user ${props.name}`}
-            size={36}
-          />
-        </div>
-        <div className="flex grow flex-col lg:flex-row">
-          <div className="basis-full lg:grow lg:basis-1/2">
-            <span>{props.name}</span>
-          </div>
-          <div className="flex basis-full lg:basis-24 lg:justify-end">
-            <span className="text-xs uppercase text-slate-500 dark:text-slate-400">
-              {props.date}
-            </span>
-          </div>
-        </div>
-        <div className="flex shrink-0 basis-10 justify-end lg:order-3">
-          <span>{props.value.toLocaleString("en-US")}</span>
-        </div>
-      </div>
-    );
-  };
-
-  const endorseArray = endorsements.map((bet) => {
-    return (
-      <PredictionsEntry
-        key={bet.id}
-        date={formatDate(bet.date)}
-        avatarUrl={bet.avatarUrl}
-        name={bet.name}
-        value={bet.wager}
-      />
-    );
-  });
-
-  const listHeader = (
-    <div className="flex gap-x-4 gap-y-1 font-bold uppercase">
-      <div className="basis-9"></div>
-      <p className="grow text-sm">User</p>
-      <p className="shrink-0 basis-10 text-sm">Wager</p>
-    </div>
-  );
-
-  const undorseArray = undorsements.map((bet) => {
-    return (
-      <PredictionsEntry
-        key={bet.id}
-        date={formatDate(bet.date)}
-        avatarUrl={bet.avatarUrl}
-        name={bet.name}
-        value={bet.wager}
-      />
-    );
-  });
 
   return (
     <>
@@ -265,91 +169,20 @@ export default async function Predictions(props: PredictionsPageProps) {
       <div className="mt-8 rounded-xl bg-slate-300 p-4 dark:bg-slate-600">
         <p>{hydrateTextWithMemberHandles(prediction.text, members)}</p>
       </div>
-      <div className="mt-8 flex flex-col md:flex-row md:justify-between">
-        <div>
-          <Timeline
-            status={prediction.status}
-            created_date={new Date(prediction.created_date)}
-            due_date={new Date(prediction.due_date)}
-            closed_date={
-              prediction.closed_date ? new Date(prediction.closed_date) : null
-            }
-            triggered_date={
-              prediction.triggered_date
-                ? new Date(prediction.triggered_date)
-                : null
-            }
-            retired_date={
-              prediction.retired_date ? new Date(prediction.retired_date) : null
-            }
-            judged_date={
-              prediction.judged_date ? new Date(prediction.judged_date) : null
-            }
-          />
-        </div>
-        <div className="mt-8 flex flex-col gap-10">
-          <div className="flex justify-between">
-            {userBet ? (
-              <div>
-                <p>YOUR BET</p>
-                <p>{`BET ON ${formatDate(userBet.date).toUpperCase()}`}</p>
-              </div>
-            ) : (
-              <div>
-                <p>ADD YOUR BET</p>
-                <p>{`WAGER ${differenceInDays(
-                  new Date(prediction.due_date),
-                  new Date()
-                )}`}</p>
-              </div>
-            )}
-
-            <Bet
-              bets={prediction.bets}
-              discord_id={payload.discordId}
-              status={prediction.status}
-              prediction_id={prediction.id}
-            />
-          </div>
-          {userBet && (
-            <div className="flex justify-between">
-              <div>
-                <p>POTENTIAL POINTS</p>
-                <p>GIVEN DUE DATE OF</p>
-                <p>{formatDate(prediction.due_date).toUpperCase()}</p>
-              </div>
-              <div className="flex h-12">
-                <PillDisplay
-                  text={`+/- ${Math.min(
-                    Math.floor(userBet.wager * payoutRatio),
-                    1
-                  )}`}
-                  color={"bg-silver-chalice-grey"}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-      <div className="mt-8">
-        <h3>BETS</h3>
-      </div>
-      <div className="mt-4 flex flex-col gap-8 md:flex-row md:items-start">
-        <Card title="Endorsements" className="grow basis-4">
-          {endorsements.length > 0 ? (
-            <List items={endorseArray} headerElement={listHeader} />
-          ) : (
-            <Empty text="No Endorsements for this bet" className="w-1/5 py-2" />
-          )}
-        </Card>
-        <Card title="Undorsements" className="grow basis-4">
-          {undorsements.length > 0 ? (
-            <List items={undorseArray} headerElement={listHeader} />
-          ) : (
-            <Empty text="No Undorsements for this bet" className="w-1/5 py-2" />
-          )}
-        </Card>
-      </div>
+      <ViewPrediction
+        predictionId={prediction.id}
+        status={prediction.status}
+        created_date={prediction.created_date}
+        due_date={prediction.due_date}
+        closed_date={prediction.closed_date}
+        triggered_date={prediction.triggered_date}
+        judged_date={prediction.judged_date}
+        retired_date={prediction.retired_date}
+        bets={bets}
+        endorseRatio={prediction.payouts.endorse}
+        undorseRatio={prediction.payouts.undorse}
+        user={payload}
+      />
     </>
   );
 }

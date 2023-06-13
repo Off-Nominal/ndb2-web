@@ -120,10 +120,12 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
               {props.text}
             </div>
           </div>
+
           <BetInterface
             handleBet={handleBet}
             disabledMessage={betMessage}
             currentBet={props.userBet?.endorsed}
+            containerClasses="overflow-hidden flex flex-col rounded-br-lg rounded-tr-lg h-[7em] shrink-0 grow-0 basis-12 group-open:rounded-bl-lg group-open:rounded-br-none"
           />
         </summary>
         <div className="mb-4 mt-8 flex gap-4">

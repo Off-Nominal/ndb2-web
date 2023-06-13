@@ -5,6 +5,9 @@ type BetInterfaceProps = {
   handleBet: (endorsed: boolean) => void;
   disabledMessage: string | undefined;
   currentBet: boolean | undefined;
+  containerClasses?: string;
+  endorseButtonClasses?: string;
+  undorseButtonClasses?: string;
 };
 
 export const BetInterface = (props: BetInterfaceProps) => {
@@ -20,30 +23,36 @@ export const BetInterface = (props: BetInterfaceProps) => {
   const undorsedHoverClasses =
     props.disabledMessage !== undefined ? "" : "hover:bg-deep-chestnut-red";
 
-  let endorsedPolyClasses = props.currentBet === true ? "fill-moss-green" : "";
+  let endorsedPolyClasses =
+    props.currentBet === true ? "fill-moss-green" : "fill-slate-300";
 
   if (!props.disabledMessage) {
     endorsedPolyClasses += " group-hover/endorse:fill-slate-300";
   }
 
   let undorsedPolyClasses =
-    props.currentBet === false ? "fill-deep-chestnut-red" : "";
+    props.currentBet === false ? "fill-deep-chestnut-red" : "fill-slate-300";
 
   if (!props.disabledMessage) {
     undorsedPolyClasses += " group-hover/undorse:fill-slate-300";
   }
 
+  const endorseButtonClasses = props.endorseButtonClasses || "";
+  const undorseButtonClasses = props.undorseButtonClasses || "";
+
   return (
     <div
       className={[
-        "relative flex h-[7em] shrink-0 grow-0 basis-12 flex-col rounded-br-lg rounded-tr-lg bg-slate-400 group-open:rounded-bl-lg group-open:rounded-br-none dark:bg-slate-500 ",
+        "bg-slate-400 dark:bg-slate-500 ",
         parentClasses,
+        props.containerClasses,
       ].join(" ")}
     >
       <div
         className={[
+          "group/endorse flex grow items-center justify-center",
           endorsedHoverClasses,
-          "group/endorse flex grow items-center justify-center rounded-tr-lg",
+          endorseButtonClasses,
         ].join(" ")}
         onClick={(event) => {
           event.stopPropagation();
@@ -61,15 +70,16 @@ export const BetInterface = (props: BetInterfaceProps) => {
         <Triangle
           canvasClassName="scale-75"
           polyClassName={[
-            "fill-slate-300 stroke-slate-200 dark:stroke-slate-300 stroke-[0.5px]",
+            "stroke-slate-200 dark:stroke-slate-300 stroke-[0.5px]",
             endorsedPolyClasses,
           ].join(" ")}
         />
       </div>
       <div
         className={[
+          "group/undorse flex grow items-center justify-center group-open:rounded-bl-lg group-open:rounded-br-none",
           undorsedHoverClasses,
-          "group/undorse flex grow items-center justify-center rounded-br-lg group-open:rounded-bl-lg group-open:rounded-br-none",
+          undorseButtonClasses,
         ].join(" ")}
         onClick={(event) => {
           event.stopPropagation();
@@ -87,7 +97,7 @@ export const BetInterface = (props: BetInterfaceProps) => {
         <Triangle
           canvasClassName="scale-75"
           polyClassName={[
-            "fill-slate-300 stroke-slate-200 dark:stroke-slate-300 stroke-[0.5px] origin-center rotate-180",
+            "stroke-slate-200 dark:stroke-slate-300 stroke-[0.5px] origin-center rotate-180",
             undorsedPolyClasses,
           ].join(" ")}
         />
