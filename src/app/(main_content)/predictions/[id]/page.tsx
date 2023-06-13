@@ -198,13 +198,13 @@ export default async function Predictions(props: PredictionsPageProps) {
           <div className="basis-full lg:grow lg:basis-1/2">
             <span>{props.name}</span>
           </div>
-          <div className="basis-full lg:basis-24">
+          <div className="flex basis-full lg:basis-24 lg:justify-end">
             <span className="text-xs uppercase text-slate-500 dark:text-slate-400">
               {props.date}
             </span>
           </div>
         </div>
-        <div className="lg:order-3">
+        <div className="flex shrink-0 basis-10 justify-end lg:order-3">
           <span>{props.value.toLocaleString("en-US")}</span>
         </div>
       </div>
@@ -227,7 +227,7 @@ export default async function Predictions(props: PredictionsPageProps) {
     <div className="flex gap-x-4 gap-y-1 font-bold uppercase">
       <div className="basis-9"></div>
       <p className="grow text-sm">User</p>
-      <p className="text-sm">Wager</p>
+      <p className="shrink-0 basis-10 text-sm">Wager</p>
     </div>
   );
 
@@ -334,7 +334,7 @@ export default async function Predictions(props: PredictionsPageProps) {
       <div className="mt-8">
         <h3>BETS</h3>
       </div>
-      <div className="mt-4 flex flex-col gap-8 md:flex-row">
+      <div className="mt-4 flex flex-col gap-8 md:flex-row md:items-start">
         <Card title="Endorsements" className="grow basis-4">
           {endorsements.length > 0 ? (
             <List items={endorseArray} headerElement={listHeader} />
