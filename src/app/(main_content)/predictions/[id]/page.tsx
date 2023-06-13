@@ -186,15 +186,15 @@ export default async function Predictions(props: PredictionsPageProps) {
 
   const PredictionsEntry = (props: PredictionsEntryProps) => {
     return (
-      <div className="flex flex-wrap gap-x-4 gap-y-1 lg:flex-nowrap">
-        <div className="mt-1 shrink-0 grow-0 basis-9">
+      <div className="flex gap-x-4 gap-y-1">
+        <div className="mt-1 basis-9">
           <Avatar
             src={props.avatarUrl || defaultAvatarUrl}
             alt={`Avatar photo for user ${props.name}`}
             size={36}
           />
         </div>
-        <div className="flex grow basis-32 flex-col lg:flex-row">
+        <div className="flex grow flex-col lg:flex-row">
           <div className="basis-full lg:grow lg:basis-1/2">
             <span>{props.name}</span>
           </div>
@@ -204,7 +204,7 @@ export default async function Predictions(props: PredictionsPageProps) {
             </span>
           </div>
         </div>
-        <div className="ml-2 flex shrink-0 grow-0 basis-8 justify-end lg:order-3">
+        <div className="lg:order-3">
           <span>{props.value.toLocaleString("en-US")}</span>
         </div>
       </div>
@@ -224,12 +224,10 @@ export default async function Predictions(props: PredictionsPageProps) {
   });
 
   const listHeader = (
-    <div className="flex gap-x-4 gap-y-1">
-      <div className="mt-1 shrink-0 grow-0 basis-9"></div>
-      <p className="grow text-sm font-bold uppercase">User</p>
-      <p className="shrink-0 grow-0 basis-10 text-sm font-bold uppercase">
-        Wager
-      </p>
+    <div className="flex gap-x-4 gap-y-1 font-bold uppercase">
+      <div className="basis-9"></div>
+      <p className="grow text-sm">User</p>
+      <p className="text-sm">Wager</p>
     </div>
   );
 
