@@ -190,7 +190,7 @@ export default function ViewPrediction(props: ViewPredictionProps) {
           {undorsements.length > 0 ? (
             <List items={undorseArray} headerElement={listHeader} />
           ) : (
-            <Empty text="No Undorsements for this bet" className="w-1/5 py-2" />
+            <Empty text="No Undorsements for this bet" className="pb-6" />
           )}
         </Card>
       </div>
