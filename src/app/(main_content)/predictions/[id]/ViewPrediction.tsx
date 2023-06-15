@@ -3,17 +3,17 @@
 import { Timeline } from "@/components/Timeline";
 import { PredictionLifeCycle } from "@/types/predictions";
 import { BetListItem } from "./BetListItem";
-import { add, differenceInDays, format, isAfter } from "date-fns";
+import { add, format, isAfter } from "date-fns";
 import { ListBet } from "./page";
-import { PillDisplay } from "@/components/PillDisplay";
 import { Card } from "@/components/Card";
 import { List } from "@/components/List";
 import { Empty } from "@/components/Empty";
 import { useBets } from "./useBets";
-import { BetInterface } from "../BetInterface";
+
 import { useToast } from "@/app/contexts/toast";
 import { AppJWTPayload } from "@/utils/auth";
 import { RiskPill } from "@/components/RiskPill";
+import UserBet from "./UserBet";
 
 const formatDate = (date: string) => {
   return format(new Date(date), "LLL do, yyyy");
@@ -35,10 +35,10 @@ export type ViewPredictionProps = {
 };
 
 const listHeader = (
-  <div className="flex gap-x-4 gap-y-1 font-bold uppercase">
+  <div className="flex font-bold uppercase gap-x-4 gap-y-1">
     <div className="basis-9"></div>
-    <p className="grow text-sm">User</p>
-    <p className="shrink-0 basis-10 text-sm">Wager</p>
+    <p className="text-sm grow">User</p>
+    <p className="text-sm shrink-0 basis-10">Wager</p>
   </div>
 );
 
@@ -78,12 +78,6 @@ export default function ViewPrediction(props: ViewPredictionProps) {
     ? props.endorseRatio
     : props.undorseRatio;
 
-  let betMessage;
-
-  if (props.status !== PredictionLifeCycle.OPEN) {
-    betMessage = "Predictions must be in OPEN status for bets to be made.";
-  }
-
   const handleBet = (endorsed: boolean) => {
     if (userBet) {
       if (userBet.endorsed === endorsed) {
@@ -115,7 +109,7 @@ export default function ViewPrediction(props: ViewPredictionProps) {
 
   return (
     <>
-      <div className="mt-8 flex flex-col md:flex-row md:justify-between">
+      <div className="flex flex-col mt-8 md:flex-row md:justify-between">
         <div>
           <Timeline
             status={props.status}
@@ -131,50 +125,13 @@ export default function ViewPrediction(props: ViewPredictionProps) {
             judged_date={props.judged_date ? new Date(props.judged_date) : null}
           />
         </div>
-        <div className="mt-8 flex flex-col gap-10">
-          <div className="flex justify-between">
-            {userBet ? (
-              <div>
-                <p>YOUR BET</p>
-                <p>{`BET ON ${formatDate(userBet.date).toUpperCase()}`}</p>
-              </div>
-            ) : (
-              <div>
-                <p>ADD YOUR BET</p>
-                <p>{`WAGER ${differenceInDays(
-                  new Date(props.due_date),
-                  new Date()
-                )}`}</p>
-              </div>
-            )}
-            <BetInterface
-              handleBet={handleBet}
-              currentBet={userBet?.endorsed}
-              disabledMessage={betMessage}
-              containerClasses="overflow-hidden flex rounded-full"
-              endorseButtonClasses="pr-2 pl-5 py-3"
-              undorseButtonClasses="pl-2 pr-5 py-3"
-            />
-          </div>
-          {userBet && (
-            <div className="flex justify-between">
-              <div>
-                <p>POTENTIAL POINTS</p>
-                <p>GIVEN DUE DATE OF</p>
-                <p>{formatDate(props.due_date).toUpperCase()}</p>
-              </div>
-              <div className="flex h-12">
-                <PillDisplay
-                  text={`+/- ${Math.min(
-                    Math.floor(userBet.wager * payoutRatio),
-                    1
-                  )}`}
-                  color={"bg-silver-chalice-grey"}
-                />
-              </div>
-            </div>
-          )}
-        </div>
+        <UserBet
+          userBet={userBet}
+          due_date={props.due_date}
+          handleBet={handleBet}
+          status={props.status}
+          payoutRatio={payoutRatio}
+        />
       </div>
       <div className="mt-8">
         <h3 className="text-2xl uppercase">Bets</h3>
