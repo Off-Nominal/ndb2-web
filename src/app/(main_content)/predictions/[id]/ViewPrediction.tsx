@@ -13,6 +13,7 @@ import { useBets } from "./useBets";
 import { BetInterface } from "../BetInterface";
 import { useToast } from "@/app/contexts/toast";
 import { AppJWTPayload } from "@/utils/auth";
+import { RiskPill } from "@/components/RiskPill";
 
 const formatDate = (date: string) => {
   return format(new Date(date), "LLL do, yyyy");
@@ -179,14 +180,38 @@ export default function ViewPrediction(props: ViewPredictionProps) {
         <h3 className="text-2xl uppercase">Bets</h3>
       </div>
       <div className="mt-4 flex flex-col gap-8 md:flex-row md:items-start">
-        <Card title="Endorsements" className="grow basis-4">
+        <Card
+          header={
+            <div className="flex items-center justify-between">
+              <h2 className="order-1 text-center text-xl uppercase text-white sm:text-2xl">
+                Endorsements
+              </h2>
+              <div className="order-2">
+                <RiskPill value={props.endorseRatio} />
+              </div>
+            </div>
+          }
+          className="grow basis-4"
+        >
           {endorsements.length > 0 ? (
             <List items={endorseArray} headerElement={listHeader} />
           ) : (
             <Empty text="None" className="pb-6" />
           )}
         </Card>
-        <Card title="Undorsements" className="grow basis-4">
+        <Card
+          header={
+            <div className="flex items-center justify-between">
+              <h2 className="order-1 text-center text-xl uppercase text-white sm:text-2xl md:order-2">
+                Undorsements
+              </h2>
+              <div className="order-2 md:order-1">
+                <RiskPill value={props.undorseRatio} />
+              </div>
+            </div>
+          }
+          className="grow basis-4"
+        >
           {undorsements.length > 0 ? (
             <List items={undorseArray} headerElement={listHeader} />
           ) : (

@@ -233,14 +233,28 @@ export default async function Predictions(props: PredictionsPageProps) {
         <h3 className="text-2xl uppercase">Votes</h3>
       </div>
       <div className="mt-4 flex flex-col gap-8 md:flex-row md:items-start">
-        <Card title="Yes Votes" className="grow basis-4">
+        <Card
+          header={
+            <h2 className="text-center text-2xl uppercase text-white sm:text-3xl">
+              Yes Votes
+            </h2>
+          }
+          className="grow basis-4"
+        >
           {yesVotes.length > 0 ? (
             <List items={yesVoteArray} />
           ) : (
             <Empty text="None" className="pb-6" />
           )}
         </Card>
-        <Card title="No Votes" className="grow basis-4">
+        <Card
+          header={
+            <h2 className="text-center text-2xl uppercase text-white sm:text-3xl">
+              No Votes
+            </h2>
+          }
+          className="grow basis-4"
+        >
           {noVotes.length > 0 ? (
             <List items={noVoteArray} />
           ) : (

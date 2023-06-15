@@ -17,7 +17,11 @@ export default function Error({
   return (
     <section className="grid h-full place-content-center">
       <Card
-        title="Something went wrong!"
+        header={
+          <h2 className="text-center text-2xl uppercase text-white sm:text-3xl">
+            Something went wrong!
+          </h2>
+        }
         className="m-4 h-min max-w-xl shadow-md"
       >
         <div className="p-8">
