@@ -220,7 +220,7 @@ export default async function Predictions(props: PredictionsPageProps) {
             <span className="text-sm font-bold uppercase text-slate-600 dark:text-slate-300">
               Season:
             </span>
-            <span className="ml-2 text-sm uppercase text-slate-600 dark:text-slate-300">
+            <span className="ml-2 text-sm text-slate-600 dark:text-slate-300">
               {season.name}
             </span>
           </div>
