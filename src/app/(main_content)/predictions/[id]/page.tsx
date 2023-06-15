@@ -161,12 +161,16 @@ export default async function Predictions(props: PredictionsPageProps) {
             </span>
           </div>
         </div>
+        <div className="flex w-[136px] h-[64px]">
         <PillDisplay
           text={prediction.status.toUpperCase().slice(0, 7)}
           color={statusColor[prediction.status]}
+          textSize="text-md"
+          padding={"px-6 py-5"}
         />
+        </div>
       </div>
-      <div className="mt-8 rounded-xl bg-slate-300 p-4 dark:bg-slate-600">
+      <div className="p-4 mt-8 rounded-xl bg-slate-300 dark:bg-slate-600">
         <p>{hydrateTextWithMemberHandles(prediction.text, members)}</p>
       </div>
       <ViewPrediction
