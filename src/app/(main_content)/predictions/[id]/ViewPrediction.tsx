@@ -111,8 +111,8 @@ export default function ViewPrediction(props: ViewPredictionProps) {
 
   return (
     <>
-      <div className="mt-8 flex flex-col md:flex-row md:justify-between">
-        <div>
+      <div className="mt-8 flex flex-col gap-8 md:flex-row md:justify-between">
+        <div className="basis-1/2">
           <Timeline
             status={props.status}
             created_date={new Date(props.created_date)}
@@ -127,13 +127,15 @@ export default function ViewPrediction(props: ViewPredictionProps) {
             judged_date={props.judged_date ? new Date(props.judged_date) : null}
           />
         </div>
-        <UserBet
-          userBet={userBet}
-          due_date={props.due_date}
-          handleBet={handleBet}
-          status={props.status}
-          payoutRatio={payoutRatio}
-        />
+        <div className="basis-1/2">
+          <UserBet
+            userBet={userBet}
+            due_date={props.due_date}
+            handleBet={handleBet}
+            status={props.status}
+            payoutRatio={payoutRatio}
+          />
+        </div>
       </div>
       <div className="mt-8">
         <h3 className="text-2xl uppercase">Bets</h3>

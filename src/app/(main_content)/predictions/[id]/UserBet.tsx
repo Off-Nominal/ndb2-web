@@ -63,13 +63,15 @@ const UserBet = (props: UserBetProps) => {
   }
 
   return (
-    <div className="flex flex-col gap-10 mt-8">
+    <div className="flex flex-col gap-10">
       <div className="flex justify-between gap-10">
         <div>
           {showBetInfo && props.userBet && (
             <>
               <p className="font-bold">YOUR BET</p>
-              <p className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">{`BET ON ${formatDate(props.userBet.date).toUpperCase()}`}</p>
+              <p className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">{`BET ON ${formatDate(
+                props.userBet.date
+              ).toUpperCase()}`}</p>
             </>
           )}
           {showAddBetInfo && (
@@ -93,18 +95,18 @@ const UserBet = (props: UserBetProps) => {
           />
         )}
         {showbetEndorsed && props.userBet && (
-          <div className="flex w-[136px] h-[64px]">
-          <PillDisplay
-            text={props.userBet.endorsed ? "ENDORSED" : "UNDORSED"}
-            color={
-              props.userBet.endorsed ? "bg-moss-green" : "bg-deep-chestnut-red"
-            }
-            textSize={"text-sm"}
-            padding={"px-6 py-6"}
-            
-
-          />
-            </div>
+          <div className="flex h-[64px] w-[136px]">
+            <PillDisplay
+              text={props.userBet.endorsed ? "ENDORSED" : "UNDORSED"}
+              color={
+                props.userBet.endorsed
+                  ? "bg-moss-green"
+                  : "bg-deep-chestnut-red"
+              }
+              textSize={"text-sm"}
+              padding={"px-6 py-6"}
+            />
+          </div>
         )}
       </div>
       {showPoints && props.userBet && (
