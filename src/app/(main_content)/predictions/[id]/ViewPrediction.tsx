@@ -35,20 +35,22 @@ export type ViewPredictionProps = {
 };
 
 const listHeader = (
-  <div className="flex font-bold uppercase gap-x-4 gap-y-1">
+  <div className="flex gap-x-4 gap-y-1 font-bold uppercase">
     <div className="basis-9"></div>
-    <p className="text-sm grow">User</p>
-    <p className="text-sm shrink-0 basis-10">Wager</p>
+    <p className="grow text-sm">User</p>
+    <p className="shrink-0 basis-10 text-sm">Wager</p>
   </div>
 );
 
 export default function ViewPrediction(props: ViewPredictionProps) {
   const { addToast } = useToast();
 
-  const { endorsements, undorsements, userBet, updateUserBet } = useBets(
-    props.bets,
-    props.user
-  );
+  const { endorsements, undorsements, userBet, payoutRatios, updateUserBet } =
+    useBets(
+      props.bets,
+      { endorse: props.endorseRatio, undorse: props.undorseRatio },
+      props.user
+    );
 
   const endorseArray = endorsements.map((bet) => {
     return (
@@ -75,8 +77,8 @@ export default function ViewPrediction(props: ViewPredictionProps) {
   });
 
   const payoutRatio = userBet?.endorsed
-    ? props.endorseRatio
-    : props.undorseRatio;
+    ? payoutRatios.endorse
+    : payoutRatios.undorse;
 
   const handleBet = (endorsed: boolean) => {
     if (userBet) {
@@ -109,7 +111,7 @@ export default function ViewPrediction(props: ViewPredictionProps) {
 
   return (
     <>
-      <div className="flex flex-col mt-8 md:flex-row md:justify-between">
+      <div className="mt-8 flex flex-col md:flex-row md:justify-between">
         <div>
           <Timeline
             status={props.status}
@@ -144,7 +146,7 @@ export default function ViewPrediction(props: ViewPredictionProps) {
                 Endorsements
               </h2>
               <div className="order-2">
-                <RiskPill value={props.endorseRatio} />
+                <RiskPill value={payoutRatios.endorse} />
               </div>
             </div>
           }
@@ -163,7 +165,7 @@ export default function ViewPrediction(props: ViewPredictionProps) {
                 Undorsements
               </h2>
               <div className="order-2 md:order-1">
-                <RiskPill value={props.undorseRatio} />
+                <RiskPill value={payoutRatios.undorse} />
               </div>
             </div>
           }

@@ -3,8 +3,16 @@ import { ListBet } from "./page";
 import { APIPredictions } from "@/types/predictions";
 import { AppJWTPayload } from "@/utils/auth";
 
-export const useBets = (initialBets: ListBet[], user: AppJWTPayload) => {
+export const useBets = (
+  initialBets: ListBet[],
+  payoutRatio: { endorse: number; undorse: number },
+  user: AppJWTPayload
+) => {
   const [bets, setBets] = useState(initialBets);
+  const [payoutRatios, setPayoutRatios] = useState<{
+    endorse: number;
+    undorse: number;
+  }>(payoutRatio);
 
   const userBet = bets.find((bet) => bet.better_discordId === user.discordId);
 
@@ -53,6 +61,7 @@ export const useBets = (initialBets: ListBet[], user: AppJWTPayload) => {
         } else {
           setBets((prev) => [...prev, newBet]);
         }
+        setPayoutRatios(prediction.payouts);
       });
   };
 
@@ -61,5 +70,6 @@ export const useBets = (initialBets: ListBet[], user: AppJWTPayload) => {
     undorsements: bets.filter((b) => !b.endorsed),
     userBet,
     updateUserBet,
+    payoutRatios,
   };
 };

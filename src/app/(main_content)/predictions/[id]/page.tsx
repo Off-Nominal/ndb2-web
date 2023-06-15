@@ -118,7 +118,7 @@ async function fetchData(id: number): Promise<{
   predictor: ShortDiscordGuildMember;
   bets: ListBet[];
   votes: ListVote[];
-  season: APISeasons.Season;
+  season: APISeasons.Season | undefined;
   members: ShortDiscordGuildMember[];
 }> {
   let prediction: APIPredictions.EnhancedPrediction;
@@ -130,11 +130,10 @@ async function fetchData(id: number): Promise<{
     const response = await ndb2API.getSeasons();
     prediction = baseData.prediction;
     guildMemberManager = baseData.guildMemberManager;
+    console.log(prediction.season_id);
     season = response.data.find((s) => s.id === prediction.season_id);
-    if (!season) {
-      throw new Error("Failed to fetch season data");
-    }
   } catch (err) {
+    console.error(err);
     throw new Error("Failed to fetch prediction data");
   }
 
@@ -222,20 +221,20 @@ export default async function Predictions(props: PredictionsPageProps) {
               Season:
             </span>
             <span className="ml-2 text-sm text-slate-600 dark:text-slate-300">
-              {season.name}
+              {season?.name || "Future Season"}
             </span>
           </div>
         </div>
-        <div className="flex w-[136px] h-[64px]">
-        <PillDisplay
-          text={prediction.status.toUpperCase().slice(0, 7)}
-          color={statusColor[prediction.status]}
-          textSize="text-md"
-          padding={"px-6 py-5"}
-        />
+        <div className="flex h-[64px] w-[136px]">
+          <PillDisplay
+            text={prediction.status.toUpperCase().slice(0, 7)}
+            color={statusColor[prediction.status]}
+            textSize="text-md"
+            padding={"px-6 py-5"}
+          />
         </div>
       </div>
-      <div className="p-4 mt-8 rounded-xl bg-slate-300 dark:bg-slate-600">
+      <div className="mt-8 rounded-xl bg-slate-300 p-4 dark:bg-slate-600">
         <p>{hydrateTextWithMemberHandles(prediction.text, members)}</p>
       </div>
       <ViewPrediction
