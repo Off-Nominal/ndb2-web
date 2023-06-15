@@ -140,9 +140,10 @@ async function fetchData(id: number): Promise<{
 
   try {
     const members = guildMemberManager.getMembers();
-    const userLookup = await guildMemberManager.buildUserLookup(
-      Object.values(members).map((m) => m.discordId)
-    );
+    const userLookup = await guildMemberManager.buildUserLookup([
+      ...Object.values(members).map((m) => m.discordId),
+      ...prediction.bets.map((b) => b.better.discord_id),
+    ]);
     const predictor = userLookup[prediction.predictor.discord_id];
     const bets = prediction.bets
       .filter((bet) => bet.valid)
