@@ -24,7 +24,8 @@ export const RiskPill = (props: RiskPillProps) => {
   return (
     <div
       className={
-        "flex w-full max-w-[120px] justify-center rounded-full px-4 " + color
+        "flex w-full max-w-[120px] justify-center rounded-full px-4 shadow-lg " +
+        color
       }
     >
       <span

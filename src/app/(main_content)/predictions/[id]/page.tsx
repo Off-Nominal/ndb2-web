@@ -14,6 +14,7 @@ import { Card } from "@/components/Card";
 import { List } from "@/components/List";
 import { Empty } from "@/components/Empty";
 import { VoteListItem } from "./VoteListItem";
+import { APISeasons } from "@/types/seasons";
 
 const defaultAvatarUrl = "https://cdn.discordapp.com/embed/avatars/0.png";
 
@@ -117,15 +118,22 @@ async function fetchData(id: number): Promise<{
   predictor: ShortDiscordGuildMember;
   bets: ListBet[];
   votes: ListVote[];
+  season: APISeasons.Season;
   members: ShortDiscordGuildMember[];
 }> {
   let prediction: APIPredictions.EnhancedPrediction;
   let guildMemberManager: GuildMemberManager;
+  let season: APISeasons.Season | undefined;
 
   try {
     const baseData = await baseFetch(id);
+    const response = await ndb2API.getSeasons();
     prediction = baseData.prediction;
     guildMemberManager = baseData.guildMemberManager;
+    season = response.data.find((s) => s.id === prediction.season_id);
+    if (!season) {
+      throw new Error("Failed to fetch season data");
+    }
   } catch (err) {
     throw new Error("Failed to fetch prediction data");
   }
@@ -149,6 +157,7 @@ async function fetchData(id: number): Promise<{
       predictor,
       bets,
       votes,
+      season,
       members: Object.values(members),
     };
   } catch (err) {
@@ -169,7 +178,8 @@ export default async function Predictions(props: PredictionsPageProps) {
     return redirect("/signin");
   }
 
-  const { prediction, predictor, votes, bets, members } = await fetchData(id);
+  const { prediction, predictor, votes, bets, season, members } =
+    await fetchData(id);
 
   const statusColor = {
     [PredictionLifeCycle.RETIRED]: "bg-silver-chalice-grey",
@@ -195,15 +205,23 @@ export default async function Predictions(props: PredictionsPageProps) {
 
   return (
     <>
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-2">
-          <h2 className="text-xl uppercase sm:text-2xl">
+      <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-2 md:flex-row md:flex-wrap">
+          <h2 className="text-xl uppercase sm:text-2xl md:basis-full">
             Prediction # {prediction.id}
           </h2>
-          <div className="flex items-start gap-2">
+          <div className="flex items-start gap-2 md:grow-[2]">
             <Avatar src={predictor.avatarUrl} size={24} alt={predictor.name} />
             <span className="text-slate-600 dark:text-slate-300">
               {predictor.name}
+            </span>
+          </div>
+          <div className="md:grow-[1]">
+            <span className="text-sm font-bold uppercase text-slate-600 dark:text-slate-300">
+              Season:
+            </span>
+            <span className="ml-2 text-sm uppercase text-slate-600 dark:text-slate-300">
+              {season.name}
             </span>
           </div>
         </div>
