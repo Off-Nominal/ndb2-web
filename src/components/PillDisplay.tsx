@@ -1,32 +1,27 @@
 type PillDisplayProps = {
   text: string;
   color?: string;
-  size?: "xs" | "sm" | "md" | "lg";
+  textSize?: string;
+  padding?: string;
 };
 
 export const PillDisplay = (props: PillDisplayProps) => {
-  let sizeClasses = "px-6 py-3 text-lg";
   const colorClasses = props.color ? props.color : "bg-moonstone-blue";
+  const textClasses = props.textSize ? props.textSize : "text-md";
+  const paddingClasses = props.padding ? props.padding : "px-6 py-3";
 
-  if (props.size === "xs") {
-    sizeClasses = "px-4 py-0 text-sm";
-  } else if (props.size === "sm") {
-    sizeClasses = "px-6 py-2 text-md";
-  } else if (props.size === "md") {
-    sizeClasses = "px-6 py-3 text-lg";
-  } else if (props.size === "lg") {
-    sizeClasses = "px-8 py-4 text-2xl";
-  }
-
+  
   return (
-    <span
-      className={[
-        colorClasses,
-        sizeClasses,
-        "inline rounded-full text-center font-bold uppercase tracking-widest shadow-md",
-      ].join(" ")}
-    >
-      {props.text}
-    </span>
+    
+      <span
+        className={[
+          colorClasses,
+          textClasses,
+          paddingClasses,
+          "inline rounded-full text-center font-bold uppercase tracking-widest shadow-md w-full",
+        ].join(" ")}
+      >
+        {props.text}
+      </span>
   );
 };
