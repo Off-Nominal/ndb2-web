@@ -1,5 +1,6 @@
 export type EmptyProps = {
   text?: string;
+  width?: number;
   className?: string;
 };
 
@@ -9,9 +10,11 @@ export const Empty = (props: EmptyProps) => {
     props.className || "",
   ].join(" ");
   return (
-    <div className="flex flex-col items-center">
+    <div className={[classes, "flex flex-col items-center"].join(" ")}>
       <svg
-        className={classes}
+        className={"py-2"}
+        width={props.width || 100}
+        height={props.width || 100}
         viewBox="0 0 1024 1024"
         version="1.1"
         xmlns="http://www.w3.org/2000/svg"

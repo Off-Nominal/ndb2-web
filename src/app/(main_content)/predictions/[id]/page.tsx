@@ -10,6 +10,13 @@ import { Avatar } from "@/components/Avatar";
 import { hydrateTextWithMemberHandles } from "../hydrateTextWithMemberHandles";
 import { Metadata } from "next";
 import ViewPrediction from "./ViewPrediction";
+import { Card } from "@/components/Card";
+import { List } from "@/components/List";
+import { Empty } from "@/components/Empty";
+import { VoteListItem } from "./VoteListItem";
+import { APISeasons } from "@/types/seasons";
+
+const defaultAvatarUrl = "https://cdn.discordapp.com/embed/avatars/0.png";
 
 export type ListBet = Omit<APIBets.Bet, "better"> & {
   name: string;
@@ -32,6 +39,26 @@ const generateBet = (
     name: member.name,
     avatarUrl: member.avatarUrl,
     better_discordId: member.discordId,
+  };
+};
+
+export type ListVote = Omit<APIPredictions.Vote, "voter"> & {
+  name: string;
+  avatarUrl: string;
+  voter_discordId: string;
+};
+
+const generateVote = (
+  vote: APIPredictions.Vote,
+  member: ShortDiscordGuildMember | undefined
+): ListVote => {
+  return {
+    id: vote.id,
+    vote: vote.vote,
+    voted_date: vote.voted_date,
+    name: member?.name || "Unknown User",
+    avatarUrl: member?.avatarUrl || defaultAvatarUrl,
+    voter_discordId: member?.discordId || "",
   };
 };
 
@@ -90,33 +117,47 @@ async function fetchData(id: number): Promise<{
   prediction: APIPredictions.EnhancedPrediction;
   predictor: ShortDiscordGuildMember;
   bets: ListBet[];
+  votes: ListVote[];
+  season: APISeasons.Season;
   members: ShortDiscordGuildMember[];
 }> {
   let prediction: APIPredictions.EnhancedPrediction;
   let guildMemberManager: GuildMemberManager;
+  let season: APISeasons.Season | undefined;
 
   try {
     const baseData = await baseFetch(id);
+    const response = await ndb2API.getSeasons();
     prediction = baseData.prediction;
     guildMemberManager = baseData.guildMemberManager;
+    season = response.data.find((s) => s.id === prediction.season_id);
+    if (!season) {
+      throw new Error("Failed to fetch season data");
+    }
   } catch (err) {
     throw new Error("Failed to fetch prediction data");
   }
 
   try {
-    const userLookup = await guildMemberManager.buildUserLookup(
-      prediction.bets.map((bet) => bet.better.discord_id)
-    );
     const members = guildMemberManager.getMembers();
+    const userLookup = await guildMemberManager.buildUserLookup(
+      Object.values(members).map((m) => m.discordId)
+    );
     const predictor = userLookup[prediction.predictor.discord_id];
     const bets = prediction.bets
       .filter((bet) => bet.valid)
       .map((bet) => generateBet(bet, userLookup[bet.better.discord_id]));
 
+    const votes = prediction.votes.map((vote) =>
+      generateVote(vote, userLookup[vote.voter.discord_id])
+    );
+
     return {
       prediction,
       predictor,
       bets,
+      votes,
+      season,
       members: Object.values(members),
     };
   } catch (err) {
@@ -137,7 +178,8 @@ export default async function Predictions(props: PredictionsPageProps) {
     return redirect("/signin");
   }
 
-  const { prediction, predictor, bets, members } = await fetchData(id);
+  const { prediction, predictor, votes, bets, season, members } =
+    await fetchData(id);
 
   const statusColor = {
     [PredictionLifeCycle.RETIRED]: "bg-silver-chalice-grey",
@@ -147,17 +189,39 @@ export default async function Predictions(props: PredictionsPageProps) {
     [PredictionLifeCycle.CLOSED]: "bg-silver-chalice-grey",
   };
 
+  const yesVotes = votes.filter((vote) => vote.vote);
+  const noVotes = votes.filter((vote) => !vote.vote);
+
+  const yesVoteArray = yesVotes.map((vote) => {
+    return (
+      <VoteListItem key={vote.id} name={vote.name} avatarUrl={vote.avatarUrl} />
+    );
+  });
+  const noVoteArray = noVotes.map((vote) => {
+    return (
+      <VoteListItem key={vote.id} name={vote.name} avatarUrl={vote.avatarUrl} />
+    );
+  });
+
   return (
     <>
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-2">
-          <h2 className="text-xl uppercase sm:text-2xl">
+      <div className="flex items-start justify-between">
+        <div className="flex flex-col gap-2 md:flex-row md:flex-wrap">
+          <h2 className="text-xl uppercase sm:text-2xl md:basis-full">
             Prediction # {prediction.id}
           </h2>
-          <div className="flex items-start gap-2">
+          <div className="flex items-start gap-2 md:grow-[2]">
             <Avatar src={predictor.avatarUrl} size={24} alt={predictor.name} />
             <span className="text-slate-600 dark:text-slate-300">
               {predictor.name}
+            </span>
+          </div>
+          <div className="md:grow-[1]">
+            <span className="text-sm font-bold uppercase text-slate-600 dark:text-slate-300">
+              Season:
+            </span>
+            <span className="ml-2 text-sm text-slate-600 dark:text-slate-300">
+              {season.name}
             </span>
           </div>
         </div>
@@ -187,6 +251,39 @@ export default async function Predictions(props: PredictionsPageProps) {
         undorseRatio={prediction.payouts.undorse}
         user={payload}
       />
+      <div className="mt-8">
+        <h3 className="text-2xl uppercase">Votes</h3>
+      </div>
+      <div className="mt-4 flex flex-col gap-8 md:flex-row md:items-start">
+        <Card
+          header={
+            <h2 className="text-center text-2xl uppercase text-white sm:text-3xl">
+              Yes Votes
+            </h2>
+          }
+          className="grow basis-4"
+        >
+          {yesVotes.length > 0 ? (
+            <List items={yesVoteArray} />
+          ) : (
+            <Empty text="None" className="pb-6" />
+          )}
+        </Card>
+        <Card
+          header={
+            <h2 className="text-center text-2xl uppercase text-white sm:text-3xl">
+              No Votes
+            </h2>
+          }
+          className="grow basis-4"
+        >
+          {noVotes.length > 0 ? (
+            <List items={noVoteArray} />
+          ) : (
+            <Empty text="None" className="pb-6" />
+          )}
+        </Card>
+      </div>
     </>
   );
 }

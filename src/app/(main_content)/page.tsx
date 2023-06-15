@@ -189,7 +189,14 @@ export default async function Home() {
     <>
       <h2 className="text-3xl">Season Stats</h2>
       <div className="my-8 flex flex-col justify-center gap-4 lg:flex-row">
-        <Card title="Points" className="grow basis-4">
+        <Card
+          header={
+            <h2 className="text-center text-2xl uppercase text-white sm:text-3xl">
+              Points
+            </h2>
+          }
+          className="grow basis-4"
+        >
           <List
             items={s_points.map((l) => {
               return (
@@ -204,7 +211,14 @@ export default async function Home() {
             })}
           />
         </Card>
-        <Card title="Predictions" className="grow basis-4">
+        <Card
+          header={
+            <h2 className="text-center text-2xl uppercase text-white sm:text-3xl">
+              Predictions
+            </h2>
+          }
+          className="grow basis-4"
+        >
           <List
             items={s_predictions.map((l) => {
               return (
@@ -219,7 +233,14 @@ export default async function Home() {
             })}
           />
         </Card>
-        <Card title="Bets" className="grow basis-4">
+        <Card
+          header={
+            <h2 className="text-center text-2xl uppercase text-white sm:text-3xl">
+              Bets
+            </h2>
+          }
+          className="grow basis-4"
+        >
           <List
             items={s_bets.map((l) => {
               return (
@@ -237,7 +258,14 @@ export default async function Home() {
       </div>
       <h2>All-Time Stats</h2>
       <div className="my-8 flex flex-col justify-center gap-4 lg:flex-row">
-        <Card title="Points" className="grow basis-4">
+        <Card
+          header={
+            <h2 className="text-center text-2xl uppercase text-white sm:text-3xl">
+              Points
+            </h2>
+          }
+          className="grow basis-4"
+        >
           <List
             items={at_points.map((l) => {
               return (
@@ -252,7 +280,14 @@ export default async function Home() {
             })}
           />
         </Card>
-        <Card title="Predictions" className="grow basis-4">
+        <Card
+          header={
+            <h2 className="text-center text-2xl uppercase text-white sm:text-3xl">
+              Predictions
+            </h2>
+          }
+          className="grow basis-4"
+        >
           <List
             items={at_predictions.map((l) => {
               return (
@@ -267,7 +302,14 @@ export default async function Home() {
             })}
           />
         </Card>
-        <Card title="Bets" className="grow basis-4">
+        <Card
+          header={
+            <h2 className="text-center text-2xl uppercase text-white sm:text-3xl">
+              Bets
+            </h2>
+          }
+          className="grow basis-4"
+        >
           <List
             items={at_bets.map((l) => {
               return (
