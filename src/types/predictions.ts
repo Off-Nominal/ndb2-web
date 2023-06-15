@@ -53,6 +53,16 @@ export type SearchOptions = {
 };
 
 export namespace APIPredictions {
+  export type Vote = {
+    id: string;
+    vote: boolean;
+    voted_date: string;
+    voter: {
+      id: string;
+      discord_id: string;
+    };
+  };
+
   export type EnhancedPrediction = {
     id: number;
     predictor: {
@@ -72,15 +82,7 @@ export namespace APIPredictions {
     retired_date: string | null;
     status: PredictionLifeCycle;
     bets: APIBets.Bet[];
-    votes: {
-      id: string;
-      vote: boolean;
-      voted_date: string;
-      voter: {
-        id: string;
-        discord_id: string;
-      };
-    }[];
+    votes: Vote[];
     payouts: {
       endorse: number;
       undorse: number;

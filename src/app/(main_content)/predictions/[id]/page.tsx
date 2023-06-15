@@ -10,6 +10,12 @@ import { Avatar } from "@/components/Avatar";
 import { hydrateTextWithMemberHandles } from "../hydrateTextWithMemberHandles";
 import { Metadata } from "next";
 import ViewPrediction from "./ViewPrediction";
+import { Card } from "@/components/Card";
+import { List } from "@/components/List";
+import { Empty } from "@/components/Empty";
+import { VoteListItem } from "./VoteListItem";
+
+const defaultAvatarUrl = "https://cdn.discordapp.com/embed/avatars/0.png";
 
 export type ListBet = Omit<APIBets.Bet, "better"> & {
   name: string;
@@ -32,6 +38,26 @@ const generateBet = (
     name: member.name,
     avatarUrl: member.avatarUrl,
     better_discordId: member.discordId,
+  };
+};
+
+export type ListVote = Omit<APIPredictions.Vote, "voter"> & {
+  name: string;
+  avatarUrl: string;
+  voter_discordId: string;
+};
+
+const generateVote = (
+  vote: APIPredictions.Vote,
+  member: ShortDiscordGuildMember | undefined
+): ListVote => {
+  return {
+    id: vote.id,
+    vote: vote.vote,
+    voted_date: vote.voted_date,
+    name: member?.name || "Unknown User",
+    avatarUrl: member?.avatarUrl || defaultAvatarUrl,
+    voter_discordId: member?.discordId || "",
   };
 };
 
@@ -90,6 +116,7 @@ async function fetchData(id: number): Promise<{
   prediction: APIPredictions.EnhancedPrediction;
   predictor: ShortDiscordGuildMember;
   bets: ListBet[];
+  votes: ListVote[];
   members: ShortDiscordGuildMember[];
 }> {
   let prediction: APIPredictions.EnhancedPrediction;
@@ -104,19 +131,24 @@ async function fetchData(id: number): Promise<{
   }
 
   try {
-    const userLookup = await guildMemberManager.buildUserLookup(
-      prediction.bets.map((bet) => bet.better.discord_id)
-    );
     const members = guildMemberManager.getMembers();
+    const userLookup = await guildMemberManager.buildUserLookup(
+      Object.values(members).map((m) => m.discordId)
+    );
     const predictor = userLookup[prediction.predictor.discord_id];
     const bets = prediction.bets
       .filter((bet) => bet.valid)
       .map((bet) => generateBet(bet, userLookup[bet.better.discord_id]));
 
+    const votes = prediction.votes.map((vote) =>
+      generateVote(vote, userLookup[vote.voter.discord_id])
+    );
+
     return {
       prediction,
       predictor,
       bets,
+      votes,
       members: Object.values(members),
     };
   } catch (err) {
@@ -137,7 +169,7 @@ export default async function Predictions(props: PredictionsPageProps) {
     return redirect("/signin");
   }
 
-  const { prediction, predictor, bets, members } = await fetchData(id);
+  const { prediction, predictor, votes, bets, members } = await fetchData(id);
 
   const statusColor = {
     [PredictionLifeCycle.RETIRED]: "bg-silver-chalice-grey",
@@ -146,6 +178,20 @@ export default async function Predictions(props: PredictionsPageProps) {
     [PredictionLifeCycle.OPEN]: "bg-moonstone-blue",
     [PredictionLifeCycle.CLOSED]: "bg-silver-chalice-grey",
   };
+
+  const yesVotes = votes.filter((vote) => vote.vote);
+  const noVotes = votes.filter((vote) => !vote.vote);
+
+  const yesVoteArray = yesVotes.map((vote) => {
+    return (
+      <VoteListItem key={vote.id} name={vote.name} avatarUrl={vote.avatarUrl} />
+    );
+  });
+  const noVoteArray = noVotes.map((vote) => {
+    return (
+      <VoteListItem key={vote.id} name={vote.name} avatarUrl={vote.avatarUrl} />
+    );
+  });
 
   return (
     <>
@@ -183,6 +229,25 @@ export default async function Predictions(props: PredictionsPageProps) {
         undorseRatio={prediction.payouts.undorse}
         user={payload}
       />
+      <div className="mt-8">
+        <h3 className="text-2xl uppercase">Votes</h3>
+      </div>
+      <div className="mt-4 flex flex-col gap-8 md:flex-row md:items-start">
+        <Card title="Yes Votes" className="grow basis-4">
+          {yesVotes.length > 0 ? (
+            <List items={yesVoteArray} />
+          ) : (
+            <Empty text="None" className="pb-6" />
+          )}
+        </Card>
+        <Card title="No Votes" className="grow basis-4">
+          {noVotes.length > 0 ? (
+            <List items={noVoteArray} />
+          ) : (
+            <Empty text="None" className="pb-6" />
+          )}
+        </Card>
+      </div>
     </>
   );
 }

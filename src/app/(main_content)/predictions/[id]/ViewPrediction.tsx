@@ -176,21 +176,21 @@ export default function ViewPrediction(props: ViewPredictionProps) {
         </div>
       </div>
       <div className="mt-8">
-        <h3>BETS</h3>
+        <h3 className="text-2xl uppercase">Bets</h3>
       </div>
       <div className="mt-4 flex flex-col gap-8 md:flex-row md:items-start">
         <Card title="Endorsements" className="grow basis-4">
           {endorsements.length > 0 ? (
             <List items={endorseArray} headerElement={listHeader} />
           ) : (
-            <Empty text="No Endorsements for this bet" className="w-1/5 py-2" />
+            <Empty text="None" className="pb-6" />
           )}
         </Card>
         <Card title="Undorsements" className="grow basis-4">
           {undorsements.length > 0 ? (
             <List items={undorseArray} headerElement={listHeader} />
           ) : (
-            <Empty text="No Undorsements for this bet" className="pb-6" />
+            <Empty text="None" className="pb-6" />
           )}
         </Card>
       </div>
