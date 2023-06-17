@@ -63,9 +63,9 @@ const UserBet = (props: UserBetProps) => {
   }
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex min-h-[168px] flex-col gap-10">
       <div className="flex justify-between gap-10">
-        <div>
+        <div className="flex flex-col justify-center md:justify-start">
           {showBetInfo && props.userBet && (
             <>
               <p className="font-bold">YOUR BET</p>
@@ -95,7 +95,7 @@ const UserBet = (props: UserBetProps) => {
           />
         )}
         {showbetEndorsed && props.userBet && (
-          <div className="flex h-[64px] w-[136px]">
+          <div className="flex h-[64px] shrink-0 basis-[140px]">
             <PillDisplay
               text={props.userBet.endorsed ? "ENDORSED" : "UNDORSED"}
               color={
@@ -104,26 +104,26 @@ const UserBet = (props: UserBetProps) => {
                   : "bg-deep-chestnut-red"
               }
               textSize={"text-sm"}
-              padding={"px-6 py-6"}
             />
           </div>
         )}
       </div>
       {showPoints && props.userBet && (
         <div className="flex justify-between gap-10">
-          <div>
+          <div className="flex flex-col justify-center md:justify-start">
             <p className="font-bold uppercase">Potential Points</p>
             <p className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">
               Given Due Date of {formatDate(props.due_date)}
             </p>
           </div>
-          <div className="flex h-12">
+          <div className="flex h-[64px] shrink-0 basis-[140px]">
             <PillDisplay
               text={`+/- ${Math.max(
                 Math.floor(props.userBet.wager * props.payoutRatio),
                 1
-              )}`}
+              ).toLocaleString()}`}
               color={"bg-silver-chalice-grey"}
+              textSize={"text-base"}
             />
           </div>
         </div>
