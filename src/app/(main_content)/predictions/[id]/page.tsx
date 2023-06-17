@@ -130,7 +130,6 @@ async function fetchData(id: number): Promise<{
     const response = await ndb2API.getSeasons();
     prediction = baseData.prediction;
     guildMemberManager = baseData.guildMemberManager;
-    console.log(prediction.season_id);
     season = response.data.find((s) => s.id === prediction.season_id);
   } catch (err) {
     console.error(err);

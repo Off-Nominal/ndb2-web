@@ -187,7 +187,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
           <div className=" grow-0 basis-12"></div>
         </div>
         <div className="flex justify-end p-6">
-          <Link href={`/predictions/${props.id}`}>
+          <Link href={`/predictions/${props.id}`} prefetch={false}>
             <Button size="sm">More Details</Button>
           </Link>
         </div>
