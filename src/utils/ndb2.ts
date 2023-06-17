@@ -65,7 +65,6 @@ const isNDB2Error = (body: any): body is NDB2Response => {
 };
 
 const handleNDB2Error = (res: Response, body: any) => {
-  // console.log(body);
   if (res.status === 404) {
     return new Error("Resource Not Found");
   }

@@ -98,6 +98,7 @@ export const usePredictionSearch = (
           });
         })
         .then((prediction: APIPredictions.EnhancedPrediction) => {
+          // update user bets state
           const newBets = [...userBets];
           const existingBetIndex = userBets.findIndex(
             (b) => b.prediction_id === predictionId
@@ -117,9 +118,34 @@ export const usePredictionSearch = (
               ]);
             }
           }
+
+          // update prediction state
+          const existingPredictionIndex = predictions.findIndex(
+            (p) => p.id === predictionId
+          );
+          if (existingPredictionIndex >= 0) {
+            const newPredictions = [...predictions];
+            newPredictions[existingPredictionIndex] = {
+              ...prediction,
+              bets: {
+                endorsements: prediction.bets.filter(
+                  (b) => b.endorsed && b.valid
+                ).length,
+                undorsements: prediction.bets.filter(
+                  (b) => !b.endorsed && b.valid
+                ).length,
+                invalid: prediction.bets.filter((b) => !b.valid).length,
+              },
+              votes: {
+                yes: prediction.votes.filter((v) => v.vote).length,
+                no: prediction.votes.filter((v) => !v.vote).length,
+              },
+            };
+            setPredictions(newPredictions);
+          }
         });
     },
-    [discordId, userBets]
+    [discordId, userBets, predictions]
   );
 
   // loading states
@@ -196,8 +222,6 @@ export const usePredictionSearch = (
     } else {
       params.delete("unbetter");
     }
-
-    console.log(params.toString());
 
     history.replaceState(history.state, "", `${pathname}?${params.toString()}`);
   }, [
