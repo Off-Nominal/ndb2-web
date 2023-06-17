@@ -7,7 +7,7 @@ export const Navigation = () => {
   const pathname = usePathname();
 
   const isSelected = (path: string): boolean => {
-    return path === pathname;
+    return path.split("/")[1] === pathname.split("/")[1];
   };
 
   const baseLiClasses =

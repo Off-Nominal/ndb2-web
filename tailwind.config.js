@@ -21,8 +21,11 @@ module.exports = {
       "silver-chalice-grey": "#B2AFA1",
       "deep-chestnut-red": "#B64E45",
       "california-gold": "#B2893A",
+      "warning-yellow": "#facc15",
       "discord-purple": "#7983f5",
       transparent: "transparent",
+      "discord-mention-foreground": "#c9cdfb",
+      "discord-mention-background": "#5865f2",
       slate: {
         50: "#f8fafc",
         100: "#f1f5f9",
@@ -46,6 +49,20 @@ module.exports = {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      },
+      animation: {
+        "fade-in": "fade-in 0.3s ease-in-out",
+        "fade-out": "fade-out 0.3s ease-in-out",
+      },
+      keyframes: {
+        "fade-in": {
+          "0%": { opacity: "0%" },
+          "100%": { opacity: "100%" },
+        },
+        "fade-out": {
+          "0%": { opacity: "100%" },
+          "100%": { opacity: "0%" },
+        },
       },
     },
   },

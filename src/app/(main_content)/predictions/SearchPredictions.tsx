@@ -19,6 +19,7 @@ import { APIBets } from "@/types/bets";
 import { APISeasons } from "@/types/seasons";
 import { format } from "date-fns";
 import { ScrollToTop } from "../../../components/ScrollToTop";
+import { hydrateTextWithMemberHandles } from "./hydrateTextWithMemberHandles";
 
 const sortByOptions = [
   {
@@ -99,6 +100,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
     reachedEndOfList,
     season_id,
     setSeasonId,
+    userBets,
   } = usePredictionSearch(props.discordId, props.bets);
 
   usePageIncrement(predictions, incrementPage);
@@ -152,48 +154,43 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
           <div className="mt-4 flex justify-center">
             <div className="w-full">
               <CheckboxButtonList<PredictionLifeCycle | "all">
+                onChange={handleStatusChange}
                 items={[
                   {
                     name: "all",
                     value: "all",
                     label: "All",
                     checked: statuses.all,
-                    onChange: handleStatusChange,
                   },
                   {
                     name: "open",
                     value: PredictionLifeCycle.OPEN,
                     label: "Open",
                     checked: statuses.open,
-                    onChange: handleStatusChange,
                   },
                   {
                     name: "closed",
                     value: PredictionLifeCycle.CLOSED,
                     label: "Voting",
                     checked: statuses.closed,
-                    onChange: handleStatusChange,
                   },
                   {
                     name: "retired",
                     value: PredictionLifeCycle.RETIRED,
                     label: "Retired",
                     checked: statuses.retired,
-                    onChange: handleStatusChange,
                   },
                   {
                     name: "successful",
                     value: PredictionLifeCycle.SUCCESSFUL,
                     label: "Successful",
                     checked: statuses.successful,
-                    onChange: handleStatusChange,
                   },
                   {
                     name: "failed",
                     value: PredictionLifeCycle.FAILED,
                     label: "Failed",
                     checked: statuses.failed,
-                    onChange: handleStatusChange,
                   },
                 ]}
               />
@@ -340,6 +337,10 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
               </h4>
               <div className="mt-4">
                 <CheckboxButtonList<string>
+                  onChange={(event) => {
+                    setStatus(PredictionLifeCycle.OPEN, true);
+                    setShowBetOpportunities(event.target.checked);
+                  }}
                   items={[
                     {
                       name: "betOpps",
@@ -348,10 +349,6 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
                         ? "Showing Bet Opportunities"
                         : "Showing All",
                       checked: showBetOpportunities,
-                      onChange: (event) => {
-                        setStatus(PredictionLifeCycle.OPEN, true);
-                        setShowBetOpportunities(event.target.checked);
-                      },
                     },
                   ]}
                 />
@@ -375,17 +372,17 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
       <section className="my-8 flex w-full flex-col gap-4">
         {predictions.length > 0 &&
           predictions.map((p) => {
-            const endorsed = !!props.bets.find((b) => b.prediction_id === p.id);
+            const userBet = userBets.find((b) => b.prediction_id === p.id);
 
             return (
               <PredictionListItem
                 updateUserBet={updateUserBet}
                 loading={searching}
                 key={p.id}
-                text={p.text}
+                text={hydrateTextWithMemberHandles(p.text, props.members)}
                 id={p.id}
                 status={p.status}
-                endorsed={endorsed}
+                userBet={userBet}
                 endorse_ratio={p.payouts.endorse}
                 undorse_ratio={p.payouts.undorse}
                 endorsements={p.bets.endorsements}

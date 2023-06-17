@@ -2,11 +2,15 @@ import { ReactNode } from "react";
 
 type ListProps = {
   items: ReactNode[];
+  headerElement?: ReactNode;
 };
 
 export const List = (props: ListProps) => {
   return (
-    <ul className="flex flex-col pb-4">
+    <ul className="flex flex-col pb-6">
+      {props.headerElement && (
+        <div className="px-4 py-2 sm:py-4">{props.headerElement}</div>
+      )}
       {props.items.map((item, i) => {
         return (
           <li

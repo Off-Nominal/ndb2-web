@@ -7,7 +7,6 @@ import {
 } from "@/types/predictions";
 import { responseHandler } from "@/utils/misc";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const findStatus = (
@@ -89,19 +88,35 @@ export const usePredictionSearch = (
         method: "POST",
         body: JSON.stringify({ discord_id: discordId, endorsed }),
       })
-        .then(responseHandler)
-        .then(() => {
-          const newBets = [...userBets];
-          const bet = newBets.find((b) => b.prediction_id === predictionId);
-
-          if (bet) {
-            bet.endorsed = endorsed;
-            setUserBets([...userBets]);
-          }
+        .then((res) => {
+          return res.json().then((response) => {
+            if (res.ok) {
+              return response;
+            } else {
+              throw response.error;
+            }
+          });
         })
-        .catch((err) => {
-          console.error(err);
-          throw err;
+        .then((prediction: APIPredictions.EnhancedPrediction) => {
+          const newBets = [...userBets];
+          const existingBetIndex = userBets.findIndex(
+            (b) => b.prediction_id === predictionId
+          );
+          if (existingBetIndex >= 0) {
+            const updatedBet = { ...newBets[existingBetIndex], endorsed };
+            newBets[existingBetIndex] = updatedBet;
+            setUserBets(newBets);
+          } else {
+            const newBet = prediction.bets.find(
+              (b) => b.better.discord_id === discordId
+            );
+            if (newBet) {
+              setUserBets([
+                ...newBets,
+                { ...newBet, prediction_id: prediction.id },
+              ]);
+            }
+          }
         });
     },
     [discordId, userBets]
@@ -122,7 +137,7 @@ export const usePredictionSearch = (
     sort_by:
       (searchParams.get("sort_by") as SortByOption) || SortByOption.DUE_ASC,
     season_id: searchParams.get("season_id") || undefined,
-    showBetOpportunities: searchParams.get("show_bet_opportunities") === "true",
+    showBetOpportunities: searchParams.get("unbetter") !== null,
   };
 
   // Search Params States
@@ -146,7 +161,6 @@ export const usePredictionSearch = (
   const keywordRef = useRef(keyword);
   const pageRef = useRef(page);
 
-  const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -183,9 +197,10 @@ export const usePredictionSearch = (
       params.delete("unbetter");
     }
 
-    history.pushState(null, "", `${pathname}?${params.toString()}`);
+    console.log(params.toString());
+
+    history.replaceState(history.state, "", `${pathname}?${params.toString()}`);
   }, [
-    router,
     pathname,
     searchParams,
     keyword,
@@ -318,6 +333,7 @@ export const usePredictionSearch = (
       userBet: userBets.find((b) => b.prediction_id === p.id) || false,
     })),
     updateUserBet,
+    userBets,
     searching,
     incrementallySearching,
     statuses: {
@@ -345,6 +361,9 @@ export const usePredictionSearch = (
     },
     showBetOpportunities,
     setShowBetOpportunities: (value: boolean) => {
+      if (value === true && predictor_id === discordId) {
+        setPredictorId("");
+      }
       setShowBetOpportunities(value);
       resetPages();
     },
@@ -364,6 +383,9 @@ export const usePredictionSearch = (
     },
     predictor_id,
     setPredictorId: (newPredictorId: string) => {
+      if (newPredictorId === discordId) {
+        setShowBetOpportunities(false);
+      }
       setPredictorId(newPredictorId);
       resetPages();
     },

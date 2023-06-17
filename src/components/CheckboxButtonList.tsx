@@ -4,8 +4,8 @@ type CheckboxButtonListProps<T> = {
     value: T;
     label: string;
     checked: boolean;
-    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   }[];
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
 export const CheckboxButtonList = <
@@ -43,7 +43,7 @@ export const CheckboxButtonList = <
                 id={"checkbox-list-item-" + i + "-" + item.name}
                 checked={item.checked}
                 value={item.value}
-                onChange={item.onChange}
+                onChange={props.onChange}
               />
               <label
                 htmlFor={"checkbox-list-item-" + i + "-" + item.name}

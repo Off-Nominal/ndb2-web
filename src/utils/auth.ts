@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 const JWT_SECRET = process.env.JWT_SECRET || "";
 
-type AppJWTPayload = {
+export type AppJWTPayload = {
   name: string;
   avatarUrl: string;
   discordId: string;

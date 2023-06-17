@@ -14,7 +14,14 @@ export default async function SignIn() {
 
   return (
     <div className="grid h-full place-content-center">
-      <Card title="Login with Discord" className="m-4 h-min max-w-xl">
+      <Card
+        header={
+          <h2 className="text-center text-2xl uppercase text-white sm:text-3xl">
+            Login with Discord
+          </h2>
+        }
+        className="m-4 h-min max-w-xl"
+      >
         <div className="p-8">
           <div className="my-4 flex justify-center">
             <Image

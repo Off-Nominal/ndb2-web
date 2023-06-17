@@ -33,6 +33,13 @@ export async function POST(
     );
   }
 
+  if (discord_id !== payload.discordId) {
+    return NextResponse.json(
+      { error: "Can only make bets for yourself" },
+      { status: 401 }
+    );
+  }
+
   if (typeof endorsed !== "boolean") {
     return NextResponse.json(
       { error: "Missing required field: endorsed" },
@@ -44,9 +51,6 @@ export async function POST(
     .addBet(Number(predictionId), endorsed, discord_id)
     .then((data) => NextResponse.json(data.data))
     .catch((err) => {
-      return NextResponse.json(
-        { error: `Error fetching predictions: ${err}` },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: err.message }, { status: 500 });
     });
 }

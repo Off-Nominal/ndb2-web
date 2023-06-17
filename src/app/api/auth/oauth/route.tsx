@@ -60,7 +60,7 @@ export async function GET(req: Request) {
       httpOnly: true,
       path: "/",
       secure: process.env.NODE_ENV !== "development",
-      expires: add(new Date(), { days: 1 }),
+      expires: add(new Date(), { days: 30 }),
       sameSite: "lax",
     });
   } catch (err) {
