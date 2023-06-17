@@ -137,7 +137,7 @@ export const usePredictionSearch = (
     sort_by:
       (searchParams.get("sort_by") as SortByOption) || SortByOption.DUE_ASC,
     season_id: searchParams.get("season_id") || undefined,
-    showBetOpportunities: searchParams.get("show_bet_opportunities") === "true",
+    showBetOpportunities: searchParams.get("unbetter") !== null,
   };
 
   // Search Params States
@@ -196,6 +196,8 @@ export const usePredictionSearch = (
     } else {
       params.delete("unbetter");
     }
+
+    console.log(params.toString());
 
     history.replaceState(history.state, "", `${pathname}?${params.toString()}`);
   }, [
@@ -359,6 +361,9 @@ export const usePredictionSearch = (
     },
     showBetOpportunities,
     setShowBetOpportunities: (value: boolean) => {
+      if (value === true && predictor_id === discordId) {
+        setPredictorId("");
+      }
       setShowBetOpportunities(value);
       resetPages();
     },
@@ -378,6 +383,9 @@ export const usePredictionSearch = (
     },
     predictor_id,
     setPredictorId: (newPredictorId: string) => {
+      if (newPredictorId === discordId) {
+        setShowBetOpportunities(false);
+      }
       setPredictorId(newPredictorId);
       resetPages();
     },
