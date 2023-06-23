@@ -185,7 +185,6 @@ export const usePredictionSearch = (
 
   const timeout = useRef<ReturnType<typeof setTimeout> | undefined>();
   const keywordRef = useRef(keyword);
-  const pageRef = useRef(page);
 
   const pathname = usePathname();
 
@@ -237,20 +236,35 @@ export const usePredictionSearch = (
   ]);
 
   const incrementPage = useCallback(() => {
+    if (reachedEndOfList) {
+      return;
+    }
     setPage((prev) => prev + 1);
-  }, []);
+  }, [reachedEndOfList]);
 
-  const handleSearch = useCallback((options: SearchOptions) => {
-    setSearching(true);
-    search(options)
-      .then((predictions) => {
-        setPredictions(predictions);
-      })
-      .catch((err) => console.error(err))
-      .finally(() => {
-        setSearching(false);
-      });
-  }, []);
+  const handleSearch = useCallback(
+    (options: SearchOptions) => {
+      setSearching(true);
+      search(options)
+        .then((preds) => {
+          if (preds.length < 10) {
+            setReachedEndOfList(true);
+          }
+          setPredictions((prev) => {
+            if (page === 1) {
+              return preds;
+            } else {
+              return [...prev, ...preds];
+            }
+          });
+        })
+        .catch((err) => console.error(err))
+        .finally(() => {
+          setSearching(false);
+        });
+    },
+    [page]
+  );
 
   useEffect(() => {
     const options: SearchOptions = {
@@ -263,6 +277,10 @@ export const usePredictionSearch = (
       non_better_id: showBetOpportunities ? discordId : undefined,
     };
 
+    if (reachedEndOfList) {
+      return;
+    }
+
     if (keywordRef.current !== keyword) {
       keywordRef.current = keyword;
       clearTimeout(timeout.current);
@@ -270,24 +288,6 @@ export const usePredictionSearch = (
       timeout.current = setTimeout(() => {
         handleSearch(options);
       }, 500);
-    } else if (pageRef.current !== page && page !== 1) {
-      pageRef.current = page;
-      if (reachedEndOfList) {
-        return;
-      }
-      setIncrementallySearching(true);
-      search(options)
-        .then((predictions) => {
-          if (predictions.length === 0) {
-            setReachedEndOfList(true);
-            return;
-          }
-          setPredictions((prev) => [...prev, ...predictions]);
-        })
-        .catch((err) => console.error(err))
-        .finally(() => {
-          setIncrementallySearching(false);
-        });
     } else {
       handleSearch(options);
     }
@@ -336,6 +336,11 @@ export const usePredictionSearch = (
     [statuses]
   );
 
+  const resetPages = useCallback(() => {
+    setPage(1);
+    setReachedEndOfList(false);
+  }, []);
+
   const clearFilters = useCallback(() => {
     setKeyword("");
     setStatus("all", true);
@@ -343,13 +348,8 @@ export const usePredictionSearch = (
     setPredictorId("");
     setShowBetOpportunities(false);
     setSeasonId(undefined);
-    setPage(1);
-  }, [setStatus]);
-
-  const resetPages = useCallback(() => {
-    setPage(1);
-    setReachedEndOfList(false);
-  }, []);
+    resetPages();
+  }, [setStatus, resetPages]);
 
   return {
     predictions: predictions.map((p) => ({
