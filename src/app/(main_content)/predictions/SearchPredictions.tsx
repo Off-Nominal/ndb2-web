@@ -14,7 +14,7 @@ import { Autocomplete } from "@/components/Autocomplete";
 import { Avatar } from "@/components/Avatar";
 import { ReactNode, useState } from "react";
 import { Button } from "@/components/Button";
-import { useElementIntersect } from "./useElementIntersect";
+import { useElementIntersect } from "../../../hooks/useElementIntersect";
 import { APIBets } from "@/types/bets";
 import { APISeasons } from "@/types/seasons";
 import { format } from "date-fns";
@@ -370,55 +370,45 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
         </details>
       </form>
       <section className="my-8 flex w-full flex-col gap-4">
-        {predictions.length > 0 &&
-          predictions.map((p) => {
-            const userBet = userBets.find((b) => b.prediction_id === p.id);
+        {predictions.map((p) => {
+          const userBet = userBets.find((b) => b.prediction_id === p.id);
 
-            return (
-              <PredictionListItem
-                updateUserBet={updateUserBet}
-                loading={searching}
-                key={p.id}
-                text={hydrateTextWithMemberHandles(p.text, props.members)}
-                id={p.id}
-                status={p.status}
-                userBet={userBet}
-                endorse_ratio={p.payouts.endorse}
-                undorse_ratio={p.payouts.undorse}
-                endorsements={p.bets.endorsements}
-                undorsements={p.bets.undorsements}
-                yesVotes={p.votes.yes}
-                noVotes={p.votes.no}
-                dueDate={new Date(p.due_date)}
-                createdDate={new Date(p.created_date)}
-                discordId={props.discordId}
-                judgedDate={
-                  p.judged_date !== null ? new Date(p.judged_date) : null
-                }
-                triggeredDate={
-                  p.triggered_date !== null ? new Date(p.triggered_date) : null
-                }
-                closedDate={
-                  p.closed_date !== null ? new Date(p.closed_date) : null
-                }
-                retiredDate={
-                  p.retired_date !== null ? new Date(p.retired_date) : null
-                }
-              />
-            );
-          })}
+          return (
+            <PredictionListItem
+              updateUserBet={updateUserBet}
+              loading={searching}
+              key={p.id}
+              text={hydrateTextWithMemberHandles(p.text, props.members)}
+              id={p.id}
+              status={p.status}
+              userBet={userBet}
+              endorse_ratio={p.payouts.endorse}
+              undorse_ratio={p.payouts.undorse}
+              endorsements={p.bets.endorsements}
+              undorsements={p.bets.undorsements}
+              yesVotes={p.votes.yes}
+              noVotes={p.votes.no}
+              dueDate={new Date(p.due_date)}
+              createdDate={new Date(p.created_date)}
+              discordId={props.discordId}
+              judgedDate={
+                p.judged_date !== null ? new Date(p.judged_date) : null
+              }
+              triggeredDate={
+                p.triggered_date !== null ? new Date(p.triggered_date) : null
+              }
+              closedDate={
+                p.closed_date !== null ? new Date(p.closed_date) : null
+              }
+              retiredDate={
+                p.retired_date !== null ? new Date(p.retired_date) : null
+              }
+            />
+          );
+        })}
       </section>
       {incrementallySearching && <div>Loading more...</div>}
-      {predictions.length === 0 && (
-        <section className="md:w-[675px]">
-          <div className="flex justify-center">
-            <p className="text-center text-xl">
-              No predictions found for your search criteria.
-            </p>
-          </div>
-        </section>
-      )}
-      {predictions.length !== 0 && reachedEndOfList && (
+      {reachedEndOfList && (
         <section className="md:w-[675px]">
           <div className="flex justify-center">
             <p className="text-center text-xl">
