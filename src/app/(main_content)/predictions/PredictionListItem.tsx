@@ -114,7 +114,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
             <div className="mt-3 rounded-md border-slate-700 bg-slate-300 px-2 py-1 dark:border-slate-200 dark:bg-slate-500">
               <p className="w-full text-center text-sm">
                 Due:
-                <br /> {format(props.dueDate, "PP")}
+                <br /> {format(props.dueDate, "MMM d, yyyy")}
               </p>
             </div>
           </div>
