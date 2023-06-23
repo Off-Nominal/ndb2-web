@@ -1,7 +1,7 @@
 import { useToast } from "@/app/contexts/toast";
 import { RiskPill } from "@/components/RiskPill";
 import { PredictionLifeCycle } from "@/types/predictions";
-import { add, isAfter } from "date-fns";
+import { add, format, isAfter } from "date-fns";
 import { BetInterface } from "./BetInterface";
 import { APIBets } from "@/types/bets";
 import Link from "next/link";
@@ -107,9 +107,15 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
               {props.status.slice(0, 7)}
             </p>
           </div>
-          <div className="hidden shrink-0 grow-0 sm:basis-24 md:block">
+          <div className="hidden shrink-0 grow-0 sm:basis-32 md:block">
             <div className="mt-3 rounded-md border-slate-700 bg-slate-300 px-4 dark:border-slate-200 dark:bg-slate-500">
               <p className="w-full text-center text-xl">#{props.id}</p>
+            </div>
+            <div className="mt-3 rounded-md border-slate-700 bg-slate-300 px-2 py-1 dark:border-slate-200 dark:bg-slate-500">
+              <p className="w-full text-center text-sm">
+                Due:
+                <br /> {format(props.dueDate, "PP")}
+              </p>
             </div>
           </div>
           <div className="relative h-[6em] grow basis-24 self-center overflow-hidden after:absolute after:bottom-0 after:right-0 after:h-[1.5em] after:w-3/4 after:bg-gradient-to-r after:from-white/0 after:to-slate-200/100 after:text-right group-open:mt-2 group-open:h-full group-open:self-start group-open:overflow-visible group-open:after:hidden dark:after:to-slate-700/100">
