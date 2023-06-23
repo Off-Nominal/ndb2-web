@@ -111,12 +111,14 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
             <div className="mt-3 rounded-md border-slate-700 bg-slate-300 px-4 dark:border-slate-200 dark:bg-slate-500">
               <p className="w-full text-center text-xl">#{props.id}</p>
             </div>
-            <div className="mt-3 rounded-md border-slate-700 bg-slate-300 px-2 py-1 dark:border-slate-200 dark:bg-slate-500">
-              <p className="w-full text-center text-sm">
-                Due:
-                <br /> {format(props.dueDate, "MMM d, yyyy")}
-              </p>
-            </div>
+            {props.status === PredictionLifeCycle.OPEN && (
+              <div className="mt-3 rounded-md border-slate-700 bg-slate-300 px-2 py-1 dark:border-slate-200 dark:bg-slate-500">
+                <p className="w-full text-center text-sm">
+                  Due:
+                  <br /> {format(props.dueDate, "MMM d, yyyy")}
+                </p>
+              </div>
+            )}
           </div>
           <div className="relative h-[6em] grow basis-24 self-center overflow-hidden after:absolute after:bottom-0 after:right-0 after:h-[1.5em] after:w-3/4 after:bg-gradient-to-r after:from-white/0 after:to-slate-200/100 after:text-right group-open:mt-2 group-open:h-full group-open:self-start group-open:overflow-visible group-open:after:hidden dark:after:to-slate-700/100">
             <div className="w-full">
