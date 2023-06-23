@@ -14,7 +14,7 @@ import { Autocomplete } from "@/components/Autocomplete";
 import { Avatar } from "@/components/Avatar";
 import { ReactNode, useState } from "react";
 import { Button } from "@/components/Button";
-import { usePageIncrement } from "./usePageIncrement";
+import { useElementIntersect } from "./useElementIntersect";
 import { APIBets } from "@/types/bets";
 import { APISeasons } from "@/types/seasons";
 import { format } from "date-fns";
@@ -103,7 +103,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
     userBets,
   } = usePredictionSearch(props.discordId, props.bets);
 
-  usePageIncrement(predictions, incrementPage);
+  const ref = useElementIntersect(incrementPage);
 
   const [members, setMembers] = useState<ShortDiscordGuildMember[]>(
     props.members
@@ -427,6 +427,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
           </div>
         </section>
       )}
+      <div ref={ref}></div>
       <ScrollToTop text={"To Top"} />
     </div>
   );
