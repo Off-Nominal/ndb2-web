@@ -7,6 +7,7 @@ import { ShortDiscordGuildMember } from "@/types/discord";
 import { APIBets } from "@/types/bets";
 import { APISeasons } from "@/types/seasons";
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 
 const title = "Nostradambot2 - Predictions";
 const description =
@@ -32,7 +33,8 @@ export const metadata: Metadata = {
 };
 
 const getPredictionSearchData = async () => {
-  const payload = await authAPI.verify();
+  const token = cookies().get("token")?.value || "";
+  const payload = await authAPI.verify(token);
 
   if (!payload) {
     return redirect("/signin");

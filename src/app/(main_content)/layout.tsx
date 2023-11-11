@@ -1,17 +1,26 @@
 import authAPI from "@/utils/auth";
 import { Navigation } from "./Navigation";
 import { redirect } from "next/navigation";
+import { cookies, headers } from "next/headers";
 import Link from "next/link";
 
 export default async function MainLayout({
-  children, // will be a page or nested layout
+  children,
 }: {
   children: React.ReactNode;
 }) {
-  const payload = await authAPI.verify();
+  const token = cookies().get("token")?.value || "";
+  const payload = await authAPI.verify(token);
 
+  // user is not signed in, redirect to login
   if (!payload) {
-    return redirect("/signin");
+    // preserve initial path for later redirect
+    const pathname = headers().get("x-pathname");
+    const search = headers().get("x-search");
+
+    return redirect(
+      "/signin?returnTo=" + encodeURIComponent(pathname + (search || ""))
+    );
   }
 
   return (

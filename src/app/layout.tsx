@@ -1,13 +1,18 @@
 import { Toast } from "@/components/Toast";
 import ToastProvider from "./contexts/toast";
 import "./globals.css";
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 
 const title = "Nostradambot2";
 const description =
   "A fun predictions betting game for the Off-Nominal Discord.";
 
+export const viewport: Viewport = {
+  themeColor: "#020617",
+};
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://ndb2.offnom.com"),
   title: {
     template: "%s | NDB2",
     default: title,
@@ -40,7 +45,6 @@ export const metadata: Metadata = {
     creator: "@JakeOnOrbit",
   },
   manifest: "/site.webmanifest",
-  themeColor: "#020617",
   icons: {
     other: {
       rel: "mask-icon",

@@ -52,12 +52,15 @@ const buildDiscordOAuthUrl = (options: {
   clientId: string;
   scope: string[];
   redirectUri: string;
+  state: string;
 }): string => {
   return `${options.baseUrl}/oauth2/authorize?response_type=code&client_id=${
     options.clientId
   }&scope=${encodeURIComponent(
     options.scope.join(" ")
-  )}&redirect_uri=${encodeURIComponent(options.redirectUri)}&prompt=consent`;
+  )}&redirect_uri=${encodeURIComponent(
+    options.redirectUri
+  )}&prompt=consent&state=${options.state}`;
 };
 
 export const buildAvatarUrl = (
@@ -264,17 +267,22 @@ export class GuildMemberManager {
   };
 }
 
+const getOAuthUrl = (state: string): string => {
+  return buildDiscordOAuthUrl({
+    baseUrl,
+    clientId: envVars.DISCORD_CLIENT_ID,
+    redirectUri: REDIRECT_URI,
+    scope,
+    state,
+  });
+};
+
 const discordAPI = {
   authenticate,
   identify,
   authorize,
   GuildMemberManager,
-  oAuthUrl: buildDiscordOAuthUrl({
-    baseUrl,
-    clientId: envVars.DISCORD_CLIENT_ID,
-    redirectUri: REDIRECT_URI,
-    scope,
-  }),
+  getOAuthUrl,
 };
 
 export default discordAPI;

@@ -4,12 +4,25 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SignInMessage } from "./SignInMessage";
+import { cookies } from "next/headers";
 
-export default async function SignIn() {
-  const payload = await authAPI.verify();
+export default async function SignIn({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  const token = cookies().get("token")?.value || "";
+  const payload = await authAPI.verify(token);
 
+  // User already logged in, redirect to home page
   if (payload) {
     redirect("/");
+  }
+
+  let returnToPath = searchParams.returnTo;
+
+  if (typeof returnToPath !== "string") {
+    returnToPath = "/";
   }
 
   return (
@@ -38,7 +51,10 @@ export default async function SignIn() {
             className={
               "block rounded-2xl bg-discord-purple px-8 py-4 text-center text-xl"
             }
-            href="/api/auth/oauth"
+            href={
+              "/api/auth/oauth?returnTo=" +
+              encodeURIComponent(returnToPath || "/")
+            }
           >
             Sign In through Discord
           </Link>

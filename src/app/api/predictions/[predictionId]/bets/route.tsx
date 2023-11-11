@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import authAPI from "@/utils/auth";
 import ndb2API from "@/utils/ndb2";
+import { cookies } from "next/headers";
 
 export async function POST(
   req: Request,
   { params }: { params: { predictionId: string } }
 ) {
-  const payload = await authAPI.verify();
+  const token = cookies().get("token")?.value || "";
+  const payload = await authAPI.verify(token);
 
   if (!payload) {
     return NextResponse.json(

@@ -1,12 +1,27 @@
+import { add } from "date-fns";
 import * as jose from "jose";
+import { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
 
 const JWT_SECRET = process.env.JWT_SECRET || "";
+const COOKIE_EXPIRY_IN_DAYS = 60;
 
 export type AppJWTPayload = {
   name: string;
   avatarUrl: string;
   discordId: string;
+};
+
+const buildCookie = (token: string): ResponseCookie => {
+  return {
+    name: "token",
+    value: token,
+    httpOnly: true,
+    path: "/",
+    secure: process.env.NODE_ENV !== "development",
+    expires: add(new Date(), { days: COOKIE_EXPIRY_IN_DAYS }),
+    sameSite: "lax",
+  };
 };
 
 const isAppJWTPayload = (val: jose.JWTPayload): val is AppJWTPayload => {
@@ -31,7 +46,7 @@ const isAppJWTPayload = (val: jose.JWTPayload): val is AppJWTPayload => {
 
 const sign = (payload: any): Promise<string> => {
   const iat = Math.floor(Date.now() / 1000);
-  const exp = iat + 24 * 60 * 60 * 30; // Thirty days
+  const exp = iat + 24 * 60 * 60 * COOKIE_EXPIRY_IN_DAYS;
 
   return new jose.SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
@@ -41,9 +56,7 @@ const sign = (payload: any): Promise<string> => {
     .sign(new TextEncoder().encode(JWT_SECRET));
 };
 
-const verify = async (): Promise<AppJWTPayload | null> => {
-  const token = cookies().get("token")?.value || "";
-
+const verify = async (token: string): Promise<AppJWTPayload | null> => {
   try {
     const { payload } = await jose.jwtVerify(
       token,
@@ -60,6 +73,7 @@ const verify = async (): Promise<AppJWTPayload | null> => {
       discordId: payload.discordId,
     };
   } catch (err) {
+    console.error(err);
     return null;
   }
 };
@@ -67,6 +81,7 @@ const verify = async (): Promise<AppJWTPayload | null> => {
 const authAPI = {
   sign,
   verify,
+  buildCookie,
 };
 
 export default authAPI;
