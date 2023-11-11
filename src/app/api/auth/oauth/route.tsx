@@ -6,16 +6,58 @@ import authAPI from "@/utils/auth";
 import { RESTGetAPIGuildMemberResult } from "discord-api-types/v10";
 import { APIAuth } from "@/types/user";
 import envVars from "@/config";
+import crypto from "crypto";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const code = searchParams.get("code");
 
+  // If there is no code, redirect to the Discord OAuth page
   if (typeof code !== "string") {
-    return NextResponse.redirect(discordAPI.oAuthUrl);
+    // This is the path that the user will be redirected to after they sign in
+    const returnToPath = searchParams.get("returnTo");
+
+    const state = {
+      returnTo: returnToPath || "/",
+      nonce: crypto.randomBytes(16).toString("hex") + Date.now().toString(),
+    };
+
+    const cookie = Buffer.from(JSON.stringify(state)).toString("base64");
+
+    cookies().set("state", cookie, {
+      expires: add(new Date(), { minutes: 5 }),
+    });
+
+    return NextResponse.redirect(discordAPI.getOAuthUrl(state.nonce));
   }
 
   let access_token: string;
+
+  const nonce = searchParams.get("state");
+  const cookie = cookies().get("state");
+
+  if (
+    typeof nonce !== "string" ||
+    !cookie ||
+    typeof cookie.value !== "string"
+  ) {
+    return NextResponse.redirect(envVars.APP_URL + "/signin?error=state");
+  }
+
+  let returnToPath: string = "";
+
+  try {
+    const state = JSON.parse(
+      Buffer.from(cookie.value, "base64").toString("utf-8")
+    );
+    if (state.nonce !== nonce) {
+      throw new Error("Nonce does not match");
+    }
+    returnToPath = state.returnTo;
+    cookies().delete("state");
+  } catch (err) {
+    return NextResponse.redirect(envVars.APP_URL + "/signin?error=state");
+  }
 
   try {
     const response = await discordAPI.authenticate(code);
@@ -51,9 +93,6 @@ export async function GET(req: Request) {
   try {
     const token = await authAPI.sign(user);
 
-    // NEXT JS has a bug where it doesn't recognize the typing for the set method inside a server route
-    // This comment written while on Next.JS v 13.4.2
-    // @ts-ignore
     cookies().set({
       name: "token",
       value: token,
@@ -67,5 +106,5 @@ export async function GET(req: Request) {
     console.error(err);
   }
 
-  return NextResponse.redirect(envVars.APP_URL);
+  return NextResponse.redirect(envVars.APP_URL + returnToPath);
 }
