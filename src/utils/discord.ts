@@ -31,7 +31,7 @@ const handleDiscordError = (res: Response, body: any) => {
       );
     } else {
       return new Error(
-        "Something went wrong with the Discord API call, but we don't recognise the error."
+        "Something went wrong with the Discord API call, but we don't recognize the error."
       );
     }
   }

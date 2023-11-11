@@ -74,7 +74,6 @@ async function getLeaderboards(): Promise<{
     allTimeLeaders.predictions = at_predictionsLeaders.data.leaders;
     allTimeLeaders.bets = at_betsLeaders.data.leaders;
   } catch (err) {
-    console.error(err);
     throw new Error(
       "There was an error fetching the data for the Leaderboards from the Nostradambot2 API."
     );
