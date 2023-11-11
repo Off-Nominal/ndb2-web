@@ -10,6 +10,8 @@ export type AppJWTPayload = {
   name: string;
   avatarUrl: string;
   discordId: string;
+  iat: number;
+  exp: number;
 };
 
 const buildCookie = (token: string): ResponseCookie => {
@@ -48,7 +50,7 @@ const sign = (payload: any): Promise<string> => {
   const iat = Math.floor(Date.now() / 1000);
   const exp = iat + 24 * 60 * 60 * COOKIE_EXPIRY_IN_DAYS;
 
-  return new jose.SignJWT({ ...payload })
+  return new jose.SignJWT({ ...payload, iat, exp })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setExpirationTime(exp)
     .setIssuedAt(iat)
@@ -67,11 +69,7 @@ const verify = async (token: string): Promise<AppJWTPayload | null> => {
       return null;
     }
 
-    return {
-      name: payload.name,
-      avatarUrl: payload.avatarUrl,
-      discordId: payload.discordId,
-    };
+    return payload;
   } catch (err) {
     console.error(err);
     return null;

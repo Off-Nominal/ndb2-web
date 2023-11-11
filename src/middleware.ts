@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import authAPI from "./utils/auth";
+import { sub } from "date-fns";
 
 export async function middleware(request: NextRequest) {
   // sets url and path headers for easy access
@@ -19,7 +20,7 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  // refresh cookies
+  // refresh cookies if needed
   try {
     const token = request.cookies.get("token")?.value;
 
@@ -29,7 +30,10 @@ export async function middleware(request: NextRequest) {
 
     const payload = await authAPI.verify(token);
 
-    if (!payload) {
+    if (
+      !payload ||
+      payload.iat * 1000 > sub(new Date(), { days: 1 }).getTime()
+    ) {
       return response;
     }
 
