@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import authAPI from "./utils/auth";
 
-export async function middleware(request: Request) {
+export async function middleware(request: NextRequest) {
   // sets url and path headers for easy access
   const url = new URL(request.url);
   const origin = url.origin;
@@ -21,15 +21,20 @@ export async function middleware(request: Request) {
 
   // refresh cookies
   try {
-    const payload = await authAPI.verify();
+    const token = request.cookies.get("token")?.value;
+
+    if (!token) {
+      return response;
+    }
+
+    const payload = await authAPI.verify(token);
 
     if (!payload) {
       return response;
     }
 
     const newToken = await authAPI.sign(payload);
-    const cookie = authAPI.getCookie(newToken);
-    response.cookies.set(cookie);
+    response.cookies.set(authAPI.buildCookie(newToken));
   } catch (err) {
     console.error(err);
   }

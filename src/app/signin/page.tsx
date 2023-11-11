@@ -4,13 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SignInMessage } from "./SignInMessage";
+import { cookies } from "next/headers";
 
 export default async function SignIn({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  const payload = await authAPI.verify();
+  const token = cookies().get("token")?.value || "";
+  const payload = await authAPI.verify(token);
 
   // User already logged in, redirect to home page
   if (payload) {

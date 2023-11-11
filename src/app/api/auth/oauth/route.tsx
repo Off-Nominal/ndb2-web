@@ -92,8 +92,7 @@ export async function GET(req: Request) {
 
   try {
     const token = await authAPI.sign(user);
-    const cookie = authAPI.getCookie(token);
-    cookies().set(cookie);
+    cookies().set(authAPI.buildCookie(token));
   } catch (err) {
     console.error(err);
   }

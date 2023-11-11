@@ -12,7 +12,7 @@ export type AppJWTPayload = {
   discordId: string;
 };
 
-const getCookie = (token: string): ResponseCookie => {
+const buildCookie = (token: string): ResponseCookie => {
   return {
     name: "token",
     value: token,
@@ -56,9 +56,7 @@ const sign = (payload: any): Promise<string> => {
     .sign(new TextEncoder().encode(JWT_SECRET));
 };
 
-const verify = async (): Promise<AppJWTPayload | null> => {
-  const token = cookies().get("token")?.value || "";
-
+const verify = async (token: string): Promise<AppJWTPayload | null> => {
   try {
     const { payload } = await jose.jwtVerify(
       token,
@@ -83,7 +81,7 @@ const verify = async (): Promise<AppJWTPayload | null> => {
 const authAPI = {
   sign,
   verify,
-  getCookie,
+  buildCookie,
 };
 
 export default authAPI;

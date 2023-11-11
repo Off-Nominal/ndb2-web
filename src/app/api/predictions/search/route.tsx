@@ -8,9 +8,11 @@ import {
   isSortByOption,
 } from "@/types/predictions";
 import ndb2API from "@/utils/ndb2";
+import { cookies } from "next/headers";
 
 export async function GET(req: Request) {
-  const payload = await authAPI.verify();
+  const token = cookies().get("token")?.value || "";
+  const payload = await authAPI.verify(token);
 
   if (!payload) {
     return NextResponse.redirect("/signin");

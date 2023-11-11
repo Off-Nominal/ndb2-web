@@ -15,6 +15,7 @@ import { List } from "@/components/List";
 import { Empty } from "@/components/Empty";
 import { VoteListItem } from "./VoteListItem";
 import { APISeasons } from "@/types/seasons";
+import { cookies } from "next/headers";
 
 const defaultAvatarUrl = "https://cdn.discordapp.com/embed/avatars/0.png";
 
@@ -171,7 +172,8 @@ export default async function Predictions(props: PredictionsPageProps) {
     return redirect("/predictions");
   }
 
-  const payload = await authAPI.verify();
+  const token = cookies().get("token")?.value || "";
+  const payload = await authAPI.verify(token);
 
   if (!payload) {
     return redirect("/signin");
