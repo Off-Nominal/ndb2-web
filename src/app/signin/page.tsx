@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SignInMessage } from "./SignInMessage";
-import { type } from "os";
 
 export default async function SignIn({
   searchParams,

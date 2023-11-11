@@ -92,16 +92,8 @@ export async function GET(req: Request) {
 
   try {
     const token = await authAPI.sign(user);
-
-    cookies().set({
-      name: "token",
-      value: token,
-      httpOnly: true,
-      path: "/",
-      secure: process.env.NODE_ENV !== "development",
-      expires: add(new Date(), { days: 30 }),
-      sameSite: "lax",
-    });
+    const cookie = authAPI.getCookie(token);
+    cookies().set(cookie);
   } catch (err) {
     console.error(err);
   }

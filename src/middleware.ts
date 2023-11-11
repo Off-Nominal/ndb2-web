@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import authAPI from "./utils/auth";
 
-export function middleware(request: Request) {
+export async function middleware(request: Request) {
   // sets url and path headers for easy access
   const url = new URL(request.url);
   const origin = url.origin;
@@ -12,9 +13,26 @@ export function middleware(request: Request) {
   requestHeaders.set("x-pathname", pathname);
   requestHeaders.set("x-search", url.search);
 
-  return NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: requestHeaders,
     },
   });
+
+  // refresh cookies
+  try {
+    const payload = await authAPI.verify();
+
+    if (!payload) {
+      return response;
+    }
+
+    const newToken = await authAPI.sign(payload);
+    const cookie = authAPI.getCookie(newToken);
+    response.cookies.set(cookie);
+  } catch (err) {
+    console.error(err);
+  }
+
+  return response;
 }
