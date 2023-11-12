@@ -1,7 +1,4 @@
-import authAPI from "@/utils/auth";
 import { Navigation } from "./Navigation";
-import { redirect } from "next/navigation";
-import { cookies, headers } from "next/headers";
 import Link from "next/link";
 
 export default async function MainLayout({

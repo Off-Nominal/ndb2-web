@@ -9,6 +9,7 @@ import { APISeasons } from "@/types/seasons";
 import { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import { getURLSearchParams } from "@/utils/helpers";
+import { PageProps } from "@/types/base";
 
 const title = "Nostradambot2 - Predictions";
 const description =
@@ -70,17 +71,15 @@ const getPredictionSearchData = async (payload: AppJWTPayload) => {
     });
 };
 
-export default async function Predictions({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
+export type PredictionsProps = {} & PageProps;
+
+export default async function Predictions(props: PredictionsProps) {
   const token = cookies().get("token")?.value || "";
   const payload = await authAPI.verify(token);
 
   // user is not signed in, redirect to login
   if (!payload) {
-    const queryString = getURLSearchParams(searchParams).toString();
+    const queryString = getURLSearchParams(props.searchParams).toString();
     return redirect(
       "/signin?returnTo=" + encodeURIComponent("/predictions" + queryString)
     );

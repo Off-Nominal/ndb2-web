@@ -5,9 +5,10 @@ import { APIScores } from "@/types/scores";
 import { List } from "@/components/List";
 import { redirect } from "next/navigation";
 import { getURLSearchParams, truncateText } from "@/utils/helpers";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import authAPI from "@/utils/auth";
 import { LeaderboardListItem } from "./LeaderboardListItem";
+import { PageProps } from "@/types/base";
 
 type Leader = {
   discordId: string;
@@ -145,18 +146,16 @@ async function getLeaderboards(): Promise<{
   }
 }
 
+export type HomeProps = {} & PageProps;
+
 // FRONT END
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
+export default async function Home(props: HomeProps) {
   const token = cookies().get("token")?.value || "";
   const payload = await authAPI.verify(token);
 
   // user is not signed in, redirect to login
   if (!payload) {
-    const queryString = getURLSearchParams(searchParams).toString();
+    const queryString = getURLSearchParams(props.searchParams).toString();
     return redirect(
       "/signin?returnTo=" + encodeURIComponent("/" + queryString)
     );

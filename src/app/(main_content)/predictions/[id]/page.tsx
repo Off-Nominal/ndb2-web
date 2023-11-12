@@ -17,6 +17,7 @@ import { VoteListItem } from "./VoteListItem";
 import { APISeasons } from "@/types/seasons";
 import { cookies } from "next/headers";
 import { getURLSearchParams } from "@/utils/helpers";
+import { PageProps } from "@/types/base";
 
 const defaultAvatarUrl = "https://cdn.discordapp.com/embed/avatars/0.png";
 
@@ -64,10 +65,7 @@ const generateVote = (
   };
 };
 
-type PredictionsPageProps = {
-  params: { id: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
+type PredictionsPageProps = {} & PageProps;
 
 // SERVER SIDE DATA FETCHING
 
