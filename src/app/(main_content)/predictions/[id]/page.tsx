@@ -16,6 +16,8 @@ import { Empty } from "@/components/Empty";
 import { VoteListItem } from "./VoteListItem";
 import { APISeasons } from "@/types/seasons";
 import { cookies } from "next/headers";
+import { generateURIComponent, getURLSearchParams } from "@/utils/helpers";
+import { PageProps } from "@/types/base";
 
 const defaultAvatarUrl = "https://cdn.discordapp.com/embed/avatars/0.png";
 
@@ -63,9 +65,7 @@ const generateVote = (
   };
 };
 
-type PredictionsPageProps = {
-  params: { id: string };
-};
+type PredictionsPageProps = {} & PageProps;
 
 // SERVER SIDE DATA FETCHING
 
@@ -172,11 +172,14 @@ export default async function Predictions(props: PredictionsPageProps) {
     return redirect("/predictions");
   }
 
-  const token = cookies().get("token")?.value || "";
+  const token = cookies().get("token");
   const payload = await authAPI.verify(token);
 
   if (!payload) {
-    return redirect("/signin");
+    const queryString = getURLSearchParams(props.searchParams).toString();
+    const path = "/predictions/" + props.params.id;
+    const uriComponent = generateURIComponent(path, queryString);
+    return redirect("/signin?returnTo=" + uriComponent);
   }
 
   const { prediction, predictor, votes, bets, season, members } =

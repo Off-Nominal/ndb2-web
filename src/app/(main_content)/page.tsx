@@ -3,8 +3,16 @@ import ndb2API, { GetLeaderboardOptions } from "@/utils/ndb2";
 import discordAPI from "@/utils/discord";
 import { APIScores } from "@/types/scores";
 import { List } from "@/components/List";
-import { Avatar } from "@/components/Avatar";
-import { truncateText } from "@/utils/helpers";
+import { redirect } from "next/navigation";
+import {
+  generateURIComponent,
+  getURLSearchParams,
+  truncateText,
+} from "@/utils/helpers";
+import { cookies } from "next/headers";
+import authAPI from "@/utils/auth";
+import { LeaderboardListItem } from "./LeaderboardListItem";
+import { PageProps } from "@/types/base";
 
 type Leader = {
   discordId: string;
@@ -142,40 +150,20 @@ async function getLeaderboards(): Promise<{
   }
 }
 
-type LeaderboardEntryProps = {
-  rank: number;
-  avatarUrl: string;
-  name: string;
-  value: number | string;
-};
-
-const defaultAvatarUrl = "https://cdn.discordapp.com/embed/avatars/0.png";
-
-const LeaderboardEntry = (props: LeaderboardEntryProps) => {
-  return (
-    <div className="flex items-center">
-      <div className="mr-2 flex shrink-0 grow-0 basis-5 justify-end">
-        <span>{props.rank}</span>
-      </div>
-      <div className="mx-2 shrink-0 grow-0 basis-8">
-        <Avatar
-          src={props.avatarUrl || defaultAvatarUrl}
-          alt={`Avatar photo for user ${props.name}`}
-          size={30}
-        />
-      </div>
-      <div className="mx-2 grow">
-        <span>{props.name}</span>
-      </div>
-      <div className="ml-2 shrink-0 grow-0 ">
-        <span>{props.value.toLocaleString("en-US")}</span>
-      </div>
-    </div>
-  );
-};
+export type HomeProps = {} & PageProps;
 
 // FRONT END
-export default async function Home() {
+export default async function Home(props: HomeProps) {
+  const token = cookies().get("token");
+  const payload = await authAPI.verify(token);
+
+  // user is not signed in, redirect to login
+  if (!payload) {
+    const queryString = getURLSearchParams(props.searchParams).toString();
+    const uriComponent = generateURIComponent("/", queryString);
+    return redirect("/signin?returnTo=" + uriComponent);
+  }
+
   const {
     s_points,
     s_predictions,
@@ -200,7 +188,7 @@ export default async function Home() {
           <List
             items={s_points.map((l) => {
               return (
-                <LeaderboardEntry
+                <LeaderboardListItem
                   key={l.discordId}
                   rank={l.rank}
                   name={truncateText(l.name, 20)}
@@ -222,7 +210,7 @@ export default async function Home() {
           <List
             items={s_predictions.map((l) => {
               return (
-                <LeaderboardEntry
+                <LeaderboardListItem
                   key={l.discordId}
                   rank={l.rank}
                   name={truncateText(l.name, 24)}
@@ -244,7 +232,7 @@ export default async function Home() {
           <List
             items={s_bets.map((l) => {
               return (
-                <LeaderboardEntry
+                <LeaderboardListItem
                   key={l.discordId}
                   rank={l.rank}
                   name={truncateText(l.name, 20)}
@@ -269,7 +257,7 @@ export default async function Home() {
           <List
             items={at_points.map((l) => {
               return (
-                <LeaderboardEntry
+                <LeaderboardListItem
                   key={l.discordId}
                   rank={l.rank}
                   name={truncateText(l.name, 20)}
@@ -291,7 +279,7 @@ export default async function Home() {
           <List
             items={at_predictions.map((l) => {
               return (
-                <LeaderboardEntry
+                <LeaderboardListItem
                   key={l.discordId}
                   rank={l.rank}
                   name={truncateText(l.name, 20)}
@@ -313,7 +301,7 @@ export default async function Home() {
           <List
             items={at_bets.map((l) => {
               return (
-                <LeaderboardEntry
+                <LeaderboardListItem
                   key={l.discordId}
                   rank={l.rank}
                   name={truncateText(l.name, 20)}

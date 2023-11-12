@@ -5,13 +5,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SignInMessage } from "./SignInMessage";
 import { cookies } from "next/headers";
+import { PageProps } from "@/types/base";
 
-export default async function SignIn({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
-  const token = cookies().get("token")?.value || "";
+export type SignInProps = {} & PageProps;
+
+export default async function SignIn(props: SignInProps) {
+  const token = cookies().get("token");
   const payload = await authAPI.verify(token);
 
   // User already logged in, redirect to home page
@@ -19,7 +18,7 @@ export default async function SignIn({
     redirect("/");
   }
 
-  let returnToPath = searchParams.returnTo;
+  let returnToPath = props.searchParams.returnTo;
 
   if (typeof returnToPath !== "string") {
     returnToPath = "/";
