@@ -1,4 +1,4 @@
-import authAPI from "@/utils/auth";
+import authAPI, { AppJWTPayload } from "@/utils/auth";
 import { SearchPredictions } from "./SearchPredictions";
 import { redirect } from "next/navigation";
 import ndb2API from "@/utils/ndb2";
@@ -7,7 +7,8 @@ import { ShortDiscordGuildMember } from "@/types/discord";
 import { APIBets } from "@/types/bets";
 import { APISeasons } from "@/types/seasons";
 import { Metadata } from "next";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { getURLSearchParams } from "@/utils/helpers";
 
 const title = "Nostradambot2 - Predictions";
 const description =
@@ -32,14 +33,7 @@ export const metadata: Metadata = {
   },
 };
 
-const getPredictionSearchData = async () => {
-  const token = cookies().get("token")?.value || "";
-  const payload = await authAPI.verify(token);
-
-  if (!payload) {
-    return redirect("/signin");
-  }
-
+const getPredictionSearchData = async (payload: AppJWTPayload) => {
   const data: {
     discordId: string;
     bets: APIBets.UserBet[];
@@ -76,8 +70,25 @@ const getPredictionSearchData = async () => {
     });
 };
 
-export default async function Predictions() {
-  const { discordId, bets, members, seasons } = await getPredictionSearchData();
+export default async function Predictions({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  const token = cookies().get("token")?.value || "";
+  const payload = await authAPI.verify(token);
+
+  // user is not signed in, redirect to login
+  if (!payload) {
+    const queryString = getURLSearchParams(searchParams).toString();
+    return redirect(
+      "/signin?returnTo=" + encodeURIComponent("/predictions" + queryString)
+    );
+  }
+
+  const { discordId, bets, members, seasons } = await getPredictionSearchData(
+    payload
+  );
 
   return (
     <>

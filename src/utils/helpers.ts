@@ -1,5 +1,6 @@
 import { PredictionLifeCycle } from "@/types/predictions";
 import { format } from "date-fns";
+import { URLSearchParams } from "url";
 
 export const truncateText = (text: string, maxLength: number) => {
   if (text.length <= maxLength) {
@@ -110,4 +111,18 @@ export const buildTimeline = (
   }
 
   return [item1, item2, item3, item4];
+};
+
+export const getURLSearchParams = (searchParams: {
+  [key: string]: string | string[] | undefined;
+}): URLSearchParams => {
+  const params = new URLSearchParams();
+
+  Object.entries(searchParams).forEach(([key, value]) => {
+    if (value) {
+      params.set(key, Array.isArray(value) ? value.join(",") : value);
+    }
+  });
+
+  return params;
 };

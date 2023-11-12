@@ -16,6 +16,7 @@ import { Empty } from "@/components/Empty";
 import { VoteListItem } from "./VoteListItem";
 import { APISeasons } from "@/types/seasons";
 import { cookies } from "next/headers";
+import { getURLSearchParams } from "@/utils/helpers";
 
 const defaultAvatarUrl = "https://cdn.discordapp.com/embed/avatars/0.png";
 
@@ -65,6 +66,7 @@ const generateVote = (
 
 type PredictionsPageProps = {
   params: { id: string };
+  searchParams: { [key: string]: string | string[] | undefined };
 };
 
 // SERVER SIDE DATA FETCHING
@@ -176,7 +178,11 @@ export default async function Predictions(props: PredictionsPageProps) {
   const payload = await authAPI.verify(token);
 
   if (!payload) {
-    return redirect("/signin");
+    const queryString = getURLSearchParams(props.searchParams).toString();
+    return redirect(
+      "/signin?returnTo=" +
+        encodeURIComponent("/predictions/" + props.params.id + queryString)
+    );
   }
 
   const { prediction, predictor, votes, bets, season, members } =
