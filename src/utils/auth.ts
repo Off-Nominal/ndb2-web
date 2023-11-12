@@ -1,6 +1,9 @@
 import { add } from "date-fns";
 import * as jose from "jose";
-import { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
+import {
+  RequestCookie,
+  ResponseCookie,
+} from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
 
 const JWT_SECRET = process.env.JWT_SECRET || "";
@@ -58,7 +61,19 @@ const sign = (payload: any): Promise<string> => {
     .sign(new TextEncoder().encode(JWT_SECRET));
 };
 
-const verify = async (token: string): Promise<AppJWTPayload | null> => {
+const verify = async (
+  cookie: RequestCookie | undefined
+): Promise<AppJWTPayload | null> => {
+  if (!cookie) {
+    return null;
+  }
+
+  const token = cookie.value;
+
+  if (!token) {
+    return null;
+  }
+
   try {
     const { payload } = await jose.jwtVerify(
       token,

@@ -7,7 +7,7 @@ export async function POST(
   req: Request,
   { params }: { params: { predictionId: string } }
 ) {
-  const token = cookies().get("token")?.value || "";
+  const token = cookies().get("token");
   const payload = await authAPI.verify(token);
 
   if (!payload) {

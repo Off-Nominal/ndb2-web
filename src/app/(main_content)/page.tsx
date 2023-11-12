@@ -4,7 +4,11 @@ import discordAPI from "@/utils/discord";
 import { APIScores } from "@/types/scores";
 import { List } from "@/components/List";
 import { redirect } from "next/navigation";
-import { getURLSearchParams, truncateText } from "@/utils/helpers";
+import {
+  generateURIComponent,
+  getURLSearchParams,
+  truncateText,
+} from "@/utils/helpers";
 import { cookies } from "next/headers";
 import authAPI from "@/utils/auth";
 import { LeaderboardListItem } from "./LeaderboardListItem";
@@ -150,15 +154,14 @@ export type HomeProps = {} & PageProps;
 
 // FRONT END
 export default async function Home(props: HomeProps) {
-  const token = cookies().get("token")?.value || "";
+  const token = cookies().get("token");
   const payload = await authAPI.verify(token);
 
   // user is not signed in, redirect to login
   if (!payload) {
     const queryString = getURLSearchParams(props.searchParams).toString();
-    return redirect(
-      "/signin?returnTo=" + encodeURIComponent("/" + queryString)
-    );
+    const uriComponent = generateURIComponent("/", queryString);
+    return redirect("/signin?returnTo=" + uriComponent);
   }
 
   const {

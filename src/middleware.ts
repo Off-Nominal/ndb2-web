@@ -7,12 +7,7 @@ export async function middleware(request: NextRequest) {
 
   // refresh cookies if needed
   try {
-    const token = request.cookies.get("token")?.value;
-
-    if (!token) {
-      return response;
-    }
-
+    const token = request.cookies.get("token");
     const payload = await authAPI.verify(token);
 
     if (

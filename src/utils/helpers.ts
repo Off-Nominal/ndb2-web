@@ -1,6 +1,5 @@
 import { PredictionLifeCycle } from "@/types/predictions";
 import { format } from "date-fns";
-import { URLSearchParams } from "url";
 
 export const truncateText = (text: string, maxLength: number) => {
   if (text.length <= maxLength) {
@@ -125,4 +124,12 @@ export const getURLSearchParams = (searchParams: {
   });
 
   return params;
+};
+
+export const generateURIComponent = (
+  path: string,
+  queryString: string
+): string => {
+  const uriComponent = path + (queryString ? "?" + queryString : "");
+  return encodeURIComponent(uriComponent);
 };

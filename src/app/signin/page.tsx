@@ -10,7 +10,7 @@ import { PageProps } from "@/types/base";
 export type SignInProps = {} & PageProps;
 
 export default async function SignIn(props: SignInProps) {
-  const token = cookies().get("token")?.value || "";
+  const token = cookies().get("token");
   const payload = await authAPI.verify(token);
 
   // User already logged in, redirect to home page

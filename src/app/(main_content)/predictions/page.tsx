@@ -8,7 +8,7 @@ import { APIBets } from "@/types/bets";
 import { APISeasons } from "@/types/seasons";
 import { Metadata } from "next";
 import { cookies, headers } from "next/headers";
-import { getURLSearchParams } from "@/utils/helpers";
+import { generateURIComponent, getURLSearchParams } from "@/utils/helpers";
 import { PageProps } from "@/types/base";
 
 const title = "Nostradambot2 - Predictions";
@@ -74,15 +74,14 @@ const getPredictionSearchData = async (payload: AppJWTPayload) => {
 export type PredictionsProps = {} & PageProps;
 
 export default async function Predictions(props: PredictionsProps) {
-  const token = cookies().get("token")?.value || "";
+  const token = cookies().get("token");
   const payload = await authAPI.verify(token);
 
   // user is not signed in, redirect to login
   if (!payload) {
     const queryString = getURLSearchParams(props.searchParams).toString();
-    return redirect(
-      "/signin?returnTo=" + encodeURIComponent("/predictions" + queryString)
-    );
+    const uriComponent = generateURIComponent("/predictions", queryString);
+    return redirect("/signin?returnTo=" + uriComponent);
   }
 
   const { discordId, bets, members, seasons } = await getPredictionSearchData(
