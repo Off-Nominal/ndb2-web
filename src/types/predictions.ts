@@ -72,7 +72,7 @@ export namespace APIPredictions {
     text: string;
     season_id: number;
     created_date: string;
-    due_date: string;
+    due_date: string | null;
     closed_date: string | null;
     triggered_date: string | null;
     triggerer: {
