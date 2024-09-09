@@ -116,7 +116,7 @@ export default function ViewPrediction(props: ViewPredictionProps) {
           <Timeline
             status={props.status}
             created_date={new Date(props.created_date)}
-            due_date={new Date(props.due_date)}
+            due_date={new Date(props.due_date || 0)}
             closed_date={props.closed_date ? new Date(props.closed_date) : null}
             triggered_date={
               props.triggered_date ? new Date(props.triggered_date) : null
