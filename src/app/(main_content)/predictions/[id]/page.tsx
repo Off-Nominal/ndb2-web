@@ -245,7 +245,7 @@ export default async function Predictions(props: PredictionsPageProps) {
         predictionId={prediction.id}
         status={prediction.status}
         created_date={prediction.created_date}
-        due_date={prediction.due_date}
+        due_date={prediction.due_date || ""}
         closed_date={prediction.closed_date}
         triggered_date={prediction.triggered_date}
         judged_date={prediction.judged_date}
