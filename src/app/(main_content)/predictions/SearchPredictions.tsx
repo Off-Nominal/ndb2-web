@@ -388,7 +388,7 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
               undorsements={p.bets.undorsements}
               yesVotes={p.votes.yes}
               noVotes={p.votes.no}
-              dueDate={new Date(p.due_date)}
+              dueDate={new Date(p.due_date || 0)}
               createdDate={new Date(p.created_date)}
               discordId={props.discordId}
               judgedDate={

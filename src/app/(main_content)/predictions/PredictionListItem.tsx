@@ -115,7 +115,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
               <div className="mt-3 rounded-md border-slate-700 bg-slate-300 px-2 py-1 dark:border-slate-200 dark:bg-slate-500">
                 <p className="w-full text-center text-sm">
                   Due:
-                  <br /> {format(props.dueDate, "MMM d, yyyy")}
+                  <br /> {format(props.dueDate || new Date(0), "MMM d, yyyy")}
                 </p>
               </div>
             )}
@@ -142,7 +142,7 @@ export const PredictionListItem = (props: PredictionListItemProps) => {
             <Timeline
               status={props.status}
               created_date={props.createdDate}
-              due_date={props.dueDate}
+              due_date={props.dueDate || new Date(0)}
               closed_date={props.closedDate}
               triggered_date={props.triggeredDate}
               retired_date={props.retiredDate}
