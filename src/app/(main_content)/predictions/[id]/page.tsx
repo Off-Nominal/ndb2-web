@@ -18,6 +18,7 @@ import { APISeasons } from "@/types/seasons";
 import { cookies } from "next/headers";
 import { generateURIComponent, getURLSearchParams } from "@/utils/helpers";
 import { PageProps } from "@/types/base";
+import { statusLabel } from "../helpers";
 
 const defaultAvatarUrl = "https://cdn.discordapp.com/embed/avatars/0.png";
 
@@ -190,6 +191,7 @@ export default async function Predictions(props: PredictionsPageProps) {
     [PredictionLifeCycle.SUCCESSFUL]: "bg-moss-green",
     [PredictionLifeCycle.FAILED]: "bg-deep-chestnut-red",
     [PredictionLifeCycle.OPEN]: "bg-moonstone-blue",
+    [PredictionLifeCycle.CHECKING]: "bg-moonstone-blue",
     [PredictionLifeCycle.CLOSED]: "bg-silver-chalice-grey",
   };
 
@@ -231,7 +233,7 @@ export default async function Predictions(props: PredictionsPageProps) {
         </div>
         <div className="flex h-[64px] w-[136px]">
           <PillDisplay
-            text={prediction.status.toUpperCase().slice(0, 7)}
+            text={statusLabel[prediction.status]}
             color={statusColor[prediction.status]}
             textSize="text-md"
             padding={"px-6 py-5"}
@@ -242,17 +244,18 @@ export default async function Predictions(props: PredictionsPageProps) {
         <p>{hydrateTextWithMemberHandles(prediction.text, members)}</p>
       </div>
       <ViewPrediction
-        predictionId={prediction.id}
-        status={prediction.status}
-        created_date={prediction.created_date}
-        due_date={prediction.due_date || ""}
-        closed_date={prediction.closed_date}
-        triggered_date={prediction.triggered_date}
-        judged_date={prediction.judged_date}
-        retired_date={prediction.retired_date}
+        prediction={prediction}
+        // predictionId={prediction.id}
+        // status={prediction.status}
+        // created_date={prediction.created_date}
+        // due_date={prediction.due_date || ""}
+        // closed_date={prediction.closed_date}
+        // triggered_date={prediction.triggered_date}
+        // judged_date={prediction.judged_date}
+        // retired_date={prediction.retired_date}
         bets={bets}
-        endorseRatio={prediction.payouts.endorse}
-        undorseRatio={prediction.payouts.undorse}
+        // endorseRatio={prediction.payouts.endorse}
+        // undorseRatio={prediction.payouts.undorse}
         user={payload}
       />
       <div className="mt-8">

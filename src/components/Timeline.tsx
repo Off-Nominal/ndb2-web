@@ -1,27 +1,16 @@
-import { buildTimeline } from "@/utils/helpers";
+import {
+  buildTimeline,
+  DateDrivenTimelineProps,
+  EventDrivenTimelineProps,
+} from "@/utils/helpers";
 import { TimelineItem } from "./TimelineItem";
-import { PredictionLifeCycle } from "@/types/predictions";
 
 type TimelineProps = {
-  status: PredictionLifeCycle;
-  created_date: Date;
-  due_date: Date;
-  closed_date: Date | null;
-  triggered_date: Date | null;
-  retired_date: Date | null;
-  judged_date: Date | null;
+  prediction: DateDrivenTimelineProps | EventDrivenTimelineProps;
 };
 
 export const Timeline = (props: TimelineProps) => {
-  const timelineItemArray = buildTimeline(
-    props.status,
-    props.created_date,
-    props.due_date,
-    props.closed_date,
-    props.triggered_date,
-    props.retired_date,
-    props.judged_date
-  );
+  const timelineItemArray = buildTimeline(props.prediction);
 
   const builtTimeline = timelineItemArray.map((item, i) => {
     return (

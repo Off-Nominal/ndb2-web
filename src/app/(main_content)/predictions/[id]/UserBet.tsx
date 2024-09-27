@@ -3,7 +3,7 @@ import { BetInterface } from "../BetInterface";
 import { PillDisplay } from "@/components/PillDisplay";
 import { PredictionLifeCycle } from "@/types/predictions";
 
-export type UserBetProps = {
+type UserBetProps = {
   userBet:
     | {
         endorsed: boolean;
@@ -11,10 +11,10 @@ export type UserBetProps = {
         date: string;
       }
     | undefined;
-  due_date: string;
   handleBet: (endorsed: boolean) => void;
   status: PredictionLifeCycle;
   payoutRatio: number;
+  calcDate: string;
 };
 
 const UserBet = (props: UserBetProps) => {
@@ -78,7 +78,7 @@ const UserBet = (props: UserBetProps) => {
             <>
               <p className="font-bold">ADD YOUR BET</p>
               <p className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">{`WAGER ${differenceInDays(
-                new Date(props.due_date),
+                new Date(props.calcDate),
                 new Date()
               )}`}</p>
             </>
@@ -113,7 +113,7 @@ const UserBet = (props: UserBetProps) => {
           <div className="flex flex-col justify-center md:justify-start">
             <p className="font-bold uppercase">Potential Points</p>
             <p className="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">
-              Given Due Date of {formatDate(props.due_date)}
+              Given Potential Close Date of {formatDate(props.calcDate)}
             </p>
           </div>
           <div className="flex h-[64px] shrink-0 basis-[140px]">

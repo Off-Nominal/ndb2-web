@@ -1,6 +1,11 @@
 import { APIResponse } from "./api";
 import { APIBets } from "./bets";
 
+export enum PredictionDriver {
+  EVENT = "event",
+  DATE = "date",
+}
+
 export enum PredictionLifeCycle {
   OPEN = "open",
   RETIRED = "retired",
@@ -64,7 +69,17 @@ export namespace APIPredictions {
     };
   };
 
-  export type EnhancedPrediction = {
+  type EventDrivenPrediction = {
+    driver: PredictionDriver.EVENT;
+    check_date: string;
+  };
+
+  type DateDrivenPrediction = {
+    driver: PredictionDriver.DATE;
+    due_date: string;
+  };
+
+  type EnhancedPredictionBase = {
     id: number;
     predictor: {
       id: string;
@@ -73,7 +88,6 @@ export namespace APIPredictions {
     text: string;
     season_id: number;
     created_date: string;
-    due_date: string | null;
     closed_date: string | null;
     triggered_date: string | null;
     triggerer: {
@@ -91,8 +105,12 @@ export namespace APIPredictions {
     };
   };
 
-  export type ShortEnhancedPrediction = Omit<
-    EnhancedPrediction,
+  export type EnhancedPrediction =
+    | (EventDrivenPrediction & EnhancedPredictionBase)
+    | (DateDrivenPrediction & EnhancedPredictionBase);
+
+  export type ShortEnhancedPredictionBase = Omit<
+    EnhancedPredictionBase,
     "bets" | "votes"
   > & {
     bets: {
@@ -105,6 +123,10 @@ export namespace APIPredictions {
       no: number;
     };
   };
+
+  export type ShortEnhancedPrediction =
+    | (ShortEnhancedPredictionBase & EventDrivenPrediction)
+    | (ShortEnhancedPredictionBase & DateDrivenPrediction);
 
   export type GetPredictionById = APIResponse<EnhancedPrediction>;
 

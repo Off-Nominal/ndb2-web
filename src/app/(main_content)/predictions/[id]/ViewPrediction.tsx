@@ -1,7 +1,11 @@
 "use client";
 
 import { Timeline } from "@/components/Timeline";
-import { PredictionLifeCycle } from "@/types/predictions";
+import {
+  APIPredictions,
+  PredictionDriver,
+  PredictionLifeCycle,
+} from "@/types/predictions";
 import { BetListItem } from "./BetListItem";
 import { add, format, isAfter } from "date-fns";
 import { ListBet } from "./page";
@@ -20,17 +24,8 @@ const formatDate = (date: string) => {
 };
 
 export type ViewPredictionProps = {
-  predictionId: number;
-  status: PredictionLifeCycle;
-  created_date: string;
-  due_date: string;
-  closed_date: string | null;
-  triggered_date: string | null;
-  retired_date: string | null;
-  judged_date: string | null;
+  prediction: APIPredictions.EnhancedPrediction;
   bets: ListBet[];
-  endorseRatio: number;
-  undorseRatio: number;
   user: AppJWTPayload;
 };
 
@@ -48,7 +43,10 @@ export default function ViewPrediction(props: ViewPredictionProps) {
   const { endorsements, undorsements, userBet, payoutRatios, updateUserBet } =
     useBets(
       props.bets,
-      { endorse: props.endorseRatio, undorse: props.undorseRatio },
+      {
+        endorse: props.prediction.payouts.endorse,
+        undorse: props.prediction.payouts.undorse,
+      },
       props.user
     );
 
@@ -94,7 +92,7 @@ export default function ViewPrediction(props: ViewPredictionProps) {
       }
     }
 
-    updateUserBet(props.predictionId, endorsed)
+    updateUserBet(props.prediction.id, endorsed)
       .then(() => {
         addToast({
           message: "Bet successfully updated",
@@ -113,26 +111,18 @@ export default function ViewPrediction(props: ViewPredictionProps) {
     <>
       <div className="mt-8 flex flex-col gap-8 md:flex-row md:justify-between">
         <div className="basis-1/2">
-          <Timeline
-            status={props.status}
-            created_date={new Date(props.created_date)}
-            due_date={new Date(props.due_date || 0)}
-            closed_date={props.closed_date ? new Date(props.closed_date) : null}
-            triggered_date={
-              props.triggered_date ? new Date(props.triggered_date) : null
-            }
-            retired_date={
-              props.retired_date ? new Date(props.retired_date) : null
-            }
-            judged_date={props.judged_date ? new Date(props.judged_date) : null}
-          />
+          <Timeline prediction={props.prediction} />
         </div>
         <div className="basis-1/2">
           <UserBet
             userBet={userBet}
-            due_date={props.due_date}
+            calcDate={
+              props.prediction.driver === PredictionDriver.DATE
+                ? props.prediction.due_date
+                : props.prediction.check_date
+            }
             handleBet={handleBet}
-            status={props.status}
+            status={props.prediction.status}
             payoutRatio={payoutRatio}
           />
         </div>
