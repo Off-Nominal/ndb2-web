@@ -168,6 +168,12 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
                     label: "Open",
                     checked: statuses.open,
                   },
+                  // {
+                  //   name: "checking",
+                  //   value: PredictionLifeCycle.CHECKING,
+                  //   label: "Checking",
+                  //   checked: statuses.checking,
+                  // },
                   {
                     name: "closed",
                     value: PredictionLifeCycle.CLOSED,
@@ -379,30 +385,9 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
               loading={searching}
               key={p.id}
               text={hydrateTextWithMemberHandles(p.text, props.members)}
-              id={p.id}
-              status={p.status}
-              userBet={userBet}
-              endorse_ratio={p.payouts.endorse}
-              undorse_ratio={p.payouts.undorse}
-              endorsements={p.bets.endorsements}
-              undorsements={p.bets.undorsements}
-              yesVotes={p.votes.yes}
-              noVotes={p.votes.no}
-              dueDate={new Date(p.due_date || 0)}
-              createdDate={new Date(p.created_date)}
               discordId={props.discordId}
-              judgedDate={
-                p.judged_date !== null ? new Date(p.judged_date) : null
-              }
-              triggeredDate={
-                p.triggered_date !== null ? new Date(p.triggered_date) : null
-              }
-              closedDate={
-                p.closed_date !== null ? new Date(p.closed_date) : null
-              }
-              retiredDate={
-                p.retired_date !== null ? new Date(p.retired_date) : null
-              }
+              userBet={userBet}
+              prediction={p}
             />
           );
         })}

@@ -1,4 +1,8 @@
-import { PredictionLifeCycle } from "@/types/predictions";
+import {
+  APIPredictions,
+  PredictionDriver,
+  PredictionLifeCycle,
+} from "@/types/predictions";
 import { format } from "date-fns";
 
 export const truncateText = (text: string, maxLength: number) => {
@@ -20,16 +24,31 @@ type TimelineItem = {
     | "cancelled";
 };
 
+interface BuildTimeLinePropsBase {
+  status: PredictionLifeCycle;
+  created_date: string;
+  retired_date: string | null;
+  triggered_date: string | null;
+  judged_date: string | null;
+  closed_date: string | null;
+}
+
+export interface EventDrivenTimelineProps extends BuildTimeLinePropsBase {
+  driver: PredictionDriver.EVENT;
+  check_date: string;
+}
+
+export interface DateDrivenTimelineProps extends BuildTimeLinePropsBase {
+  driver: PredictionDriver.DATE;
+  due_date: string;
+}
+
 export const buildTimeline = (
-  status: PredictionLifeCycle,
-  createdDate: Date,
-  dueDate: Date,
-  closedDate: Date | null,
-  triggeredDate: Date | null,
-  retiredDate: Date | null,
-  judgedDate: Date | null
+  prediction: DateDrivenTimelineProps | EventDrivenTimelineProps
 ): [TimelineItem, TimelineItem, TimelineItem, TimelineItem] => {
   const dateFormat = "MMM do, yyyy";
+
+  const createdDate = new Date(prediction.created_date);
 
   const item1: TimelineItem = {
     label: "Created",
@@ -37,21 +56,43 @@ export const buildTimeline = (
     status: "complete",
   };
 
-  let item2: TimelineItem;
+  let item2: TimelineItem = {
+    label: "",
+    value: "",
+    status: "not_started",
+  };
 
-  if (status === PredictionLifeCycle.OPEN) {
-    item2 = {
-      label: "Due",
-      value: format(dueDate, dateFormat),
-      status: "in_progress",
-    };
-  } else if (status === PredictionLifeCycle.RETIRED && retiredDate) {
+  if (
+    prediction.status === PredictionLifeCycle.OPEN ||
+    prediction.status === PredictionLifeCycle.CHECKING
+  ) {
+    if (prediction.driver === PredictionDriver.EVENT) {
+      const checkDate = new Date(prediction.check_date);
+      item2 = {
+        label: "Will Check",
+        value: format(checkDate, dateFormat),
+        status: "in_progress",
+      };
+    } else if (prediction.driver === PredictionDriver.DATE) {
+      const dueDate = new Date(prediction.due_date);
+      item2 = {
+        label: "Due",
+        value: format(dueDate, dateFormat),
+        status: "in_progress",
+      };
+    }
+  } else if (
+    prediction.status === PredictionLifeCycle.RETIRED &&
+    prediction.retired_date
+  ) {
+    const retiredDate = new Date(prediction.retired_date);
     item2 = {
       label: "Retired",
       value: format(retiredDate, dateFormat),
       status: "complete_negative",
     };
-  } else {
+  } else if (prediction.triggered_date) {
+    const triggeredDate = new Date(prediction.triggered_date);
     item2 = {
       label: "Triggered",
       value: triggeredDate ? format(triggeredDate, dateFormat) : "",
@@ -59,21 +100,39 @@ export const buildTimeline = (
     };
   }
 
-  let item3: TimelineItem;
+  let item3: TimelineItem = {
+    label: "",
+    value: "",
+    status: "not_started",
+  };
 
-  if (status === PredictionLifeCycle.OPEN) {
+  if (
+    prediction.status === PredictionLifeCycle.OPEN ||
+    prediction.status === PredictionLifeCycle.CHECKING
+  ) {
     item3 = {
       label: "Close",
       value: "",
       status: "not_started",
     };
-  } else if (status === PredictionLifeCycle.RETIRED) {
-    item3 = {
-      label: "Due",
-      value: format(dueDate, dateFormat),
-      status: "cancelled",
-    };
-  } else {
+  } else if (prediction.status === PredictionLifeCycle.RETIRED) {
+    if (prediction.driver === PredictionDriver.EVENT) {
+      const checkDate = new Date(prediction.check_date);
+      item3 = {
+        label: "Check",
+        value: format(checkDate, dateFormat),
+        status: "cancelled",
+      };
+    } else {
+      const dueDate = new Date(prediction.due_date);
+      item3 = {
+        label: "Due",
+        value: format(dueDate, dateFormat),
+        status: "cancelled",
+      };
+    }
+  } else if (prediction.closed_date) {
+    const closedDate = new Date(prediction.closed_date);
     item3 = {
       label: "Eff. Close",
       value: closedDate ? format(closedDate, dateFormat) : "",
@@ -81,32 +140,43 @@ export const buildTimeline = (
     };
   }
 
-  let item4: TimelineItem;
+  let item4: TimelineItem = {
+    label: "",
+    value: "",
+    status: "not_started",
+  };
 
-  if (status === PredictionLifeCycle.OPEN) {
+  if (
+    prediction.status === PredictionLifeCycle.OPEN ||
+    prediction.status === PredictionLifeCycle.CHECKING
+  ) {
     item4 = {
       label: "Judgement",
       value: "",
       status: "not_started",
     };
-  } else if (status === PredictionLifeCycle.RETIRED) {
+  } else if (prediction.status === PredictionLifeCycle.RETIRED) {
     item4 = {
       label: "Judgement",
       value: "",
       status: "cancelled",
     };
-  } else if (status === PredictionLifeCycle.FAILED) {
-    item4 = {
-      label: "Judgement",
-      value: judgedDate ? format(judgedDate, dateFormat) : "",
-      status: "complete_negative",
-    };
-  } else {
-    item4 = {
-      label: "Judged",
-      value: judgedDate ? format(judgedDate, dateFormat) : "",
-      status: "complete",
-    };
+  } else if (prediction.judged_date) {
+    const judgedDate = new Date(prediction.judged_date);
+
+    if (prediction.status === PredictionLifeCycle.FAILED) {
+      item4 = {
+        label: "Judgement",
+        value: judgedDate ? format(judgedDate, dateFormat) : "",
+        status: "complete_negative",
+      };
+    } else if (prediction.status === PredictionLifeCycle.SUCCESSFUL) {
+      item4 = {
+        label: "Judged",
+        value: judgedDate ? format(judgedDate, dateFormat) : "",
+        status: "complete",
+      };
+    }
   }
 
   return [item1, item2, item3, item4];
