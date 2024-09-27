@@ -200,6 +200,10 @@ export const usePredictionSearch = (
     params.delete("status");
     for (const status of statuses) {
       params.append("status", status);
+
+      if (status === PredictionLifeCycle.OPEN) {
+        params.append("status", PredictionLifeCycle.CHECKING);
+      }
     }
 
     params.set("sort_by", sort_by);
@@ -317,6 +321,7 @@ export const usePredictionSearch = (
       for (const status of statuses) {
         if (status !== newStatus) {
           newStatuses.push(status);
+
           continue;
         }
 
@@ -364,6 +369,10 @@ export const usePredictionSearch = (
       all: allStatuses(statuses),
       [PredictionLifeCycle.OPEN]: findStatus(
         PredictionLifeCycle.OPEN,
+        statuses
+      ),
+      [PredictionLifeCycle.CHECKING]: findStatus(
+        PredictionLifeCycle.CHECKING,
         statuses
       ),
       [PredictionLifeCycle.CLOSED]: findStatus(

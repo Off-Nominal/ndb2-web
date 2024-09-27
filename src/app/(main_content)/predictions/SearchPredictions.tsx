@@ -168,6 +168,12 @@ export const SearchPredictions = (props: SearchPredictionsProps) => {
                     label: "Open",
                     checked: statuses.open,
                   },
+                  // {
+                  //   name: "checking",
+                  //   value: PredictionLifeCycle.CHECKING,
+                  //   label: "Checking",
+                  //   checked: statuses.checking,
+                  // },
                   {
                     name: "closed",
                     value: PredictionLifeCycle.CLOSED,

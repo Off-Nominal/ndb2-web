@@ -7,6 +7,7 @@ export enum PredictionLifeCycle {
   CLOSED = "closed",
   SUCCESSFUL = "successful",
   FAILED = "failed",
+  CHECKING = "checking",
 }
 
 export const isPredictionLifeCycle = (val: any): val is PredictionLifeCycle => {
